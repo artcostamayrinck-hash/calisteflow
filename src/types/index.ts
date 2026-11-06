@@ -57,7 +57,10 @@ export interface Exercise {
     | 'muscleup'
     | 'handstand'
     | 'lunges'
-    | 'australianpullup';
+    | 'australianpullup'
+    | 'frontlever'
+    | 'planche'
+    | 'pistolsquat';
 }
 
 export interface RoutineExercise {

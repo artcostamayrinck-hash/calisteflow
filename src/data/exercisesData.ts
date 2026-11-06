@@ -571,6 +571,124 @@ export const EXERCISES_DATABASE: Exercise[] = [
         correction: 'Evite lesões de ombro subindo ambos os cotovelos simultaneamente.'
       }
     ]
+  },
+  {
+    id: 'front_lever',
+    name: 'Front Lever Hold',
+    category: 'Skill',
+    difficulty: 'Elite',
+    type: 'isometric',
+    primaryMuscles: ['costas', 'abdomen', 'antebraco'],
+    secondaryMuscles: ['ombros', 'gluteos', 'lombar'],
+    defaultSets: 4,
+    defaultHoldSeconds: 15,
+    defaultRestSeconds: 90,
+    description: 'Movimento estático lendário da calistenia onde o corpo é suspenso horizontalmente paralelo ao solo.',
+    breathingTip: 'Expirações curtas e controladas, mantendo o abdômen e grande dorsal sob tensão contínua.',
+    animationType: 'frontlever',
+    executionSteps: [
+      {
+        step: 1,
+        title: 'Depressão e Retração Escapular',
+        description: 'Puxe as escápulas fortemente para baixo e para trás antes de iniciar a alavanca horizontal.'
+      },
+      {
+        step: 2,
+        title: 'Alinhamento Horizontal Reto',
+        description: 'Mantenha braços 100% esticados empurrando a barra para baixo, corpo alinhado da cabeça aos pés.'
+      },
+      {
+        step: 3,
+        title: 'Trava de Glúteo e Pélvis',
+        description: 'Aperte os glúteos e aponte os pés para manter o corpo em uma prancha perfeitamente reta no ar.'
+      }
+    ],
+    commonMistakes: [
+      {
+        mistake: 'Dobrar os cotovelos',
+        correction: 'O front lever exige braços completamente retos com força nos dorsais e tríceps cabeça longa.'
+      },
+      {
+        mistake: 'Quadril caído ou curvado em V',
+        correction: 'Inicie com a variação Tuck ou Advanced Tuck antes do Front Lever completo.'
+      }
+    ]
+  },
+  {
+    id: 'planche_lean',
+    name: 'Planche Lean (Inclinação de Planche)',
+    category: 'Skill',
+    difficulty: 'Avançado',
+    type: 'isometric',
+    primaryMuscles: ['ombros', 'abdomen', 'antebraco'],
+    secondaryMuscles: ['peito', 'lombar'],
+    defaultSets: 4,
+    defaultHoldSeconds: 25,
+    defaultRestSeconds: 75,
+    description: 'Exercício fundamental de condicionamento dos ombros e tendões do bíceps para a planche completa.',
+    breathingTip: 'Respire pelo tórax mantendo a protração escapular máxima o tempo todo.',
+    animationType: 'planche',
+    executionSteps: [
+      {
+        step: 1,
+        title: 'Base de Prancha com Protração',
+        description: 'Mãos no solo ligeiramente viradas para fora. Empurre o chão afastando as escápulas no topo.'
+      },
+      {
+        step: 2,
+        title: 'Projeção Anterior do Peso',
+        description: 'Incline os ombros significativamente à frente da linha dos punhos mantendo os braços estendidos.'
+      },
+      {
+        step: 3,
+        title: 'Sustentação na Ponta dos Pés',
+        description: 'Fique na ponta dos dedos dos pés, sentindo o peso corporal inteiro recair sobre os ombros e punhos.'
+      }
+    ],
+    commonMistakes: [
+      {
+        mistake: 'Retração escapular (escápulas afundadas)',
+        correction: 'Mantenha a protração máxima (costas arredondadas e peito empurrado para cima).'
+      }
+    ]
+  },
+  {
+    id: 'pistol_squat',
+    name: 'Pistol Squat (Agachamento Unilateral)',
+    category: 'Legs',
+    difficulty: 'Avançado',
+    type: 'reps',
+    primaryMuscles: ['quadriceps', 'gluteos'],
+    secondaryMuscles: ['panturrilhas', 'abdomen', 'posteriores'],
+    defaultSets: 3,
+    defaultReps: 6,
+    defaultRestSeconds: 75,
+    description: 'O padrão ouro de força unilateral nas pernas, exigindo flexibilidade, estabilidade de tornozelo e potência pura.',
+    breathingTip: 'Inspire na descida lenta; expire ao subir pressionando o calcanhar com força no solo.',
+    animationType: 'pistolsquat',
+    executionSteps: [
+      {
+        step: 1,
+        title: 'Equilíbrio em Uma Perna',
+        description: 'Fique sobre uma perna e estenda a outra totalmente à frente, paralela ao solo.'
+      },
+      {
+        step: 2,
+        title: 'Descida Profunda com Controle',
+        description: 'Flexione o joelho e quadril descendo até o glúteo encostar no calcanhar sem apoiar a perna estendida.'
+      },
+      {
+        step: 3,
+        title: 'Extensão Concêntrica Explosiva',
+        description: 'Empurre pelo mediopé e calcanhar até estender totalmente a perna de apoio.'
+      }
+    ],
+    commonMistakes: [
+      {
+        mistake: 'Calcanhar descolando do solo',
+        correction: 'Trabalhe a mobilidade de dorsiflexão do tornozelo ou use uma pequena elevação sob o calcanhar.'
+      }
+    ]
   }
 ];
 

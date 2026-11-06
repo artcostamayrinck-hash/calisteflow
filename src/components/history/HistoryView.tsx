@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState, useRef } from 'react';
 import type { WorkoutSession, WorkoutStats } from '../../types';
 import { MUSCLE_LABELS } from '../../data/exercisesData';
 import {
@@ -13,6 +13,9 @@ import {
   Dumbbell,
   Play,
   Award,
+  Download,
+  Upload,
+  BarChart3,
 } from 'lucide-react';
 
 interface HistoryViewProps {
@@ -20,15 +23,19 @@ interface HistoryViewProps {
   stats: WorkoutStats;
   onDeleteSession: (sessionId: string) => void;
   onNavigateToRoutines: () => void;
+  onImportBackup?: (importedHistory: WorkoutSession[]) => void;
 }
 
-export const HistoryView: React.FC<HistoryViewProps> = ({
+export const HistoryView = ({
   history,
   stats,
   onDeleteSession,
   onNavigateToRoutines,
-}) => {
+  onImportBackup,
+}: HistoryViewProps) => {
   const [expandedSessionId, setExpandedSessionId] = useState<string | null>(null);
+  const [showVolumeAnalytics, setShowVolumeAnalytics] = useState<boolean>(true);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const formatDuration = (totalSec: number) => {
     const mins = Math.floor(totalSec / 60);
@@ -51,17 +58,100 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
     }
   };
 
+  // Calculate muscle volume distribution
+  const muscleVolumeMap: Record<string, number> = {};
+  history.forEach(session => {
+    session.musclesWorked?.forEach(m => {
+      muscleVolumeMap[m] = (muscleVolumeMap[m] || 0) + (session.totalSetsCompleted || 1);
+    });
+  });
+
+  const sortedMuscles = Object.entries(muscleVolumeMap).sort((a, b) => b[1] - a[1]);
+  const maxMuscleSets = sortedMuscles.length > 0 ? sortedMuscles[0][1] : 1;
+
+  // Export JSON Backup
+  const handleExportBackup = () => {
+    const data = {
+      version: '1.1.0',
+      exportedAt: new Date().toISOString(),
+      stats,
+      history,
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `calisteflow-backup-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // Import JSON Backup
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = event => {
+      try {
+        const parsed = JSON.parse(event.target?.result as string);
+        if (Array.isArray(parsed.history)) {
+          if (onImportBackup) {
+            onImportBackup(parsed.history);
+          } else {
+            localStorage.setItem('calistheflow_history_v1', JSON.stringify(parsed.history));
+            window.location.reload();
+          }
+          alert('Backup restaurado com sucesso!');
+        } else {
+          alert('Arquivo de backup inválido.');
+        }
+      } catch {
+        alert('Erro ao ler arquivo de backup.');
+      }
+    };
+    reader.readAsText(file);
+  };
+
   return (
     <div className="space-y-6 pb-20">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-black text-slate-100 flex items-center gap-2">
-          <Trophy className="w-6 h-6 text-amber-400" />
-          Histórico & Progresso
-        </h1>
-        <p className="text-xs sm:text-sm text-slate-400 mt-1">
-          Acompanhe sua consistência calistênica, volume de treino e histórico salvo localmente.
-        </p>
+      {/* Header with Export / Import Actions */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-black text-slate-100 flex items-center gap-2">
+            <Trophy className="w-6 h-6 text-amber-400" />
+            Histórico & Progresso
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-400 mt-1">
+            Acompanhe sua consistência calistênica, volume de treino e histórico salvo localmente.
+          </p>
+        </div>
+
+        {/* Backup Buttons */}
+        <div className="flex items-center gap-2">
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            accept=".json"
+            className="hidden"
+          />
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition active:scale-95"
+            title="Importar Backup JSON"
+          >
+            <Upload className="w-3.5 h-3.5 text-cyan-400" /> Importar
+          </button>
+          <button
+            onClick={handleExportBackup}
+            disabled={history.length === 0}
+            className="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 disabled:opacity-40 transition active:scale-95"
+            title="Baixar Backup JSON"
+          >
+            <Download className="w-3.5 h-3.5 text-emerald-400" /> Exportar
+          </button>
+        </div>
       </div>
 
       {/* Aggregate Stats Bar */}
@@ -120,6 +210,45 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Muscle Volume Distribution Analytics */}
+      {sortedMuscles.length > 0 && (
+        <div className="bg-slate-900 rounded-3xl border border-slate-800 p-4 sm:p-5 shadow-lg space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+              <BarChart3 className="w-4 h-4 text-emerald-400" /> Volume Acumulado por Grupo Muscular
+            </h3>
+            <button
+              onClick={() => setShowVolumeAnalytics(!showVolumeAnalytics)}
+              className="text-xs text-slate-400 hover:text-slate-200"
+            >
+              {showVolumeAnalytics ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            </button>
+          </div>
+
+          {showVolumeAnalytics && (
+            <div className="space-y-2.5 pt-1">
+              {sortedMuscles.map(([muscle, totalSets]) => {
+                const percent = Math.round((totalSets / maxMuscleSets) * 100);
+                return (
+                  <div key={muscle} className="space-y-1">
+                    <div className="flex justify-between text-xs font-semibold">
+                      <span className="text-slate-300">{MUSCLE_LABELS[muscle] || muscle}</span>
+                      <span className="text-emerald-400">{totalSets} séries estimuladas</span>
+                    </div>
+                    <div className="w-full bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-800/80">
+                      <div
+                        className="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-500"
+                        style={{ width: `${percent}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* History Log List */}
       <div className="space-y-3">

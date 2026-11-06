@@ -333,6 +333,53 @@ export const ExercisePostureVisual: React.FC<ExercisePostureVisualProps> = ({
           </svg>
         );
 
+      case 'frontlever':
+        return (
+          <svg viewBox="0 0 320 180" className="w-full h-full">
+            <line x1="60" y1="25" x2="260" y2="25" stroke="#94a3b8" strokeWidth="8" strokeLinecap="round" />
+            <line x1="110" y1="25" x2="110" y2="85" stroke="#38bdf8" strokeWidth="6" strokeLinecap="round" />
+            <circle cx="110" cy="25" r="5" fill="#38bdf8" />
+            <circle cx="85" cy="85" r="9" fill="#10b981" />
+            <line x1="95" y1="85" x2="250" y2="85" stroke="#10b981" strokeWidth="13" strokeLinecap="round" />
+            <line x1="250" y1="85" x2="265" y2="85" stroke="#38bdf8" strokeWidth="6" strokeLinecap="round" />
+            <line x1="75" y1="92" x2="260" y2="92" stroke="#10b981" strokeWidth="1.5" strokeDasharray="4 4" />
+            <text x="140" y="70" fill="#10b981" fontSize="11" fontWeight="bold">180° Horizontal</text>
+            <text x="140" y="112" fill="#38bdf8" fontSize="10">Depressão Escapular Ativa</text>
+          </svg>
+        );
+
+      case 'planche':
+        return (
+          <svg viewBox="0 0 320 180" className="w-full h-full">
+            <line x1="20" y1="150" x2="300" y2="150" stroke="#475569" strokeWidth="4" strokeLinecap="round" />
+            <circle cx="120" cy="146" r="5" fill="#38bdf8" />
+            <line x1="120" y1="146" x2="160" y2="85" stroke="#38bdf8" strokeWidth="7" strokeLinecap="round" />
+            <circle cx="180" cy="78" r="9" fill="#10b981" />
+            <line x1="170" y1="85" x2="50" y2="144" stroke="#10b981" strokeWidth="12" strokeLinecap="round" />
+            <circle cx="50" cy="144" r="5" fill="#38bdf8" />
+            <line x1="120" y1="146" x2="120" y2="60" stroke="#f59e0b" strokeWidth="1.5" strokeDasharray="3 3" />
+            <path d="M120 100 Q140 100 145 110" fill="none" stroke="#f59e0b" strokeWidth="2" />
+            <text x="135" y="72" fill="#f59e0b" fontSize="10" fontWeight="bold">Inclinação 45°</text>
+            <text x="170" y="120" fill="#10b981" fontSize="10" fontWeight="bold">Protração Máxima</text>
+          </svg>
+        );
+
+      case 'pistolsquat':
+        return (
+          <svg viewBox="0 0 320 180" className="w-full h-full">
+            <line x1="30" y1="160" x2="290" y2="160" stroke="#475569" strokeWidth="4" strokeLinecap="round" />
+            <rect x="110" y="154" width="22" height="6" rx="2" fill="#38bdf8" />
+            <line x1="120" y1="154" x2="120" y2="115" stroke="#38bdf8" strokeWidth="8" strokeLinecap="round" />
+            <line x1="120" y1="115" x2="125" y2="118" stroke="#10b981" strokeWidth="10" strokeLinecap="round" />
+            <line x1="125" y1="118" x2="220" y2="118" stroke="#38bdf8" strokeWidth="8" strokeLinecap="round" />
+            <circle cx="225" cy="118" r="4" fill="#38bdf8" />
+            <line x1="125" y1="118" x2="140" y2="70" stroke="#10b981" strokeWidth="12" strokeLinecap="round" />
+            <circle cx="145" cy="55" r="9" fill="#10b981" />
+            <line x1="140" y1="78" x2="185" y2="78" stroke="#38bdf8" strokeWidth="5" strokeLinecap="round" />
+            <text x="170" y="105" fill="#10b981" fontSize="10" fontWeight="bold">Perna 100% Horizontal</text>
+          </svg>
+        );
+
       default:
         // Generic Calisthenics Vector with motion arrows
         return (

@@ -4,6 +4,7 @@ import { EXERCISES_DATABASE } from '../../data/exercisesData';
 import { soundManager } from '../../utils/audio';
 import { ExercisePostureVisual } from '../visuals/ExercisePostureVisual';
 import { MuscleMap } from '../visuals/MuscleMap';
+import { CadenceMetronome } from './CadenceMetronome';
 import {
   Play,
   Pause,
@@ -564,6 +565,9 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
                 >
                   <CheckCircle2 className="w-5 h-5 stroke-[2.5]" /> CONCLUIR SÉRIE
                 </button>
+
+                {/* Cadence TUT Metronome */}
+                <CadenceMetronome />
               </div>
             )}
           </div>

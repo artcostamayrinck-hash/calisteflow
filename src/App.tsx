@@ -114,6 +114,11 @@ export function App() {
     setHistory(updated);
   };
 
+  const handleImportBackup = (importedHistory: WorkoutSession[]) => {
+    localStorage.setItem('calistheflow_history_v1', JSON.stringify(importedHistory));
+    setHistory(importedHistory);
+  };
+
   const handleInspectExerciseFromRoutine = (exerciseId: string) => {
     setDetailRoutine(null);
     setInspectExerciseId(exerciseId);
@@ -191,6 +196,7 @@ export function App() {
             stats={stats}
             onDeleteSession={handleDeleteHistorySession}
             onNavigateToRoutines={() => setActiveTab('routines')}
+            onImportBackup={handleImportBackup}
           />
         )}
       </main>

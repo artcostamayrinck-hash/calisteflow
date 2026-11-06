@@ -13,18 +13,21 @@ Um aplicativo web moderno, responsivo e mobile-first (estilo PWA) desenvolvido e
 
 2. **Modo de Treino com Temporizadores (HUD Imersivo):**
    - Execução de treinos com cronômetro global em tempo real.
+   - **Metrônomo de Cadência (TUT):** Guia sonoro e visual para tempo excêntrico, pausa e concêntrico (ex: 3-1-1-0).
    - Temporizador regressivo automático para o tempo de descanso entre as séries (com botões de `+15s`, `-15s` e pular descanso).
-   - Cronômetro dedicado para exercícios isométricos baseados em tempo (ex: prancha, L-sit, handstand hold, canoa).
+   - Cronômetro dedicado para exercícios isométricos baseados em tempo (ex: prancha, L-sit, handstand hold, canoa, front lever).
    - Bipes sonoros nos últimos 3 segundos (3, 2, 1) e sinal comemorativo ao finalizar via **Web Audio API** nativa (100% offline).
    - Wake Lock API integrado para manter a tela do celular acesa durante a prática de exercícios.
 
 3. **Instruções Gráficas e Visuais:**
-   - Ilustrações e diagramas animados passo a passo demonstrando a postura correta, alinhamento articular e vetores de movimento.
+   - Ilustrações e diagramas animados passo a passo demonstrando postura correta, alinhamento articular e vetores de movimento (incluindo Front Lever, Planche Lean e Pistol Squat).
    - Mapa anatômico interativo (Vista Frontal e Posterior) destacando grupos musculares primários (alvo) e secundários (sinergistas).
    - Filtro de exercícios por grupo muscular através do toque no mapa.
    - Lista de erros críticos e dicas de respiração para cada movimento.
 
-4. **Histórico e Dados Locais:**
+4. **Histórico, Analytics e Backup:**
+   - **Gráficos de Volume Muscular:** Acompanhamento visual de séries estimuladas por cada grupo muscular.
+   - **Exportação & Importação JSON:** Backup e restauração completa de treinos e rotinas em um clique.
    - Armazenamento automático via `localStorage` (nenhuma dependência externa necessária).
    - Tela comemorativa de conclusão de treino com confetes dinâmicos, estatísticas de volume, avaliação de esforço percebido (RPE 1-10) e anotações.
    - Aba de histórico com contador de treinos, horas treinadas, total de séries e sequência ativa de dias (*streak* 🔥).
