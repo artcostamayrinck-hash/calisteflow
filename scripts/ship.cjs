@@ -43,3 +43,4 @@ console.log('🌐 [Git Automation] Enviando alterações para o GitHub (origin m
 run('git push origin main');
 
 console.log('✅ [Git Automation] Concluído com sucesso! Repositório sincronizado.');
+
