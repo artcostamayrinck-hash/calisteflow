@@ -110,9 +110,18 @@ export const RoutineDetailModal = ({
                     className="p-4 glass-card rounded-2xl border border-white/5 hover:border-white/15 transition flex items-center justify-between gap-3 shadow-md"
                   >
                     <div className="flex items-center gap-3.5">
-                      <div className="w-8 h-8 rounded-xl bg-white/[0.06] text-slate-300 font-black text-xs flex items-center justify-center shrink-0 border border-white/10 font-mono">
-                        {index + 1}
-                      </div>
+                      {ex?.videoThumbnail ? (
+                        <img
+                          src={ex.videoThumbnail}
+                          alt={ex.name}
+                          loading="lazy"
+                          className="w-10 h-10 rounded-xl object-cover bg-black/40 border border-white/10 shrink-0 shadow-md"
+                        />
+                      ) : (
+                        <div className="w-8 h-8 rounded-xl bg-white/[0.06] text-slate-300 font-black text-xs flex items-center justify-center shrink-0 border border-white/10 font-mono">
+                          {index + 1}
+                        </div>
+                      )}
                       <div>
                         <div className="flex items-center gap-2">
                           <span className="font-extrabold text-sm text-slate-100">

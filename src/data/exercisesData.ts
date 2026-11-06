@@ -14,6 +14,8 @@ export const EXERCISES_DATABASE: Exercise[] = [
     defaultRestSeconds: 60,
     description: 'O exercício fundamental de empurrar na calistenia, fortalecendo peitorais, tríceps e estabilidade de tronco.',
     breathingTip: 'Inspire ao descer controladamente; expire ao empurrar o solo para cima.',
+    videoUrl: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@main/pectorals/push-up.gif',
+    videoThumbnail: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@main/pectorals/push-up.thumb.webp',
     animationType: 'pushup',
     executionSteps: [
       {
@@ -65,6 +67,8 @@ export const EXERCISES_DATABASE: Exercise[] = [
     defaultRestSeconds: 75,
     description: 'Variação avançada com base fechada que prioriza intensamente a cabeça lateral e medial do tríceps.',
     breathingTip: 'Inspire na descida lenta; expire ao explodir na extensão dos braços.',
+    videoUrl: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@main/triceps/diamond-push-up.gif',
+    videoThumbnail: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@main/triceps/diamond-push-up.thumb.webp',
     animationType: 'pushup',
     executionSteps: [
       {
@@ -107,6 +111,8 @@ export const EXERCISES_DATABASE: Exercise[] = [
     defaultRestSeconds: 90,
     description: 'O rei dos exercícios de peito inferior e tríceps com peso corporal, desenvolvendo força bruta no plano vertical.',
     breathingTip: 'Inspire na descida flexionando cotovelos; expire fortemente ao empurrar até a extensão dos braços.',
+    videoUrl: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@main/pectorals/chest-dip.gif',
+    videoThumbnail: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@main/pectorals/chest-dip.thumb.webp',
     animationType: 'dip',
     executionSteps: [
       {
@@ -154,6 +160,8 @@ export const EXERCISES_DATABASE: Exercise[] = [
     defaultRestSeconds: 90,
     description: 'Exercício essencial para costas em V, grande dorsal e bíceps. Exige controle de tração vertical completa.',
     breathingTip: 'Inspire enquanto está suspenso; expire enquanto puxa seu corpo acima da barra.',
+    videoUrl: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@main/lats/pull-up.gif',
+    videoThumbnail: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@main/lats/pull-up.thumb.webp',
     animationType: 'pullup',
     executionSteps: [
       {
@@ -201,6 +209,8 @@ export const EXERCISES_DATABASE: Exercise[] = [
     defaultRestSeconds: 75,
     description: 'Variação com pegada invertida que coloca enorme ênfase no pico dos bíceps e grande dorsal.',
     breathingTip: 'Puxe expirando vigorosamente; desça inspirando com ritmo cadenciado.',
+    videoUrl: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@main/lats/chin-up.gif',
+    videoThumbnail: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@main/lats/chin-up.thumb.webp',
     animationType: 'pullup',
     executionSteps: [
       {
@@ -239,6 +249,8 @@ export const EXERCISES_DATABASE: Exercise[] = [
     defaultRestSeconds: 60,
     description: 'Puxada horizontal excelente para construir densidade nas costas, romboides e postura ereta.',
     breathingTip: 'Puxe soltando o ar; estenda os braços puxando o ar.',
+    videoUrl: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@main/upper-back/suspended-row.gif',
+    videoThumbnail: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@main/upper-back/suspended-row.thumb.webp',
     animationType: 'australianpullup',
     executionSteps: [
       {
@@ -277,6 +289,8 @@ export const EXERCISES_DATABASE: Exercise[] = [
     defaultRestSeconds: 75,
     description: 'Desenvolve força overhead e hipertrofia de deltoides, servindo de base para flexões na parada de mão.',
     breathingTip: 'Inspire enquanto inclina a cabeça para a frente e para baixo; expire ao empurrar.',
+    videoUrl: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@main/pectorals/exercise-ball-pike-push-up.gif',
+    videoThumbnail: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@main/pectorals/exercise-ball-pike-push-up.thumb.webp',
     animationType: 'pikepushup',
     executionSteps: [
       {
@@ -315,6 +329,8 @@ export const EXERCISES_DATABASE: Exercise[] = [
     defaultRestSeconds: 90,
     description: 'Postura isométrica pura de elevação, desenvolvendo força nos deltoides, estabilidade escapular e equilíbrio.',
     breathingTip: 'Respire de forma curta e controlada pelo diafragma sem soltar a pressão abdominal.',
+    videoUrl: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@main/triceps/handstand.gif',
+    videoThumbnail: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@main/triceps/handstand.thumb.webp',
     animationType: 'handstand',
     executionSteps: [
       {
@@ -353,6 +369,8 @@ export const EXERCISES_DATABASE: Exercise[] = [
     defaultRestSeconds: 60,
     description: 'Padrão motor primário de membros inferiores para construir coxas fortes, mobilidade de quadril e glúteos.',
     breathingTip: 'Inspire ao afundar o quadril; expire subindo pressionando calcanhares e mediopé.',
+    videoUrl: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@main/glutes/bodyweight-drop-jump-squat.gif',
+    videoThumbnail: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@main/glutes/bodyweight-drop-jump-squat.thumb.webp',
     animationType: 'squat',
     executionSteps: [
       {
@@ -395,6 +413,8 @@ export const EXERCISES_DATABASE: Exercise[] = [
     defaultRestSeconds: 60,
     description: 'Trabalho unilateral fundamental para correção de assimetrias, equilíbrio e força nas pernas.',
     breathingTip: 'Inspire no avanço do passo; expire ao retornar à posição ereta.',
+    videoUrl: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@main/glutes/forward-lunge-male.gif',
+    videoThumbnail: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@main/glutes/forward-lunge-male.thumb.webp',
     animationType: 'lunges',
     executionSteps: [
       {
@@ -433,6 +453,8 @@ export const EXERCISES_DATABASE: Exercise[] = [
     defaultRestSeconds: 45,
     description: 'O alicerce da estabilidade do tronco, criando uma couraça abdominal rígida contra forças rotacionais.',
     breathingTip: 'Mantenha respiração ritmada pelas costelas mantendo o umbigo sugado em direção à coluna.',
+    videoUrl: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@main/abs/front-plank-with-twist.gif',
+    videoThumbnail: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@main/abs/front-plank-with-twist.thumb.webp',
     animationType: 'plank',
     executionSteps: [
       {
@@ -471,6 +493,8 @@ export const EXERCISES_DATABASE: Exercise[] = [
     defaultRestSeconds: 75,
     description: 'Movimento ginástico de alto nível que combina compressão abdominal ativa com força de tríceps em lockout.',
     breathingTip: 'Expirações curtas e controladas, sustentando a pressão intra-abdominal.',
+    videoUrl: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@main/abs/l-sit-on-floor.gif',
+    videoThumbnail: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@main/abs/l-sit-on-floor.thumb.webp',
     animationType: 'lsit',
     executionSteps: [
       {
@@ -509,6 +533,8 @@ export const EXERCISES_DATABASE: Exercise[] = [
     defaultRestSeconds: 60,
     description: 'A postura ginástica mais importante da calistenia, criando a base para muscle-ups, handstands e alavancas.',
     breathingTip: 'Pequenas respirações superficiais sem jamais deixar a coluna lombar descolar do piso.',
+    videoUrl: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@main/abs/arms-overhead-full-sit-up-male.gif',
+    videoThumbnail: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@main/abs/arms-overhead-full-sit-up-male.thumb.webp',
     animationType: 'hollowbody',
     executionSteps: [
       {
@@ -547,6 +573,8 @@ export const EXERCISES_DATABASE: Exercise[] = [
     defaultRestSeconds: 120,
     description: 'A transição suprema da calistenia: puxada explosiva alta combinada com transição e mergulho sobre a barra.',
     breathingTip: 'Inspire no balanço; solte o ar na puxada explosiva e transição sobre a barra.',
+    videoUrl: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@main/lats/muscle-up.gif',
+    videoThumbnail: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@main/lats/muscle-up.thumb.webp',
     animationType: 'muscleup',
     executionSteps: [
       {
@@ -585,6 +613,8 @@ export const EXERCISES_DATABASE: Exercise[] = [
     defaultRestSeconds: 90,
     description: 'Movimento estático lendário da calistenia onde o corpo é suspenso horizontalmente paralelo ao solo.',
     breathingTip: 'Expirações curtas e controladas, mantendo o abdômen e grande dorsal sob tensão contínua.',
+    videoUrl: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@main/abs/front-lever.gif',
+    videoThumbnail: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@main/abs/front-lever.thumb.webp',
     animationType: 'frontlever',
     executionSteps: [
       {
@@ -627,6 +657,8 @@ export const EXERCISES_DATABASE: Exercise[] = [
     defaultRestSeconds: 75,
     description: 'Exercício fundamental de condicionamento dos ombros e tendões do bíceps para a planche completa.',
     breathingTip: 'Respire pelo tórax mantendo a protração escapular máxima o tempo todo.',
+    videoUrl: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@main/abs/lean-planche.gif',
+    videoThumbnail: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@main/abs/lean-planche.thumb.webp',
     animationType: 'planche',
     executionSteps: [
       {
@@ -665,6 +697,8 @@ export const EXERCISES_DATABASE: Exercise[] = [
     defaultRestSeconds: 75,
     description: 'O padrão ouro de força unilateral nas pernas, exigindo flexibilidade, estabilidade de tornozelo e potência pura.',
     breathingTip: 'Inspire na descida lenta; expire ao subir pressionando o calcanhar com força no solo.',
+    videoUrl: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@main/glutes/single-leg-squat-pistol-male.gif',
+    videoThumbnail: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@main/glutes/single-leg-squat-pistol-male.thumb.webp',
     animationType: 'pistolsquat',
     executionSteps: [
       {

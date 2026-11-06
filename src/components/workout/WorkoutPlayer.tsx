@@ -5,6 +5,7 @@ import { soundManager } from '../../utils/audio';
 import { ExercisePostureVisual } from '../visuals/ExercisePostureVisual';
 import { MuscleMap } from '../visuals/MuscleMap';
 import { CadenceMetronome } from './CadenceMetronome';
+import { ExerciseVideoPlayer } from './ExerciseVideoPlayer';
 import {
   Play,
   Pause,
@@ -46,14 +47,16 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
   // Rest Timer State
   const [restSecondsLeft, setRestSecondsLeft] = useState<number>(60);
   const [restInitialSeconds, setRestInitialSeconds] = useState<number>(60);
+  const [restTargetTimestamp, setRestTargetTimestamp] = useState<number | null>(null);
 
   // Isometric Exercise Timer State
   const [isometricTimerRunning, setIsometricTimerRunning] = useState<boolean>(false);
   const [isometricSecondsLeft, setIsometricSecondsLeft] = useState<number>(30);
   const [isometricInitialSeconds, setIsometricInitialSeconds] = useState<number>(30);
 
-  // Current set reps adjustment
+  // Current set reps & load adjustment
   const [currentReps, setCurrentReps] = useState<number>(10);
+  const [currentWeightKg, setCurrentWeightKg] = useState<number>(0);
 
   // Audio / Sound toggle
   const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
@@ -87,15 +90,31 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
   const currentExerciseData = EXERCISES_DATABASE.find(e => e.id === currentRoutineExercise.exerciseId);
   const isIsometric = currentExerciseData?.type === 'isometric';
 
-  // Request Screen Wake Lock (keep display awake during gym sessions)
+  // Request Screen Wake Lock with re-acquisition on visibilitychange
   useEffect(() => {
     let wakeLock: any = null;
-    if ('wakeLock' in navigator) {
-      (navigator as any).wakeLock?.request('screen').then((lock: any) => {
-        wakeLock = lock;
-      }).catch(() => {});
-    }
+    const requestLock = async () => {
+      if ('wakeLock' in navigator && document.visibilityState === 'visible') {
+        try {
+          wakeLock = await (navigator as any).wakeLock?.request('screen');
+        } catch {
+          // Ignore
+        }
+      }
+    };
+
+    requestLock();
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        requestLock();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibility);
+
     return () => {
+      document.removeEventListener('visibilitychange', handleVisibility);
       wakeLock?.release?.().catch(() => {});
     };
   }, []);
@@ -123,27 +142,30 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
     return () => clearInterval(interval);
   }, [isWorkoutPaused]);
 
-  // Rest Countdown Timer
+  // Rest Countdown Timer (Timestamp-based, resilient to background screen lock)
   useEffect(() => {
-    if (phase !== 'rest' || isWorkoutPaused) return;
+    if (phase !== 'rest' || isWorkoutPaused || !restTargetTimestamp) return;
 
-    if (restSecondsLeft <= 0) {
-      // Rest finished!
-      soundManager.playSuccessChime();
-      advanceToNextSetOrExercise();
-      return;
-    }
+    const checkRestTime = () => {
+      const remaining = Math.max(0, Math.ceil((restTargetTimestamp - Date.now()) / 1000));
+      setRestSecondsLeft(remaining);
 
-    if (restSecondsLeft <= 3 && restSecondsLeft > 0) {
-      soundManager.playCountdownBeep();
-    }
+      if (remaining <= 0) {
+        soundManager.playSuccessChime();
+        setRestTargetTimestamp(null);
+        advanceToNextSetOrExercise();
+        return;
+      }
 
-    const timer = setInterval(() => {
-      setRestSecondsLeft(prev => prev - 1);
-    }, 1000);
+      if (remaining <= 3 && remaining > 0) {
+        soundManager.playCountdownBeep();
+      }
+    };
 
+    checkRestTime();
+    const timer = setInterval(checkRestTime, 500);
     return () => clearInterval(timer);
-  }, [phase, restSecondsLeft, isWorkoutPaused]);
+  }, [phase, restTargetTimestamp, isWorkoutPaused]);
 
   // Isometric Exercise Countdown / Stopwatch
   useEffect(() => {
@@ -186,8 +208,8 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
 
   // Complete Reps Set
   const handleCompleteRepsSet = () => {
-    // Record set
-    recordCurrentSet(currentReps, undefined);
+    // Record set with load
+    recordCurrentSet(currentReps, undefined, currentWeightKg);
 
     // Check if this was the last set of the last exercise
     const isLastSet = setIndex >= currentRoutineExercise.sets - 1;
@@ -199,10 +221,11 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
       return;
     }
 
-    // Trigger Rest Period
+    // Trigger Rest Period with timestamp anchor
     const restTime = currentRoutineExercise.restSeconds || 60;
     setRestInitialSeconds(restTime);
     setRestSecondsLeft(restTime);
+    setRestTargetTimestamp(Date.now() + restTime * 1000);
     setPhase('rest');
     soundManager.playCountdownBeep();
   };
@@ -210,7 +233,7 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
   // Complete Isometric Set
   const handleCompleteIsometricSet = () => {
     const elapsedOrCompleted = isometricInitialSeconds - Math.max(0, isometricSecondsLeft);
-    recordCurrentSet(undefined, elapsedOrCompleted || isometricInitialSeconds);
+    recordCurrentSet(undefined, elapsedOrCompleted || isometricInitialSeconds, currentWeightKg);
 
     const isLastSet = setIndex >= currentRoutineExercise.sets - 1;
     const isLastExercise = exerciseIndex >= routine.exercises.length - 1;
@@ -224,10 +247,12 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
     const restTime = currentRoutineExercise.restSeconds || 60;
     setRestInitialSeconds(restTime);
     setRestSecondsLeft(restTime);
+    setRestTargetTimestamp(Date.now() + restTime * 1000);
     setPhase('rest');
+    soundManager.playCountdownBeep();
   };
 
-  const recordCurrentSet = (reps?: number, seconds?: number) => {
+  const recordCurrentSet = (reps?: number, seconds?: number, weightKg?: number) => {
     setCompletedRecords(prev => {
       const copy = [...prev];
       if (copy[exerciseIndex] && copy[exerciseIndex].sets[setIndex]) {
@@ -236,6 +261,7 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
           completed: true,
           completedReps: reps,
           completedSeconds: seconds,
+          weightKg: weightKg || undefined,
         };
         const allSetsCompleted = copy[exerciseIndex].sets.every(s => s.completed);
         copy[exerciseIndex].completed = allSetsCompleted;
@@ -245,11 +271,17 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
   };
 
   const handleSkipRest = () => {
+    setRestTargetTimestamp(null);
     advanceToNextSetOrExercise();
   };
 
   const handleAdjustRest = (deltaSeconds: number) => {
-    setRestSecondsLeft(prev => Math.max(5, prev + deltaSeconds));
+    soundManager.triggerHaptic([20]);
+    setRestSecondsLeft(prev => {
+      const next = Math.max(5, prev + deltaSeconds);
+      setRestTargetTimestamp(Date.now() + next * 1000);
+      return next;
+    });
   };
 
   const handleTriggerFinish = () => {
@@ -453,6 +485,16 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
               })}
             </div>
 
+            {/* Real-time Continuous Video Illustration Loop */}
+            {currentExerciseData && (
+              <ExerciseVideoPlayer
+                exercise={currentExerciseData}
+                isPaused={isWorkoutPaused}
+                phase={phase}
+                autoLoop={true}
+              />
+            )}
+
             {/* Execution Card: Isometric vs Reps */}
             {isIsometric ? (
               /* ISOMETRIC EXERCISE HUD */
@@ -569,9 +611,42 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
                       setCurrentReps(currentReps + 1);
                     }}
                     className="w-14 h-14 rounded-2xl glass-card hover:bg-white/[0.1] border border-white/10 text-slate-100 flex items-center justify-center active:scale-90 transition shadow-lg"
+                    aria-label="Aumentar repetição"
                   >
                     <Plus className="w-6 h-6" />
                   </button>
+                </div>
+
+                {/* Optional Weight / Extra Load Selector */}
+                <div className="flex items-center justify-between w-full max-w-xs px-4 py-2.5 rounded-2xl bg-white/[0.04] border border-white/5 text-xs">
+                  <span className="font-bold text-slate-400">Carga Extra:</span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        soundManager.triggerHaptic([15]);
+                        setCurrentWeightKg(prev => Math.max(0, prev - 2));
+                      }}
+                      className="w-8 h-8 rounded-xl glass-card text-slate-300 font-bold active:scale-90 flex items-center justify-center border border-white/5"
+                      aria-label="Diminuir 2kg"
+                    >
+                      -2
+                    </button>
+                    <span className="font-mono font-extrabold text-xs text-emerald-400 min-w-14 text-center">
+                      {currentWeightKg > 0 ? `+${currentWeightKg}kg` : '0kg (Livre)'}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        soundManager.triggerHaptic([15]);
+                        setCurrentWeightKg(prev => prev + 2);
+                      }}
+                      className="w-8 h-8 rounded-xl glass-card text-slate-300 font-bold active:scale-90 flex items-center justify-center border border-white/5"
+                      aria-label="Aumentar 2kg"
+                    >
+                      +2
+                    </button>
+                  </div>
                 </div>
 
                 {/* Big Finish Set CTA */}
@@ -666,18 +741,31 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
             {/* Up Next Card Preview */}
             {nextExerciseData && (
               <div className="w-full glass-card rounded-3xl p-4 flex items-center justify-between gap-3 text-xs border border-white/10 shadow-lg">
-                <div>
-                  <span className="text-emerald-400 font-extrabold block text-[10px] uppercase tracking-widest">
-                    A Seguir:
-                  </span>
-                  <span className="font-black text-slate-100 text-sm">
-                    {nextExerciseData.name}
-                  </span>
-                  <span className="text-slate-400 block text-[11px] mt-0.5 font-medium">
-                    {nextIsSameExercise ? `Série ${setIndex + 2} de ${currentRoutineExercise.sets}` : 'Primeira série do próximo exercício'}
-                  </span>
+                <div className="flex items-center gap-3">
+                  {nextExerciseData.videoThumbnail ? (
+                    <img
+                      src={nextExerciseData.videoThumbnail}
+                      alt={nextExerciseData.name}
+                      className="w-12 h-12 rounded-xl object-cover bg-black/40 border border-white/10 shrink-0 shadow-md"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 rounded-xl bg-white/[0.06] border border-white/10 flex items-center justify-center shrink-0">
+                      <Play className="w-5 h-5 text-emerald-400" />
+                    </div>
+                  )}
+                  <div>
+                    <span className="text-emerald-400 font-extrabold block text-[10px] uppercase tracking-widest">
+                      A Seguir:
+                    </span>
+                    <span className="font-black text-slate-100 text-sm">
+                      {nextExerciseData.name}
+                    </span>
+                    <span className="text-slate-400 block text-[11px] mt-0.5 font-medium">
+                      {nextIsSameExercise ? `Série ${setIndex + 2} de ${currentRoutineExercise.sets}` : 'Primeira série do próximo exercício'}
+                    </span>
+                  </div>
                 </div>
-                <div className="p-3 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 glow-emerald">
+                <div className="p-3 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 glow-emerald shrink-0">
                   <Play className="w-4 h-4 fill-current" />
                 </div>
               </div>

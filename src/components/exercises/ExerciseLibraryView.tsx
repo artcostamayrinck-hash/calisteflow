@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import type { Exercise, MuscleGroup, ExerciseCategory } from '../../types';
 import { EXERCISES_DATABASE, MUSCLE_LABELS } from '../../data/exercisesData';
-import { ExercisePostureVisual } from '../visuals/ExercisePostureVisual';
 import { MuscleMap } from '../visuals/MuscleMap';
+import { ExerciseVideoPlayer } from '../workout/ExerciseVideoPlayer';
 import { soundManager } from '../../utils/audio';
 import { Search, Filter, Dumbbell, Sparkles, X, ChevronDown, ChevronUp } from 'lucide-react';
 
@@ -191,9 +191,21 @@ export const ExerciseLibraryView = ({
                 </div>
               </div>
 
-              {/* Title & Description */}
-              <h3 className="text-base sm:text-lg font-bold text-slate-100">{ex.name}</h3>
-              <p className="text-xs text-slate-400 mt-1 leading-relaxed">{ex.description}</p>
+              {/* Title & Description & Thumbnail */}
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1">
+                  <h3 className="text-base sm:text-lg font-bold text-slate-100">{ex.name}</h3>
+                  <p className="text-xs text-slate-400 mt-1 leading-relaxed line-clamp-2">{ex.description}</p>
+                </div>
+                {ex.videoThumbnail && (
+                  <img
+                    src={ex.videoThumbnail}
+                    alt={ex.name}
+                    loading="lazy"
+                    className="w-14 h-14 rounded-2xl object-cover bg-black/40 border border-white/10 shrink-0 shadow-md"
+                  />
+                )}
+              </div>
 
               {/* Muscle pills */}
               <div className="flex flex-wrap gap-1 mt-3">
@@ -267,8 +279,8 @@ export const ExerciseLibraryView = ({
 
             {/* Modal Content */}
             <div className="overflow-y-auto p-4 sm:p-6 space-y-5">
-              {/* Animated Vector Posture Visual */}
-              <ExercisePostureVisual exercise={selectedExercise} />
+              {/* Looping Video Illustration & Biomechanical Visual */}
+              <ExerciseVideoPlayer exercise={selectedExercise} autoLoop={true} />
 
               {/* Targeted Muscle Map */}
               <div className="glass-card p-4 rounded-3xl border border-white/10 shadow-lg">

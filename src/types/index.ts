@@ -45,6 +45,8 @@ export interface Exercise {
   executionSteps: ExercisePostureStep[];
   commonMistakes: ExerciseMistake[];
   breathingTip: string;
+  videoUrl?: string;
+  videoThumbnail?: string;
   animationType:
     | 'pushup'
     | 'pullup'
@@ -89,6 +91,7 @@ export interface WorkoutSetRecord {
   setNumber: number;
   completedReps?: number;
   completedSeconds?: number;
+  weightKg?: number;
   completed: boolean;
 }
 
