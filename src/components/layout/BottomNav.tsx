@@ -1,7 +1,7 @@
-import { Dumbbell, BookOpen, Trophy, Play, CalendarDays } from 'lucide-react';
+import { Dumbbell, BookOpen, Trophy, Play, CalendarDays, Home } from 'lucide-react';
 import { soundManager } from '../../utils/audio';
 
-export type NavTab = 'routines' | 'planner' | 'exercises' | 'history';
+export type NavTab = 'home' | 'routines' | 'planner' | 'exercises' | 'history';
 
 interface BottomNavProps {
   activeTab: NavTab;
@@ -48,7 +48,8 @@ export const BottomNav = ({
       )}
 
       {/* Floating Modern Glass Pill Dock */}
-      <nav className="w-full max-w-md pointer-events-auto glass-panel rounded-3xl p-1.5 shadow-2xl border border-white/10 grid grid-cols-4 gap-1 backdrop-blur-2xl">
+      <nav className="w-full max-w-md pointer-events-auto glass-panel rounded-3xl p-1.5 shadow-2xl border border-white/10 grid grid-cols-5 gap-1 backdrop-blur-2xl">
+        {/* Rotinas */}
         <button
           onClick={() => handleTabClick('routines')}
           className={`relative flex flex-col items-center justify-center py-2 px-2 rounded-2xl transition-all duration-200 active:scale-95 ${
@@ -64,6 +65,7 @@ export const BottomNav = ({
           )}
         </button>
 
+        {/* Semana */}
         <button
           onClick={() => handleTabClick('planner')}
           className={`relative flex flex-col items-center justify-center py-2 px-2 rounded-2xl transition-all duration-200 active:scale-95 ${
@@ -79,6 +81,25 @@ export const BottomNav = ({
           )}
         </button>
 
+        {/* HOME — Centre primary CTA button */}
+        <button
+          onClick={() => handleTabClick('home')}
+          className="relative flex flex-col items-center justify-center py-1 px-1 rounded-2xl transition-all duration-200 active:scale-90"
+          aria-label="Home – Treinar hoje"
+        >
+          <div
+            className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-xl transition-all duration-200 ${
+              activeTab === 'home'
+                ? 'bg-gradient-to-br from-emerald-400 via-teal-400 to-cyan-400 text-slate-950 shadow-emerald-500/40 glow-emerald scale-105'
+                : 'bg-gradient-to-br from-emerald-500/80 via-teal-500/80 to-cyan-500/80 text-slate-950 shadow-emerald-500/20'
+            }`}
+          >
+            <Home className="w-5 h-5 stroke-[2.5]" />
+          </div>
+          <span className={`text-[10px] tracking-wide mt-0.5 ${activeTab === 'home' ? 'text-emerald-400 font-bold' : 'text-slate-400'}`}>Home</span>
+        </button>
+
+        {/* Exercícios */}
         <button
           onClick={() => handleTabClick('exercises')}
           className={`relative flex flex-col items-center justify-center py-2 px-3 rounded-2xl transition-all duration-200 active:scale-95 ${
@@ -94,6 +115,7 @@ export const BottomNav = ({
           )}
         </button>
 
+        {/* Progresso */}
         <button
           onClick={() => handleTabClick('history')}
           className={`relative flex flex-col items-center justify-center py-2 px-3 rounded-2xl transition-all duration-200 active:scale-95 ${

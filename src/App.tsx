@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { Routine, WorkoutSession, WorkoutStats, WeeklyPlan } from './types';
 import {
   getStoredRoutines,
@@ -12,6 +12,7 @@ import {
   getStoredWeeklyPlan,
   saveWeeklyPlan,
 } from './utils/storage';
+import { HomeView } from './components/home/HomeView';
 import { RoutineListView } from './components/routines/RoutineListView';
 import { RoutineDetailModal } from './components/routines/RoutineDetailModal';
 import { RoutineEditorModal } from './components/routines/RoutineEditorModal';
@@ -22,11 +23,12 @@ import { HistoryView } from './components/history/HistoryView';
 import { WeeklyPlannerView } from './components/planner/WeeklyPlannerView';
 import { OnboardingModal } from './components/planner/OnboardingModal';
 import { BottomNav, type NavTab } from './components/layout/BottomNav';
+import { soundManager } from './utils/audio';
 import { Dumbbell, Flame } from 'lucide-react';
 
 export function App() {
-  // App Navigation
-  const [activeTab, setActiveTab] = useState<NavTab>('routines');
+  // App Navigation — default to 'home'
+  const [activeTab, setActiveTab] = useState<NavTab>('home');
 
   // Persistence State
   const [routines, setRoutines] = useState<Routine[]>(() => getStoredRoutines());
@@ -42,6 +44,14 @@ export function App() {
       return false;
     }
   });
+
+  // Record-beat micro-interaction state (used in handleSaveSummarySession)
+  const triggerRecordVibrate = useCallback(() => {
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+      navigator.vibrate([80, 40, 80]);
+    }
+    soundManager.playSuccessChime();
+  }, []);
 
   // Active Workout Player State
   const [activeWorkoutRoutine, setActiveWorkoutRoutine] = useState<Routine | null>(null);
@@ -126,7 +136,9 @@ export function App() {
     const updatedHistory = saveWorkoutSession(finalSession);
     setHistory(updatedHistory);
     setSummarySession(null);
-    setActiveTab('history');
+    // Vibrate + chime to celebrate
+    triggerRecordVibrate();
+    setActiveTab('home');
   };
 
   const handleDeleteHistorySession = (sessionId: string) => {
@@ -193,6 +205,17 @@ export function App() {
 
       {/* Main Tab Content View */}
       <main className="flex-1 max-w-4xl mx-auto w-full p-4 sm:p-6">
+        {activeTab === 'home' && (
+          <HomeView
+            stats={stats}
+            weeklyPlan={weeklyPlan}
+            routines={routines}
+            onStartRoutine={handleStartRoutine}
+            onNavigateTo={tab => setActiveTab(tab)}
+            onOpenOnboarding={() => setIsOnboardingOpen(true)}
+          />
+        )}
+
         {activeTab === 'routines' && (
           <RoutineListView
             routines={routines}
