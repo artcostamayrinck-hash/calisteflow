@@ -1,4 +1,4 @@
-import type { Routine, WorkoutSession, WorkoutStats, WeeklyPlan, WeeklyDayPlan, RoutineExercise } from '../types';
+import type { Routine, WorkoutSession, WorkoutStats, WeeklyPlan, WeeklyDayPlan, RoutineExercise, UserOnboardingProfile } from '../types';
 import { DEFAULT_ROUTINES } from '../data/routinesData';
 import { createPresetWeeklyPlan } from './workoutGenerator';
 
@@ -7,6 +7,8 @@ const STORAGE_KEYS = {
   HISTORY: 'calistheflow_history_v1',
   SETTINGS: 'calistheflow_settings_v1',
   WEEKLY_PLAN: 'calistheflow_weekly_plan_v1',
+  USER_PROFILE: 'calistheflow_user_profile_v1',
+  ONBOARDING_DRAFT: 'calistheflow_onboarding_draft_v1',
 };
 
 export const getStoredRoutines = (): Routine[] => {
@@ -221,5 +223,55 @@ export const convertDayPlanToRoutine = (day: WeeklyDayPlan): Routine => {
     isCustom: true,
   };
 };
+
+export interface OnboardingDraftState {
+  step: number;
+  profile: Partial<UserOnboardingProfile>;
+}
+
+export const getStoredUserProfile = (): UserOnboardingProfile | null => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.USER_PROFILE);
+    return raw ? JSON.parse(raw) : null;
+  } catch (error) {
+    console.error('Failed to load user profile from storage:', error);
+    return null;
+  }
+};
+
+export const saveUserProfile = (profile: UserOnboardingProfile): void => {
+  try {
+    localStorage.setItem(STORAGE_KEYS.USER_PROFILE, JSON.stringify(profile));
+  } catch (error) {
+    console.error('Failed to save user profile:', error);
+  }
+};
+
+export const getStoredOnboardingDraft = (): OnboardingDraftState | null => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.ONBOARDING_DRAFT);
+    return raw ? JSON.parse(raw) : null;
+  } catch (error) {
+    console.error('Failed to load onboarding draft:', error);
+    return null;
+  }
+};
+
+export const saveOnboardingDraft = (draft: OnboardingDraftState): void => {
+  try {
+    localStorage.setItem(STORAGE_KEYS.ONBOARDING_DRAFT, JSON.stringify(draft));
+  } catch (error) {
+    console.error('Failed to save onboarding draft:', error);
+  }
+};
+
+export const clearOnboardingDraft = (): void => {
+  try {
+    localStorage.removeItem(STORAGE_KEYS.ONBOARDING_DRAFT);
+  } catch (error) {
+    console.error('Failed to clear onboarding draft:', error);
+  }
+};
+
 
 

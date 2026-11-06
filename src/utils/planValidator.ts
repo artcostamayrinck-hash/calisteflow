@@ -177,3 +177,4 @@ export function calculateWeeklyMuscleVolume(plan: WeeklyPlan): WeeklyMuscleVolum
     })
     .sort((a, b) => b.totalSets - a.totalSets);
 }
+

@@ -33,7 +33,15 @@ export function App() {
   const [history, setHistory] = useState<WorkoutSession[]>(() => getWorkoutHistory());
   const [stats, setStats] = useState<WorkoutStats>(() => calculateStats(getWorkoutHistory()));
   const [weeklyPlan, setWeeklyPlan] = useState<WeeklyPlan>(() => getStoredWeeklyPlan());
-  const [isOnboardingOpen, setIsOnboardingOpen] = useState<boolean>(false);
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState<boolean>(() => {
+    try {
+      const hasProfile = localStorage.getItem('calistheflow_user_profile_v1');
+      const hasDismissed = localStorage.getItem('calistheflow_onboarding_dismissed');
+      return !hasProfile && !hasDismissed;
+    } catch {
+      return false;
+    }
+  });
 
   // Active Workout Player State
   const [activeWorkoutRoutine, setActiveWorkoutRoutine] = useState<Routine | null>(null);
@@ -260,9 +268,14 @@ export function App() {
         <OnboardingModal
           onComplete={generated => {
             handleUpdateWeeklyPlan(generated);
+            localStorage.setItem('calistheflow_onboarding_dismissed', 'true');
+            setIsOnboardingOpen(false);
+            setActiveTab('planner');
+          }}
+          onSkip={() => {
+            localStorage.setItem('calistheflow_onboarding_dismissed', 'true');
             setIsOnboardingOpen(false);
           }}
-          onSkip={() => setIsOnboardingOpen(false)}
         />
       )}
 

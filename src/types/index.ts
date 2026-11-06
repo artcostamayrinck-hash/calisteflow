@@ -135,9 +135,27 @@ export type BodyFocus =
   | 'mobilidade'
   | 'core';
 
-export type EquipmentType = 'nenhum' | 'barra' | 'paralelas' | 'argolas' | 'elastico';
+export type EquipmentType = 'nenhum' | 'barra' | 'paralelas' | 'argolas' | 'elastico' | 'banco';
 
-export type FitnessGoal = 'forca' | 'hipertrofia' | 'resistencia' | 'skills';
+export type FitnessGoal = 'forca' | 'hipertrofia' | 'resistencia' | 'skills' | 'perda_gordura' | 'mobilidade';
+
+export type JointLimitation = 'punho' | 'ombro' | 'joelho' | 'lombar';
+
+export interface UserOnboardingProfile {
+  goal: FitnessGoal;
+  level: ExerciseDifficulty | 'Nunca treinei';
+  pushupsCount?: number;
+  pullupsCount?: number;
+  equipments: EquipmentType[];
+  daysSelected: number[]; // 0-6
+  durationMinutes: 20 | 30 | 45 | 60;
+  focusMode: 'auto' | 'custom';
+  dayFocusMap?: Record<number, BodyFocus[]>;
+  limitations: JointLimitation[];
+  preferredTime?: string;
+  notificationsEnabled?: boolean;
+  completedAt?: string;
+}
 
 export type WorkoutBlockType = 'warmup' | 'main' | 'isometric_core' | 'cooldown';
 

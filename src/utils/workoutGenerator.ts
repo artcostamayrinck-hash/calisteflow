@@ -9,6 +9,8 @@ import type {
   PlannedExercise,
   ExerciseDifficulty,
   MuscleGroup,
+  UserOnboardingProfile,
+  JointLimitation,
 } from '../types';
 import { EXERCISES_DATABASE } from '../data/exercisesData';
 
@@ -63,13 +65,21 @@ export const WEEK_DAYS_NAMES = [
   { dayOfWeek: 0, shortName: 'DOM', dayName: 'Domingo' },
 ];
 
+export const JOINT_RISK_MAP: Record<JointLimitation, string[]> = {
+  punho: ['planche_lean', 'handstand_hold', 'diamond_pushup'],
+  ombro: ['dips', 'handstand_hold', 'muscleup', 'pike_pushup'],
+  joelho: ['pistol_squat', 'lunges'],
+  lombar: ['front_lever'],
+};
+
 /**
  * Filter exercises compatible with user's available equipment and level
  */
 export function filterExercises(
   exercises: Exercise[],
   userLevel: ExerciseDifficulty,
-  equipments: EquipmentType[]
+  equipments: EquipmentType[],
+  limitations?: JointLimitation[]
 ): Exercise[] {
   const levelOrder: Record<ExerciseDifficulty, number> = {
     Iniciante: 1,
@@ -79,7 +89,19 @@ export function filterExercises(
   };
   const userLevelNum = levelOrder[userLevel] || 2;
 
+  // Collect banned exercise IDs due to joint limitations
+  const riskyIds = new Set<string>();
+  if (limitations && limitations.length > 0) {
+    limitations.forEach(lim => {
+      const risks = JOINT_RISK_MAP[lim];
+      if (risks) risks.forEach(id => riskyIds.add(id));
+    });
+  }
+
   return exercises.filter(ex => {
+    // Avoid risky exercises for injured joints
+    if (riskyIds.has(ex.id)) return false;
+
     // Check level compatibility (allow exercises up to user's level or 1 above with caution)
     const exLevelNum = levelOrder[ex.difficulty] || 1;
     if (exLevelNum > userLevelNum + 1) return false;
@@ -102,6 +124,7 @@ export function generateDayWorkout(params: {
   goal: FitnessGoal;
   userLevel: ExerciseDifficulty;
   equipments: EquipmentType[];
+  limitations?: JointLimitation[];
   existingBlocks?: WorkoutBlock[]; // For locked exercises preservation
 }): WorkoutBlock[] {
   const {
@@ -110,6 +133,7 @@ export function generateDayWorkout(params: {
     goal,
     userLevel,
     equipments,
+    limitations = [],
     existingBlocks = [],
   } = params;
 
@@ -133,12 +157,15 @@ export function generateDayWorkout(params: {
     hipertrofia: { reps: 10, holdSeconds: 30, rest: 60 },
     resistencia: { reps: 15, holdSeconds: 45, rest: 45 },
     skills: { reps: 5, holdSeconds: 15, rest: 120 },
-  }[goal];
+    perda_gordura: { reps: 15, holdSeconds: 35, rest: 35 },
+    mobilidade: { reps: 8, holdSeconds: 40, rest: 40 },
+  }[goal] || { reps: 10, holdSeconds: 30, rest: 60 };
 
   const availableExercises = filterExercises(
     EXERCISES_DATABASE,
     userLevel,
-    equipments
+    equipments,
+    limitations
   );
 
   // Helper: Match exercises to focuses
@@ -366,3 +393,119 @@ export function createPresetWeeklyPlan(
     updatedAt: new Date().toISOString(),
   };
 }
+
+/**
+ * Builds a customized weekly plan from the 8-step onboarding questionnaire
+ */
+export function createCustomWeeklyPlanFromProfile(
+  profile: UserOnboardingProfile
+): WeeklyPlan {
+  const actualLevel: ExerciseDifficulty =
+    profile.level === 'Nunca treinei' ? 'Iniciante' : profile.level;
+
+  const baseDays: WeeklyDayPlan[] = WEEK_DAYS_NAMES.map(d => ({
+    dayOfWeek: d.dayOfWeek,
+    dayName: d.dayName,
+    shortName: d.shortName,
+    isActive: false,
+    name: 'Descanso Ativo',
+    focuses: [],
+    targetDurationMinutes: profile.durationMinutes,
+    goal: profile.goal,
+    timeReminder: profile.preferredTime,
+    blocks: [],
+  }));
+
+  const selectedDays = profile.daysSelected.length > 0 ? profile.daysSelected : [1, 3, 5];
+
+  const defaultDistributions: Record<number, { name: string; focuses: BodyFocus[] }[]> = {
+    1: [{ name: 'Full Body Geral', focuses: ['full_body', 'core'] }],
+    2: [
+      { name: 'Membros Superiores (Upper)', focuses: ['peito', 'costas', 'ombros'] },
+      { name: 'Membros Inferiores & Core (Lower)', focuses: ['quadriceps', 'gluteos', 'core'] },
+    ],
+    3: [
+      { name: 'Push (Empurrar)', focuses: ['peito', 'ombros', 'triceps'] },
+      { name: 'Pull (Puxar)', focuses: ['costas', 'biceps'] },
+      { name: 'Legs & Core', focuses: ['quadriceps', 'gluteos', 'core'] },
+    ],
+    4: [
+      { name: 'Push (Peito e Tríceps)', focuses: ['peito', 'triceps', 'ombros'] },
+      { name: 'Pull (Costas e Bíceps)', focuses: ['costas', 'biceps', 'antebraco'] },
+      { name: 'Legs (Pernas e Glúteos)', focuses: ['quadriceps', 'gluteos', 'posteriores'] },
+      { name: 'Upper & Core', focuses: ['peito', 'costas', 'core'] },
+    ],
+    5: [
+      { name: 'Push Força', focuses: ['peito', 'triceps'] },
+      { name: 'Pull Força', focuses: ['costas', 'biceps'] },
+      { name: 'Legs Completo', focuses: ['quadriceps', 'gluteos', 'posteriores'] },
+      { name: 'Ombros & Skills', focuses: ['ombros', 'skills'] },
+      { name: 'Core & Mobilidade', focuses: ['core', 'mobilidade'] },
+    ],
+    6: [
+      { name: 'Push A', focuses: ['peito', 'triceps'] },
+      { name: 'Pull A', focuses: ['costas', 'biceps'] },
+      { name: 'Legs A', focuses: ['quadriceps', 'gluteos'] },
+      { name: 'Push B', focuses: ['ombros', 'triceps'] },
+      { name: 'Pull B', focuses: ['costas', 'antebraco'] },
+      { name: 'Legs B & Core', focuses: ['posteriores', 'core'] },
+    ],
+    7: [
+      { name: 'Push', focuses: ['peito', 'triceps'] },
+      { name: 'Pull', focuses: ['costas', 'biceps'] },
+      { name: 'Legs', focuses: ['quadriceps', 'gluteos'] },
+      { name: 'Skills & Isometria', focuses: ['skills', 'core'] },
+      { name: 'Upper Hipertrofia', focuses: ['peito', 'costas'] },
+      { name: 'Lower & Core', focuses: ['quadriceps', 'core'] },
+      { name: 'Mobilidade Ativa', focuses: ['mobilidade'] },
+    ],
+  };
+
+  const distList = defaultDistributions[selectedDays.length] || defaultDistributions[3];
+
+  selectedDays.forEach((dayNum, index) => {
+    const day = baseDays.find(d => d.dayOfWeek === dayNum);
+    if (!day) return;
+
+    day.isActive = true;
+    day.targetDurationMinutes = profile.durationMinutes;
+    day.goal = profile.goal;
+    day.timeReminder = profile.preferredTime;
+
+    let dayFocuses: BodyFocus[] = [];
+    let dayName = '';
+
+    if (profile.focusMode === 'custom' && profile.dayFocusMap && profile.dayFocusMap[dayNum]) {
+      dayFocuses = profile.dayFocusMap[dayNum];
+      dayName = `Treino Personalizado (${dayFocuses.slice(0, 2).join(', ')})`;
+    } else {
+      const dist = distList[index % distList.length];
+      dayFocuses = dist.focuses;
+      dayName = dist.name;
+    }
+
+    day.name = dayName;
+    day.focuses = dayFocuses;
+    day.blocks = generateDayWorkout({
+      focuses: dayFocuses,
+      targetDurationMinutes: profile.durationMinutes,
+      goal: profile.goal,
+      userLevel: actualLevel,
+      equipments: profile.equipments,
+      limitations: profile.limitations,
+    });
+  });
+
+  return {
+    id: `plan-${Date.now()}`,
+    version: 1,
+    title: `Plano CalisteFlow • ${profile.goal.toUpperCase()}`,
+    userLevel: actualLevel,
+    equipments: profile.equipments,
+    days: baseDays,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+
