@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import type { Routine, WorkoutSession, WorkoutStats } from './types';
+import type { Routine, WorkoutSession, WorkoutStats, WeeklyPlan } from './types';
 import {
   getStoredRoutines,
   saveSingleRoutine,
@@ -9,6 +9,8 @@ import {
   saveWorkoutSession,
   deleteWorkoutSession,
   calculateStats,
+  getStoredWeeklyPlan,
+  saveWeeklyPlan,
 } from './utils/storage';
 import { RoutineListView } from './components/routines/RoutineListView';
 import { RoutineDetailModal } from './components/routines/RoutineDetailModal';
@@ -17,6 +19,8 @@ import { WorkoutPlayer } from './components/workout/WorkoutPlayer';
 import { WorkoutSummaryModal } from './components/workout/WorkoutSummaryModal';
 import { ExerciseLibraryView } from './components/exercises/ExerciseLibraryView';
 import { HistoryView } from './components/history/HistoryView';
+import { WeeklyPlannerView } from './components/planner/WeeklyPlannerView';
+import { OnboardingModal } from './components/planner/OnboardingModal';
 import { BottomNav, type NavTab } from './components/layout/BottomNav';
 import { Dumbbell, Flame } from 'lucide-react';
 
@@ -28,6 +32,8 @@ export function App() {
   const [routines, setRoutines] = useState<Routine[]>(() => getStoredRoutines());
   const [history, setHistory] = useState<WorkoutSession[]>(() => getWorkoutHistory());
   const [stats, setStats] = useState<WorkoutStats>(() => calculateStats(getWorkoutHistory()));
+  const [weeklyPlan, setWeeklyPlan] = useState<WeeklyPlan>(() => getStoredWeeklyPlan());
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState<boolean>(false);
 
   // Active Workout Player State
   const [activeWorkoutRoutine, setActiveWorkoutRoutine] = useState<Routine | null>(null);
@@ -88,6 +94,12 @@ export function App() {
   const handleResetDefaults = () => {
     const defaults = resetToDefaultRoutines();
     setRoutines(defaults);
+  };
+
+  // Weekly Planner Handlers
+  const handleUpdateWeeklyPlan = (updated: WeeklyPlan) => {
+    setWeeklyPlan(updated);
+    saveWeeklyPlan(updated);
   };
 
   // Workout Completion & Summary Handlers
@@ -186,6 +198,15 @@ export function App() {
           />
         )}
 
+        {activeTab === 'planner' && (
+          <WeeklyPlannerView
+            plan={weeklyPlan}
+            onUpdatePlan={handleUpdateWeeklyPlan}
+            onStartScheduledWorkout={handleStartRoutine}
+            onOpenOnboarding={() => setIsOnboardingOpen(true)}
+          />
+        )}
+
         {activeTab === 'exercises' && (
           <ExerciseLibraryView initialExerciseId={inspectExerciseId} />
         )}
@@ -231,6 +252,17 @@ export function App() {
         <WorkoutSummaryModal
           session={summarySession}
           onSaveAndClose={handleSaveSummarySession}
+        />
+      )}
+
+      {/* Onboarding Wizard Modal */}
+      {isOnboardingOpen && (
+        <OnboardingModal
+          onComplete={generated => {
+            handleUpdateWeeklyPlan(generated);
+            setIsOnboardingOpen(false);
+          }}
+          onSkip={() => setIsOnboardingOpen(false)}
         />
       )}
 

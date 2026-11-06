@@ -126,3 +126,70 @@ export interface WorkoutStats {
   lastWorkoutDate?: string;
 }
 
+// ================= WEEKLY PLANNER TYPES =================
+
+export type BodyFocus =
+  | MuscleGroup
+  | 'full_body'
+  | 'skills'
+  | 'mobilidade'
+  | 'core';
+
+export type EquipmentType = 'nenhum' | 'barra' | 'paralelas' | 'argolas' | 'elastico';
+
+export type FitnessGoal = 'forca' | 'hipertrofia' | 'resistencia' | 'skills';
+
+export type WorkoutBlockType = 'warmup' | 'main' | 'isometric_core' | 'cooldown';
+
+export interface PlannedExercise {
+  exerciseId: string;
+  sets: number;
+  targetReps?: number;
+  targetHoldSeconds?: number;
+  restSeconds: number;
+  notes?: string;
+  weightKg?: number;
+  locked?: boolean;
+}
+
+export interface WorkoutBlock {
+  id: string;
+  title: string;
+  type: WorkoutBlockType;
+  exercises: PlannedExercise[];
+}
+
+export interface WeeklyDayPlan {
+  dayOfWeek: number; // 0 = Domingo, 1 = Segunda, ..., 6 = Sábado
+  dayName: string;
+  shortName: string;
+  isActive: boolean; // Treino ativo ou descanso
+  name: string; // Ex: "Push Intenso", "Pernas & Core"
+  focuses: BodyFocus[];
+  targetDurationMinutes: 20 | 30 | 45 | 60;
+  goal: FitnessGoal;
+  timeReminder?: string; // Ex: "07:30"
+  blocks: WorkoutBlock[];
+  isCustomized?: boolean;
+}
+
+export interface WeeklyPlan {
+  id: string;
+  version: number;
+  title: string;
+  userLevel: ExerciseDifficulty;
+  equipments: EquipmentType[];
+  days: WeeklyDayPlan[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PlanValidationNotice {
+  id: string;
+  type: 'warning' | 'info' | 'error';
+  message: string;
+  affectedDays?: number[];
+  affectedMuscles?: MuscleGroup[];
+}
+
+

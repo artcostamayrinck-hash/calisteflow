@@ -1,10 +1,12 @@
-import type { Routine, WorkoutSession, WorkoutStats } from '../types';
+import type { Routine, WorkoutSession, WorkoutStats, WeeklyPlan, WeeklyDayPlan, RoutineExercise } from '../types';
 import { DEFAULT_ROUTINES } from '../data/routinesData';
+import { createPresetWeeklyPlan } from './workoutGenerator';
 
 const STORAGE_KEYS = {
   ROUTINES: 'calistheflow_routines_v1',
   HISTORY: 'calistheflow_history_v1',
   SETTINGS: 'calistheflow_settings_v1',
+  WEEKLY_PLAN: 'calistheflow_weekly_plan_v1',
 };
 
 export const getStoredRoutines = (): Routine[] => {
@@ -161,4 +163,63 @@ export const calculateStats = (history: WorkoutSession[]): WorkoutStats => {
     lastWorkoutDate: uniqueDates[0],
   };
 };
+
+export const getStoredWeeklyPlan = (): WeeklyPlan => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.WEEKLY_PLAN);
+    if (!raw) {
+      const defaultPlan = createPresetWeeklyPlan('ppl');
+      localStorage.setItem(STORAGE_KEYS.WEEKLY_PLAN, JSON.stringify(defaultPlan));
+      return defaultPlan;
+    }
+    const parsed = JSON.parse(raw);
+    return parsed && parsed.days ? parsed : createPresetWeeklyPlan('ppl');
+  } catch (error) {
+    console.error('Failed to load weekly plan from storage:', error);
+    return createPresetWeeklyPlan('ppl');
+  }
+};
+
+export const saveWeeklyPlan = (plan: WeeklyPlan): void => {
+  try {
+    const updated = { ...plan, updatedAt: new Date().toISOString() };
+    localStorage.setItem(STORAGE_KEYS.WEEKLY_PLAN, JSON.stringify(updated));
+  } catch (error) {
+    console.error('Failed to save weekly plan:', error);
+  }
+};
+
+/**
+ * Converts a scheduled day plan into a runnable Routine entity for WorkoutPlayer
+ */
+export const convertDayPlanToRoutine = (day: WeeklyDayPlan): Routine => {
+  const exercises: RoutineExercise[] = [];
+
+  day.blocks.forEach(block => {
+    block.exercises.forEach(pe => {
+      exercises.push({
+        exerciseId: pe.exerciseId,
+        sets: pe.sets,
+        targetReps: pe.targetReps,
+        targetHoldSeconds: pe.targetHoldSeconds,
+        restSeconds: pe.restSeconds || 60,
+        notes: pe.notes ? `[${block.title}] ${pe.notes}` : `[${block.title}]`,
+      });
+    });
+  });
+
+  return {
+    id: `scheduled-day-${day.dayOfWeek}-${Date.now()}`,
+    title: `${day.shortName}: ${day.name}`,
+    description: `Treino planejado para ${day.dayName}. Focos: ${day.focuses.join(', ')}`,
+    category: 'Full Body',
+    difficulty: 'Intermediário',
+    estimatedMinutes: day.targetDurationMinutes || 45,
+    exercises: exercises.length > 0 ? exercises : [
+      { exerciseId: 'pushup', sets: 3, targetReps: 10, restSeconds: 60 }
+    ],
+    isCustom: true,
+  };
+};
+
 

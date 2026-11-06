@@ -1,7 +1,7 @@
-import { Dumbbell, BookOpen, Trophy, Play } from 'lucide-react';
+import { Dumbbell, BookOpen, Trophy, Play, CalendarDays } from 'lucide-react';
 import { soundManager } from '../../utils/audio';
 
-export type NavTab = 'routines' | 'exercises' | 'history';
+export type NavTab = 'routines' | 'planner' | 'exercises' | 'history';
 
 interface BottomNavProps {
   activeTab: NavTab;
@@ -48,18 +48,33 @@ export const BottomNav = ({
       )}
 
       {/* Floating Modern Glass Pill Dock */}
-      <nav className="w-full max-w-md pointer-events-auto glass-panel rounded-3xl p-1.5 shadow-2xl border border-white/10 grid grid-cols-3 gap-1 backdrop-blur-2xl">
+      <nav className="w-full max-w-md pointer-events-auto glass-panel rounded-3xl p-1.5 shadow-2xl border border-white/10 grid grid-cols-4 gap-1 backdrop-blur-2xl">
         <button
           onClick={() => handleTabClick('routines')}
-          className={`relative flex flex-col items-center justify-center py-2 px-3 rounded-2xl transition-all duration-200 active:scale-95 ${
+          className={`relative flex flex-col items-center justify-center py-2 px-2 rounded-2xl transition-all duration-200 active:scale-95 ${
             activeTab === 'routines'
               ? 'text-emerald-400 font-bold bg-white/[0.06] shadow-inner'
               : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.02]'
           }`}
         >
           <Dumbbell className={`w-5 h-5 mb-1 transition-transform ${activeTab === 'routines' ? 'scale-110 stroke-[2.5]' : 'stroke-[1.8]'}`} />
-          <span className="text-[11px] tracking-wide">Rotinas</span>
+          <span className="text-[10px] tracking-wide">Rotinas</span>
           {activeTab === 'routines' && (
+            <span className="absolute bottom-1 w-4 h-0.5 bg-emerald-400 rounded-full glow-emerald" />
+          )}
+        </button>
+
+        <button
+          onClick={() => handleTabClick('planner')}
+          className={`relative flex flex-col items-center justify-center py-2 px-2 rounded-2xl transition-all duration-200 active:scale-95 ${
+            activeTab === 'planner'
+              ? 'text-emerald-400 font-bold bg-white/[0.06] shadow-inner'
+              : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.02]'
+          }`}
+        >
+          <CalendarDays className={`w-5 h-5 mb-1 transition-transform ${activeTab === 'planner' ? 'scale-110 stroke-[2.5]' : 'stroke-[1.8]'}`} />
+          <span className="text-[10px] tracking-wide">Semana</span>
+          {activeTab === 'planner' && (
             <span className="absolute bottom-1 w-4 h-0.5 bg-emerald-400 rounded-full glow-emerald" />
           )}
         </button>
