@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import type { Routine, WorkoutSession, WorkoutStats, WeeklyPlan } from './types';
+import type { Routine, WorkoutSession, WorkoutStats, WeeklyPlan, ActiveWorkoutBackup } from './types';
 import {
   getStoredRoutines,
   saveSingleRoutine,
@@ -11,7 +11,10 @@ import {
   calculateStats,
   getStoredWeeklyPlan,
   saveWeeklyPlan,
+  getActiveWorkoutBackup,
+  clearActiveWorkoutBackup,
 } from './utils/storage';
+import { trackEvent } from './utils/analytics';
 import { HomeView } from './components/home/HomeView';
 import { RoutineListView } from './components/routines/RoutineListView';
 import { RoutineDetailModal } from './components/routines/RoutineDetailModal';
@@ -24,6 +27,9 @@ import { WeeklyPlannerView } from './components/planner/WeeklyPlannerView';
 import { OnboardingModal } from './components/planner/OnboardingModal';
 import { HealthDisclaimerModal } from './components/safety/HealthDisclaimerModal';
 import { SafeExecutionModal } from './components/safety/SafeExecutionModal';
+import { FeedbackModal } from './components/retention/FeedbackModal';
+import { ChangelogFaqModal } from './components/retention/ChangelogFaqModal';
+import { UpdatePromptBanner } from './components/pwa/UpdatePromptBanner';
 import { BottomNav, type NavTab } from './components/layout/BottomNav';
 import { soundManager } from './utils/audio';
 import { Dumbbell, Flame, ShieldCheck } from 'lucide-react';
@@ -85,9 +91,30 @@ export function App() {
     soundManager.playSuccessChime();
   }, []);
 
-  // Active Workout Player State
+  // Active Workout Player State & Crash Recovery
   const [activeWorkoutRoutine, setActiveWorkoutRoutine] = useState<Routine | null>(null);
   const [isPlayerFullscreen, setIsPlayerFullscreen] = useState<boolean>(false);
+  const [activeBackup, setActiveBackup] = useState<ActiveWorkoutBackup | null>(() => getActiveWorkoutBackup());
+
+  // Additional modals (Feedback & FAQ)
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState<boolean>(false);
+  const [isFaqOpen, setIsFaqOpen] = useState<boolean>(false);
+
+  useEffect(() => {
+    trackEvent('app_opened');
+  }, []);
+
+  const handleResumeActiveBackup = () => {
+    if (!activeBackup) return;
+    const routine = routines.find(r => r.id === activeBackup.routine.id) || activeBackup.routine;
+    setActiveWorkoutRoutine(routine);
+    setIsPlayerFullscreen(true);
+  };
+
+  const handleDismissActiveBackup = () => {
+    clearActiveWorkoutBackup();
+    setActiveBackup(null);
+  };
 
   // Modals
   const [detailRoutine, setDetailRoutine] = useState<Routine | null>(null);
@@ -156,12 +183,14 @@ export function App() {
   const handleWorkoutFinished = (session: WorkoutSession) => {
     setIsPlayerFullscreen(false);
     setActiveWorkoutRoutine(null);
+    setActiveBackup(null);
     setSummarySession(session);
   };
 
   const handleExitWorkout = () => {
     setIsPlayerFullscreen(false);
     setActiveWorkoutRoutine(null);
+    setActiveBackup(null);
   };
 
   const handleSaveSummarySession = (finalSession: WorkoutSession) => {
@@ -245,17 +274,51 @@ export function App() {
         </div>
       </header>
 
+      {/* PWA Update Banner */}
+      <UpdatePromptBanner />
+
+      {/* Crash Recovery Notification Banner */}
+      {activeBackup && !isPlayerFullscreen && (
+        <div className="bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-amber-500/20 border-b border-amber-500/30 px-4 py-2.5 backdrop-blur-md">
+          <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping shrink-0" />
+              <span className="text-xs text-amber-200 font-bold">
+                Treino interrompido detectado: <strong className="text-white">{activeBackup.routine.title}</strong> (Ex. {activeBackup.exerciseIndex + 1}, Série {activeBackup.setIndex + 1})
+              </span>
+            </div>
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <button
+                onClick={handleResumeActiveBackup}
+                className="flex-1 sm:flex-none px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs transition active:scale-95 shadow-md shadow-amber-500/20"
+              >
+                Retomar Treino
+              </button>
+              <button
+                onClick={handleDismissActiveBackup}
+                className="px-3 py-1.5 rounded-xl bg-white/[0.08] hover:bg-white/[0.15] text-slate-300 font-semibold text-xs transition"
+              >
+                Descartar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Main Tab Content View */}
       <main className="flex-1 max-w-4xl mx-auto w-full p-4 sm:p-6">
         {activeTab === 'home' && (
           <HomeView
             stats={stats}
+            history={history}
             weeklyPlan={weeklyPlan}
             routines={routines}
             onStartRoutine={handleStartRoutine}
             onNavigateTo={tab => setActiveTab(tab)}
             onOpenOnboarding={() => setIsOnboardingOpen(true)}
             onOpenSafeExecution={() => setIsSafeExecutionOpen(true)}
+            onOpenFeedback={() => setIsFeedbackOpen(true)}
+            onOpenFaq={() => setIsFaqOpen(true)}
           />
         )}
 
@@ -302,6 +365,7 @@ export function App() {
           routine={activeWorkoutRoutine}
           onFinishWorkout={handleWorkoutFinished}
           onExitWorkout={handleExitWorkout}
+          initialBackup={activeBackup}
         />
       )}
 
@@ -356,6 +420,18 @@ export function App() {
         isOpen={isSafeExecutionOpen}
         onClose={() => setIsSafeExecutionOpen(false)}
         onSelectAudienceProgram={handleSelectAudienceProgram}
+      />
+
+      {/* Anonymous Feedback & Error Reporter Modal */}
+      <FeedbackModal
+        isOpen={isFeedbackOpen}
+        onClose={() => setIsFeedbackOpen(false)}
+      />
+
+      {/* Changelog & Interactive FAQ Modal */}
+      <ChangelogFaqModal
+        isOpen={isFaqOpen}
+        onClose={() => setIsFaqOpen(false)}
       />
 
       {/* Mobile-First Bottom Dock Navigation */}

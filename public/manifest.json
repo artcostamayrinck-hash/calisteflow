@@ -1,19 +1,50 @@
 {
-  "name": "CalisteFlow • Rotinas de Calistenia",
+  "name": "CalisteFlow • Calistenia & Postura",
   "short_name": "CalisteFlow",
-  "description": "Aplicativo web completo para rotinas, postura biomecânica e temporizadores de calistenia.",
+  "description": "App mobile-first de calistenia: treinos guiados, cronômetro inteligente de descanso, postura biomecânica e mapa muscular 100% offline.",
   "start_url": "/",
+  "id": "/",
   "display": "standalone",
   "background_color": "#020617",
   "theme_color": "#020617",
   "orientation": "portrait",
+  "lang": "pt-BR",
+  "categories": ["fitness", "health", "sports", "lifestyle"],
   "icons": [
     {
       "src": "/favicon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Treinar Hoje",
+      "short_name": "Treinar",
+      "description": "Iniciar a rotina agendada para hoje",
+      "url": "/?shortcut=today",
+      "icons": [{ "src": "/favicon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "Cronômetro de Descanso",
+      "short_name": "Cronômetro",
+      "description": "Abrir temporizador inteligente com feedback tátil",
+      "url": "/?shortcut=timer",
+      "icons": [{ "src": "/favicon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "Biblioteca de Exercícios",
+      "short_name": "Exercícios",
+      "description": "Explorar biomecânica, variações e mapa muscular",
+      "url": "/?shortcut=exercises",
+      "icons": [{ "src": "/favicon.svg", "sizes": "any" }]
     }
   ]
 }
-

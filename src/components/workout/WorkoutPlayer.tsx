@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import type { Routine, WorkoutSession, WorkoutExerciseRecord, MuscleGroup } from '../../types';
+import type { Routine, WorkoutSession, WorkoutExerciseRecord, MuscleGroup, ActiveWorkoutBackup } from '../../types';
 import { EXERCISES_DATABASE } from '../../data/exercisesData';
 import { soundManager } from '../../utils/audio';
+import { saveActiveWorkoutBackup, clearActiveWorkoutBackup } from '../../utils/storage';
 import { ExercisePostureVisual } from '../visuals/ExercisePostureVisual';
 import { MuscleMap } from '../visuals/MuscleMap';
 import { CadenceMetronome } from './CadenceMetronome';
@@ -29,20 +30,22 @@ interface WorkoutPlayerProps {
   routine: Routine;
   onFinishWorkout: (session: WorkoutSession) => void;
   onExitWorkout: () => void;
+  initialBackup?: ActiveWorkoutBackup | null;
 }
 
 export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
   routine,
   onFinishWorkout,
   onExitWorkout,
+  initialBackup,
 }) => {
-  // Navigation & Step State
-  const [exerciseIndex, setExerciseIndex] = useState<number>(0);
-  const [setIndex, setSetIndex] = useState<number>(0);
-  const [phase, setPhase] = useState<'exercise' | 'rest'>('exercise');
+  // Navigation & Step State (supports restoring from active backup)
+  const [exerciseIndex, setExerciseIndex] = useState<number>(initialBackup?.exerciseIndex || 0);
+  const [setIndex, setSetIndex] = useState<number>(initialBackup?.setIndex || 0);
+  const [phase, setPhase] = useState<'exercise' | 'rest'>(initialBackup?.phase || 'exercise');
 
   // Timers
-  const [totalElapsedSeconds, setTotalElapsedSeconds] = useState<number>(0);
+  const [totalElapsedSeconds, setTotalElapsedSeconds] = useState<number>(initialBackup?.totalElapsedSeconds || 0);
   const [isWorkoutPaused, setIsWorkoutPaused] = useState<boolean>(false);
 
   // Rest Timer State
@@ -68,10 +71,13 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
   // Confirm exit dialog
   const [showExitConfirm, setShowExitConfirm] = useState<boolean>(false);
 
-  // Completed records tracking
-  const [sessionStartTime] = useState<string>(new Date().toISOString());
-  const [completedRecords, setCompletedRecords] = useState<WorkoutExerciseRecord[]>(() =>
-    routine.exercises.map(re => {
+  // Completed records tracking (restores from backup if available)
+  const [sessionStartTime] = useState<string>(initialBackup?.sessionStartTime || new Date().toISOString());
+  const [completedRecords, setCompletedRecords] = useState<WorkoutExerciseRecord[]>(() => {
+    if (initialBackup?.completedRecords && initialBackup.completedRecords.length > 0) {
+      return initialBackup.completedRecords;
+    }
+    return routine.exercises.map(re => {
       const ex = EXERCISES_DATABASE.find(e => e.id === re.exerciseId);
       return {
         exerciseId: re.exerciseId,
@@ -84,8 +90,8 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
           completedSeconds: re.targetHoldSeconds || 0,
         })),
       };
-    })
-  );
+    });
+  });
 
   const currentRoutineExercise = routine.exercises[exerciseIndex];
   const currentExerciseData = EXERCISES_DATABASE.find(e => e.id === currentRoutineExercise.exerciseId);
@@ -142,6 +148,20 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
     }, 1000);
     return () => clearInterval(interval);
   }, [isWorkoutPaused]);
+
+  // G3: Auto-save active workout snapshot for crash/tab-close recovery
+  useEffect(() => {
+    saveActiveWorkoutBackup({
+      routine,
+      exerciseIndex,
+      setIndex,
+      phase,
+      totalElapsedSeconds,
+      completedRecords,
+      sessionStartTime,
+      timestamp: Date.now(),
+    });
+  }, [routine, exerciseIndex, setIndex, phase, totalElapsedSeconds, completedRecords, sessionStartTime]);
 
   // Rest Countdown Timer (Timestamp-based, resilient to background screen lock)
   useEffect(() => {
@@ -324,6 +344,7 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
       musclesWorked,
     };
 
+    clearActiveWorkoutBackup();
     onFinishWorkout(session);
   };
 
@@ -907,6 +928,7 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
               <button
                 onClick={() => {
                   setShowExitConfirm(false);
+                  clearActiveWorkoutBackup();
                   onExitWorkout();
                 }}
                 className="w-full py-2.5 rounded-2xl bg-rose-500/10 text-rose-300 border border-rose-500/25 text-xs font-bold hover:bg-rose-500/20 transition active:scale-98"

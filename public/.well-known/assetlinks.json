@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "app.calisteflow.twa",
+      "sha256_cert_fingerprints": [
+        "14:6D:E9:7F:0F:52:CE:EB:2B:AE:EF:E4:12:37:31:37:E9:D6:68:3B:1F:56:23:A0:2B:0A:6B:36:DD:01:CE:F0"
+      ]
+    }
+  }
+]

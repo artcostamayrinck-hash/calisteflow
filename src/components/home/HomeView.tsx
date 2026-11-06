@@ -18,16 +18,23 @@ import {
   CheckCircle2,
   ArrowRight,
   ShieldCheck,
+  MessageSquare,
+  HelpCircle,
 } from 'lucide-react';
+import { GuidedJourneyCard } from '../retention/GuidedJourneyCard';
+import type { WorkoutSession } from '../../types';
 
 interface HomeViewProps {
   stats: WorkoutStats;
+  history: WorkoutSession[];
   weeklyPlan: WeeklyPlan;
   routines: Routine[];
   onStartRoutine: (routine: Routine) => void;
   onNavigateTo: (tab: 'routines' | 'planner' | 'exercises' | 'history') => void;
   onOpenOnboarding: () => void;
   onOpenSafeExecution?: () => void;
+  onOpenFeedback?: () => void;
+  onOpenFaq?: () => void;
 }
 
 /** Greeting based on the hour of the day */
@@ -52,12 +59,15 @@ function fmtMinSec(totalSec: number): string {
 
 export const HomeView: React.FC<HomeViewProps> = ({
   stats,
+  history,
   weeklyPlan,
   routines,
   onStartRoutine,
   onNavigateTo,
   onOpenOnboarding,
   onOpenSafeExecution,
+  onOpenFeedback,
+  onOpenFaq,
 }) => {
   const [settings, setSettings] = useState<AppSettings>(getAppSettings);
   const [showSettings, setShowSettings] = useState(false);
@@ -301,6 +311,14 @@ export const HomeView: React.FC<HomeViewProps> = ({
         </div>
       </div>
 
+      {/* ── GUIDED JOURNEY & RETENTION MILESTONES (G2) ── */}
+      <GuidedJourneyCard
+        stats={stats}
+        history={history}
+        onStartQuickWorkout={handleStartQuickWorkout}
+        onNavigateToExercises={() => onNavigateTo('exercises')}
+      />
+
       {/* ── WEEKLY OVERVIEW ── */}
       <div className="glass-card rounded-3xl border border-white/10 p-4 sm:p-5 space-y-3" style={{ direction: 'ltr' }}>
         <div className={`flex items-center justify-between ${lhm ? 'flex-row-reverse' : ''}`}>
@@ -536,6 +554,39 @@ export const HomeView: React.FC<HomeViewProps> = ({
           </button>
         </div>
       )}
+
+      {/* ── FOOTER: HELP, FAQ & ANONYMOUS FEEDBACK (G4) ── */}
+      <div className="pt-2 pb-6 flex items-center justify-center gap-4 text-xs" style={{ direction: 'ltr' }}>
+        {onOpenFaq && (
+          <button
+            type="button"
+            onClick={() => {
+              soundManager.triggerHaptic([20]);
+              onOpenFaq();
+            }}
+            className="text-slate-400 hover:text-emerald-400 font-bold flex items-center gap-1.5 transition active:scale-95"
+          >
+            <HelpCircle className="w-3.5 h-3.5" />
+            <span>FAQ & Novidades</span>
+          </button>
+        )}
+
+        <span className="text-white/10">•</span>
+
+        {onOpenFeedback && (
+          <button
+            type="button"
+            onClick={() => {
+              soundManager.triggerHaptic([20]);
+              onOpenFeedback();
+            }}
+            className="text-slate-400 hover:text-emerald-400 font-bold flex items-center gap-1.5 transition active:scale-95"
+          >
+            <MessageSquare className="w-3.5 h-3.5" />
+            <span>Feedback & Erros</span>
+          </button>
+        )}
+      </div>
     </div>
   );
 };

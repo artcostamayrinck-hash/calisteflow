@@ -146,6 +146,25 @@ export interface WorkoutStats {
   lastWorkoutDate?: string;
 }
 
+export interface ActiveWorkoutBackup {
+  routine: Routine;
+  exerciseIndex: number;
+  setIndex: number;
+  phase: 'exercise' | 'rest';
+  totalElapsedSeconds: number;
+  completedRecords: WorkoutExerciseRecord[];
+  sessionStartTime: string;
+  timestamp: number;
+}
+
+export interface UserJourneyProgress {
+  day1Completed: boolean;
+  day3Completed: boolean;
+  day7Completed: boolean;
+  firstWorkoutDate?: string;
+  dismissedMessages: string[];
+}
+
 // ================= WEEKLY PLANNER TYPES =================
 
 export type BodyFocus =

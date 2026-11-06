@@ -1,4 +1,14 @@
-import type { Routine, WorkoutSession, WorkoutStats, WeeklyPlan, WeeklyDayPlan, RoutineExercise, UserOnboardingProfile } from '../types';
+import type {
+  Routine,
+  WorkoutSession,
+  WorkoutStats,
+  WeeklyPlan,
+  WeeklyDayPlan,
+  RoutineExercise,
+  UserOnboardingProfile,
+  ActiveWorkoutBackup,
+  UserJourneyProgress,
+} from '../types';
 import { DEFAULT_ROUTINES } from '../data/routinesData';
 import { createPresetWeeklyPlan } from './workoutGenerator';
 
@@ -9,6 +19,9 @@ const STORAGE_KEYS = {
   WEEKLY_PLAN: 'calistheflow_weekly_plan_v1',
   USER_PROFILE: 'calistheflow_user_profile_v1',
   ONBOARDING_DRAFT: 'calistheflow_onboarding_draft_v1',
+  ACTIVE_WORKOUT_BACKUP: 'calistheflow_active_workout_backup_v1',
+  JOURNEY_PROGRESS: 'calistheflow_journey_progress_v1',
+  AUTO_BACKUPS: 'calistheflow_auto_backups_v1',
 };
 
 export const getStoredRoutines = (): Routine[] => {
@@ -104,7 +117,10 @@ export const deleteWorkoutSession = (sessionId: string): WorkoutSession[] => {
   }
 };
 
-export const calculateStats = (history: WorkoutSession[]): WorkoutStats => {
+export const calculateStats = (
+  history: WorkoutSession[],
+  weeklyPlan?: WeeklyPlan
+): WorkoutStats => {
   if (!history || history.length === 0) {
     return {
       totalWorkouts: 0,
@@ -123,46 +139,57 @@ export const calculateStats = (history: WorkoutSession[]): WorkoutStats => {
     totalSets += session.totalSetsCompleted || 0;
   });
 
-  // Calculate workout streak
-  const uniqueDates = Array.from(
-    new Set(
-      history.map(s => {
-        const d = new Date(s.endTime || s.startTime);
-        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-      })
-    )
-  ).sort().reverse();
+  // Calculate workout streak with flexible rest days protection (G2 requirement)
+  const workoutDatesSet = new Set(
+    history.map(s => {
+      const d = new Date(s.endTime || s.startTime);
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    })
+  );
+
+  const today = new Date();
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  const yesterday = new Date(Date.now() - 86400000);
+  const yesterdayStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
+
+  const hasTrainedRecently = workoutDatesSet.has(todayStr) || workoutDatesSet.has(yesterdayStr);
 
   let streak = 0;
-  if (uniqueDates.length > 0) {
-    const today = new Date();
-    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-    const yesterday = new Date(Date.now() - 86400000);
-    const yesterdayStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
+  if (hasTrainedRecently) {
+    let checkDate = workoutDatesSet.has(todayStr) ? new Date(today) : new Date(yesterday);
+    let consecutiveRestDaysGrace = 0;
 
-    const latest = uniqueDates[0];
-    if (latest === todayStr || latest === yesterdayStr) {
-      streak = 1;
-      let checkDate = new Date(latest);
-      for (let i = 1; i < uniqueDates.length; i++) {
-        const prevExpected = new Date(checkDate.getTime() - 86400000);
-        const prevExpectedStr = `${prevExpected.getFullYear()}-${String(prevExpected.getMonth() + 1).padStart(2, '0')}-${String(prevExpected.getDate()).padStart(2, '0')}`;
-        if (uniqueDates[i] === prevExpectedStr) {
-          streak++;
-          checkDate = prevExpected;
+    for (let dayCount = 0; dayCount < 365; dayCount++) {
+      const dateStr = `${checkDate.getFullYear()}-${String(checkDate.getMonth() + 1).padStart(2, '0')}-${String(checkDate.getDate()).padStart(2, '0')}`;
+      const dayOfWeek = checkDate.getDay();
+
+      if (workoutDatesSet.has(dateStr)) {
+        streak++;
+        consecutiveRestDaysGrace = 0;
+      } else {
+        // Scheduled rest day grace: does not break streak
+        const dayPlan = weeklyPlan?.days.find(d => d.dayOfWeek === dayOfWeek);
+        const isScheduledRest = dayPlan ? !dayPlan.isActive : true;
+
+        if (isScheduledRest && consecutiveRestDaysGrace < 2) {
+          consecutiveRestDaysGrace++;
         } else {
           break;
         }
       }
+
+      checkDate = new Date(checkDate.getTime() - 86400000);
     }
   }
+
+  const sortedDates = Array.from(workoutDatesSet).sort().reverse();
 
   return {
     totalWorkouts: history.length,
     totalMinutes: Math.round(totalDurationSec / 60),
     totalSets,
     currentStreakDays: streak,
-    lastWorkoutDate: uniqueDates[0],
+    lastWorkoutDate: sortedDates[0],
   };
 };
 
@@ -270,6 +297,144 @@ export const clearOnboardingDraft = (): void => {
     localStorage.removeItem(STORAGE_KEYS.ONBOARDING_DRAFT);
   } catch (error) {
     console.error('Failed to clear onboarding draft:', error);
+  }
+};
+
+// ================= G3: ACTIVE WORKOUT BACKUP & RESUMPTION =================
+export const saveActiveWorkoutBackup = (backup: ActiveWorkoutBackup): void => {
+  try {
+    localStorage.setItem(STORAGE_KEYS.ACTIVE_WORKOUT_BACKUP, JSON.stringify(backup));
+  } catch (error) {
+    console.error('Failed to save active workout backup:', error);
+  }
+};
+
+export const getActiveWorkoutBackup = (): ActiveWorkoutBackup | null => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.ACTIVE_WORKOUT_BACKUP);
+    if (!raw) return null;
+    const parsed: ActiveWorkoutBackup = JSON.parse(raw);
+    // Discard if older than 4 hours
+    if (Date.now() - parsed.timestamp > 4 * 60 * 60 * 1000) {
+      clearActiveWorkoutBackup();
+      return null;
+    }
+    return parsed;
+  } catch (error) {
+    console.error('Failed to get active workout backup:', error);
+    return null;
+  }
+};
+
+export const clearActiveWorkoutBackup = (): void => {
+  try {
+    localStorage.removeItem(STORAGE_KEYS.ACTIVE_WORKOUT_BACKUP);
+  } catch (error) {
+    console.error('Failed to clear active workout backup:', error);
+  }
+};
+
+// ================= G2: GUIDED JOURNEY PROGRESS & RETENTION =================
+export const getUserJourneyProgress = (): UserJourneyProgress => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.JOURNEY_PROGRESS);
+    if (!raw) {
+      return {
+        day1Completed: false,
+        day3Completed: false,
+        day7Completed: false,
+        dismissedMessages: [],
+      };
+    }
+    return JSON.parse(raw);
+  } catch {
+    return {
+      day1Completed: false,
+      day3Completed: false,
+      day7Completed: false,
+      dismissedMessages: [],
+    };
+  }
+};
+
+export const saveUserJourneyProgress = (progress: UserJourneyProgress): void => {
+  try {
+    localStorage.setItem(STORAGE_KEYS.JOURNEY_PROGRESS, JSON.stringify(progress));
+  } catch (error) {
+    console.error('Failed to save journey progress:', error);
+  }
+};
+
+// ================= G3: AUTOMATED DATA BACKUPS BEFORE MIGRATIONS =================
+export interface DataBackupRecord {
+  id: string;
+  timestamp: string;
+  routinesCount: number;
+  historyCount: number;
+  weeklyPlanTitle: string;
+  payload: {
+    routines: Routine[];
+    history: WorkoutSession[];
+    weeklyPlan: WeeklyPlan;
+    profile: UserOnboardingProfile | null;
+  };
+}
+
+export const createAutomaticDataBackup = (): void => {
+  try {
+    const currentRoutines = getStoredRoutines();
+    const currentHistory = getWorkoutHistory();
+    const currentPlan = getStoredWeeklyPlan();
+    const currentProfile = getStoredUserProfile();
+
+    const backup: DataBackupRecord = {
+      id: `backup-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      routinesCount: currentRoutines.length,
+      historyCount: currentHistory.length,
+      weeklyPlanTitle: currentPlan.title,
+      payload: {
+        routines: currentRoutines,
+        history: currentHistory,
+        weeklyPlan: currentPlan,
+        profile: currentProfile,
+      },
+    };
+
+    const raw = localStorage.getItem(STORAGE_KEYS.AUTO_BACKUPS);
+    const existing: DataBackupRecord[] = raw ? JSON.parse(raw) : [];
+    const updated = [backup, ...existing].slice(0, 3);
+    localStorage.setItem(STORAGE_KEYS.AUTO_BACKUPS, JSON.stringify(updated));
+  } catch (error) {
+    console.error('Failed to create automatic backup:', error);
+  }
+};
+
+export const getAutomaticDataBackups = (): DataBackupRecord[] => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.AUTO_BACKUPS);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+};
+
+export const restoreDataBackup = (backupId: string): boolean => {
+  try {
+    const backups = getAutomaticDataBackups();
+    const target = backups.find(b => b.id === backupId);
+    if (!target) return false;
+
+    saveRoutines(target.payload.routines);
+    localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(target.payload.history));
+    saveWeeklyPlan(target.payload.weeklyPlan);
+    if (target.payload.profile) {
+      saveUserProfile(target.payload.profile);
+    }
+    return true;
+  } catch (error) {
+    console.error('Failed to restore backup:', error);
+    return false;
   }
 };
 
