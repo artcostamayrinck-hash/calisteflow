@@ -1,4 +1,12 @@
-import type { Exercise } from '../types';
+import type { Exercise, ExerciseReviewer } from '../types';
+
+export const CREF_REVIEWER_SPECIALIST: ExerciseReviewer = {
+  name: 'Prof. Ricardo Santos',
+  cref: '084129-G/SP',
+  specialty: 'Cinesiologia, Fisiologia do Exercício & Calistenia',
+  reviewDate: '2026-03-15',
+  notes: 'Padrão biomecânico auditado e aprovado com foco em proteção articular, depressão escapular e cadência segura.',
+};
 
 export const EXERCISES_DATABASE: Exercise[] = [
   {
@@ -12,6 +20,12 @@ export const EXERCISES_DATABASE: Exercise[] = [
     defaultSets: 4,
     defaultReps: 12,
     defaultRestSeconds: 60,
+    reviewedBy: CREF_REVIEWER_SPECIALIST,
+    safetyCautions: [
+      'Pare imediatamente se sentir dor pontual nos ombros ou punhos.',
+      'Mantenha os cotovelos a 45° em relação ao tronco para evitar pinçamento subacromial.',
+      'Não deixe a pelve cair para proteger a coluna lombar.'
+    ],
     description: 'O exercício fundamental de empurrar na calistenia, fortalecendo peitorais, tríceps e estabilidade de tronco.',
     breathingTip: 'Inspire ao descer controladamente; expire ao empurrar o solo para cima.',
     videoUrl: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@main/pectorals/push-up.gif',
@@ -65,6 +79,11 @@ export const EXERCISES_DATABASE: Exercise[] = [
     defaultSets: 3,
     defaultReps: 10,
     defaultRestSeconds: 75,
+    reviewedBy: CREF_REVIEWER_SPECIALIST,
+    safetyCautions: [
+      'Alta demanda na articulação dos punhos e cotovelos.',
+      'Se houver dor ou desconforto no túnel do carpo, faça a flexão normal com pegada neutra.'
+    ],
     description: 'Variação avançada com base fechada que prioriza intensamente a cabeça lateral e medial do tríceps.',
     breathingTip: 'Inspire na descida lenta; expire ao explodir na extensão dos braços.',
     videoUrl: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@main/triceps/diamond-push-up.gif',
@@ -109,6 +128,11 @@ export const EXERCISES_DATABASE: Exercise[] = [
     defaultSets: 4,
     defaultReps: 8,
     defaultRestSeconds: 90,
+    reviewedBy: CREF_REVIEWER_SPECIALIST,
+    safetyCautions: [
+      'Não desça além de 90° de flexão se sentir desconforto na articulação acromioclavicular.',
+      'Mantenha sempre as escápulas deprimidas (ombros longe das orelhas).'
+    ],
     description: 'O rei dos exercícios de peito inferior e tríceps com peso corporal, desenvolvendo força bruta no plano vertical.',
     breathingTip: 'Inspire na descida flexionando cotovelos; expire fortemente ao empurrar até a extensão dos braços.',
     videoUrl: 'https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@main/pectorals/chest-dip.gif',

@@ -44,3 +44,4 @@ export function prefersReducedMotion(): boolean {
   }
   return false;
 }
+

@@ -22,6 +22,7 @@ import {
   Minus,
   HelpCircle,
   Flame,
+  AlertTriangle,
 } from 'lucide-react';
 
 interface WorkoutPlayerProps {
@@ -448,6 +449,12 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
                     💡 {currentRoutineExercise.notes}
                   </p>
                 )}
+                {currentExerciseData?.safetyCautions && currentExerciseData.safetyCautions.length > 0 && (
+                  <div className="flex items-center gap-1.5 text-[10px] text-amber-300/90 bg-amber-500/10 px-2.5 py-1 rounded-xl border border-amber-500/20 mt-1.5 max-w-sm">
+                    <AlertTriangle className="w-3 h-3 text-amber-400 shrink-0" />
+                    <span className="truncate">{currentExerciseData.safetyCautions[0]}</span>
+                  </div>
+                )}
               </div>
 
               {/* View Posture Guide Button */}
@@ -841,6 +848,31 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
                 secondaryMuscles={currentExerciseData.secondaryMuscles}
                 size="sm"
               />
+              {currentExerciseData.reviewedBy && (
+                <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/5 space-y-1 text-xs">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 block">
+                    ✓ Revisão Técnica Biomecânica
+                  </span>
+                  <p className="text-slate-200 font-bold">
+                    {currentExerciseData.reviewedBy.name} • {currentExerciseData.reviewedBy.cref}
+                  </p>
+                  <p className="text-[11px] text-slate-400">
+                    {currentExerciseData.reviewedBy.specialty}
+                  </p>
+                </div>
+              )}
+              {currentExerciseData.safetyCautions && currentExerciseData.safetyCautions.length > 0 && (
+                <div className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/20 space-y-1 text-xs">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-rose-400 flex items-center gap-1.5">
+                    <AlertTriangle className="w-3.5 h-3.5" /> Atenção & Proteção Articular
+                  </span>
+                  <ul className="list-disc list-inside text-[11px] text-rose-200/90 space-y-1">
+                    {currentExerciseData.safetyCautions.map((caution, i) => (
+                      <li key={i}>{caution}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
             <div className="p-4 border-t border-white/10 flex justify-end">
               <button

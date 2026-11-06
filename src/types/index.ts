@@ -29,6 +29,14 @@ export interface ExerciseMistake {
   correction: string;
 }
 
+export interface ExerciseReviewer {
+  name: string;
+  cref: string;
+  specialty: string;
+  reviewDate: string;
+  notes?: string;
+}
+
 export interface Exercise {
   id: string;
   name: string;
@@ -47,6 +55,8 @@ export interface Exercise {
   breathingTip: string;
   videoUrl?: string;
   videoThumbnail?: string;
+  reviewedBy?: ExerciseReviewer;
+  safetyCautions?: string[];
   animationType:
     | 'pushup'
     | 'pullup'
@@ -74,6 +84,14 @@ export interface RoutineExercise {
   notes?: string;
 }
 
+export type RoutineTargetAudience =
+  | 'geral'
+  | 'iniciante_absoluto'
+  | 'mulheres'
+  | 'longevidade_40'
+  | 'retorno_pausa'
+  | 'casa_sem_equipamento';
+
 export interface Routine {
   id: string;
   title: string;
@@ -82,6 +100,8 @@ export interface Routine {
   difficulty: ExerciseDifficulty;
   estimatedMinutes: number;
   exercises: RoutineExercise[];
+  targetAudience?: RoutineTargetAudience;
+  safetyNotes?: string;
   isCustom?: boolean;
   createdAt?: string;
   updatedAt?: string;

@@ -22,9 +22,11 @@ import { ExerciseLibraryView } from './components/exercises/ExerciseLibraryView'
 import { HistoryView } from './components/history/HistoryView';
 import { WeeklyPlannerView } from './components/planner/WeeklyPlannerView';
 import { OnboardingModal } from './components/planner/OnboardingModal';
+import { HealthDisclaimerModal } from './components/safety/HealthDisclaimerModal';
+import { SafeExecutionModal } from './components/safety/SafeExecutionModal';
 import { BottomNav, type NavTab } from './components/layout/BottomNav';
 import { soundManager } from './utils/audio';
-import { Dumbbell, Flame } from 'lucide-react';
+import { Dumbbell, Flame, ShieldCheck } from 'lucide-react';
 
 export function App() {
   // App Navigation — default to 'home'
@@ -44,6 +46,36 @@ export function App() {
       return false;
     }
   });
+
+  // Health and safety disclaimer state (first run)
+  const [isDisclaimerOpen, setIsDisclaimerOpen] = useState<boolean>(() => {
+    try {
+      return !localStorage.getItem('calistheflow_health_disclaimer_accepted_v1');
+    } catch {
+      return false;
+    }
+  });
+
+  // Safe Execution & CREF Biomechanics Modal
+  const [isSafeExecutionOpen, setIsSafeExecutionOpen] = useState<boolean>(false);
+
+  const handleAcceptDisclaimer = () => {
+    try {
+      localStorage.setItem('calistheflow_health_disclaimer_accepted_v1', 'true');
+    } catch {
+      // ignore quota
+    }
+    setIsDisclaimerOpen(false);
+  };
+
+  const handleSelectAudienceProgram = (audienceProgramId: string) => {
+    const routine = routines.find(r => r.id === audienceProgramId);
+    if (routine) {
+      setDetailRoutine(routine);
+    } else {
+      setActiveTab('routines');
+    }
+  };
 
   // Record-beat micro-interaction state (used in handleSaveSummarySession)
   const triggerRecordVibrate = useCallback(() => {
@@ -183,7 +215,17 @@ export function App() {
           </div>
 
           {/* Header Quick Status */}
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setIsSafeExecutionOpen(true)}
+              className="flex items-center gap-1.5 text-xs text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 px-2.5 py-1.5 rounded-2xl border border-emerald-500/30 transition active:scale-95 glow-emerald"
+              title="Guia de Execução Segura & Biomecânica"
+            >
+              <ShieldCheck className="w-4 h-4 text-emerald-400" />
+              <span className="hidden sm:inline font-bold">Segurança</span>
+            </button>
+
             {stats.currentStreakDays > 0 && (
               <div
                 onClick={() => setActiveTab('history')}
@@ -213,6 +255,7 @@ export function App() {
             onStartRoutine={handleStartRoutine}
             onNavigateTo={tab => setActiveTab(tab)}
             onOpenOnboarding={() => setIsOnboardingOpen(true)}
+            onOpenSafeExecution={() => setIsSafeExecutionOpen(true)}
           />
         )}
 
@@ -301,6 +344,19 @@ export function App() {
           }}
         />
       )}
+
+      {/* Health & Safety Disclaimer Modal (First Run) */}
+      <HealthDisclaimerModal
+        isOpen={isDisclaimerOpen}
+        onAccept={handleAcceptDisclaimer}
+      />
+
+      {/* Safe Execution & CREF Biomechanics Guide Modal */}
+      <SafeExecutionModal
+        isOpen={isSafeExecutionOpen}
+        onClose={() => setIsSafeExecutionOpen(false)}
+        onSelectAudienceProgram={handleSelectAudienceProgram}
+      />
 
       {/* Mobile-First Bottom Dock Navigation */}
       <BottomNav

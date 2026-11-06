@@ -190,6 +190,220 @@ export const DEFAULT_ROUTINES: Routine[] = [
         notes: 'Pernas 100% esticadas e paralelas ao chão.'
       }
     ]
+  },
+  {
+    id: 'prog-iniciante-absoluto',
+    title: 'Iniciante Absoluto: Base Articular & Adaptação',
+    description: 'Criado para quem nunca treinou ou não consegue fazer flexões no chão. Foco em construir força de base sem dor ou sobrecarga.',
+    category: 'Full Body',
+    difficulty: 'Iniciante',
+    targetAudience: 'iniciante_absoluto',
+    estimatedMinutes: 25,
+    safetyNotes: 'Use a parede ou uma mesa firme para inclinar as flexões e diminuir a carga no punho. Pare se sentir dor aguda.',
+    exercises: [
+      {
+        exerciseId: 'pushup',
+        sets: 3,
+        targetReps: 8,
+        restSeconds: 60,
+        notes: 'Faça na parede ou mesa firme para reduzir a carga inicial.'
+      },
+      {
+        exerciseId: 'squat',
+        sets: 3,
+        targetReps: 10,
+        restSeconds: 60,
+        notes: 'Pode segurar em uma cadeira para manter o equilíbrio.'
+      },
+      {
+        exerciseId: 'australian_pullup',
+        sets: 3,
+        targetReps: 6,
+        restSeconds: 75,
+        notes: 'Posição do corpo mais inclinada para facilitar a subida.'
+      },
+      {
+        exerciseId: 'plank',
+        sets: 3,
+        targetHoldSeconds: 20,
+        restSeconds: 45,
+        notes: 'Pode apoiar os joelhos no chão se a lombar cansar.'
+      }
+    ]
+  },
+  {
+    id: 'prog-mulheres-funcional',
+    title: 'Mulheres: Força Funcional & Postura',
+    description: 'Ênfase em cadeia posterior, glúteos, abdômen e fortalecimento de ombros para progressão em flexões e barras.',
+    category: 'Full Body',
+    difficulty: 'Iniciante',
+    targetAudience: 'mulheres',
+    estimatedMinutes: 30,
+    safetyNotes: 'Atenção ao alinhamento do joelho com a ponta dos pés nas passadas e agachamentos.',
+    exercises: [
+      {
+        exerciseId: 'squat',
+        sets: 3,
+        targetReps: 15,
+        restSeconds: 60,
+        notes: 'Foco na ativação consciente de glúteos na subida.'
+      },
+      {
+        exerciseId: 'lunges',
+        sets: 3,
+        targetReps: 12,
+        restSeconds: 60,
+        notes: 'Passada controlada, sem bater o joelho de trás no solo.'
+      },
+      {
+        exerciseId: 'australian_pullup',
+        sets: 3,
+        targetReps: 8,
+        restSeconds: 60,
+        notes: 'Puxada ao peito com escápulas ativadas para correção postural.'
+      },
+      {
+        exerciseId: 'pushup',
+        sets: 3,
+        targetReps: 8,
+        restSeconds: 60,
+        notes: 'Flexões com mãos elevadas ou joelhos no chão com controle excêntrico.'
+      },
+      {
+        exerciseId: 'hollow_body',
+        sets: 3,
+        targetHoldSeconds: 25,
+        restSeconds: 45,
+        notes: 'Lombar totalmente colada no chão; expire profundamente.'
+      }
+    ]
+  },
+  {
+    id: 'prog-40-longevidade',
+    title: '40+ Longevidade Articular & Controle',
+    description: 'Desenvolvido para preservar tendões e articulações. Ênfase em cadência lenta (3 segundos na descida), sem impacto e com proteção de coluna.',
+    category: 'Full Body',
+    difficulty: 'Iniciante',
+    targetAudience: 'longevidade_40',
+    estimatedMinutes: 30,
+    safetyNotes: 'Cadência lenta e controlada. Evite qualquer movimento balístico ou hiperextensão de coluna.',
+    exercises: [
+      {
+        exerciseId: 'squat',
+        sets: 3,
+        targetReps: 12,
+        restSeconds: 75,
+        notes: 'Descida lenta em 3 segundos; sem rebote no fundo.'
+      },
+      {
+        exerciseId: 'australian_pullup',
+        sets: 3,
+        targetReps: 8,
+        restSeconds: 75,
+        notes: 'Fortalecimento de romboides e deltoide posterior para saúde dos ombros.'
+      },
+      {
+        exerciseId: 'pushup',
+        sets: 3,
+        targetReps: 8,
+        restSeconds: 75,
+        notes: 'Cotovelos fechados a 45 graus para proteger a bursa subacromial.'
+      },
+      {
+        exerciseId: 'plank',
+        sets: 3,
+        targetHoldSeconds: 30,
+        restSeconds: 60,
+        notes: 'Estabilização isométrica da coluna lombar sem arquear.'
+      }
+    ]
+  },
+  {
+    id: 'prog-retorno-pausa',
+    title: 'Retorno Pós-Pausa: Recondicionamento Gradual',
+    description: 'Para quem ficou 2 semanas ou mais sem treinar. Volume calibrado para acordar o sistema muscular sem causar dor debilitante (DOMS).',
+    category: 'Full Body',
+    difficulty: 'Iniciante',
+    targetAudience: 'retorno_pausa',
+    estimatedMinutes: 25,
+    safetyNotes: 'Não treine até a falha na primeira semana de retorno; mantenha 2 a 3 repetições de reserva.',
+    exercises: [
+      {
+        exerciseId: 'pushup',
+        sets: 2,
+        targetReps: 10,
+        restSeconds: 60,
+        notes: 'Volume reduzido intencionalmente: 2 séries de ativação.'
+      },
+      {
+        exerciseId: 'australian_pullup',
+        sets: 2,
+        targetReps: 8,
+        restSeconds: 60,
+        notes: 'Sinta a contração dorsal sem forçar a articulação do bíceps.'
+      },
+      {
+        exerciseId: 'lunges',
+        sets: 2,
+        targetReps: 10,
+        restSeconds: 60,
+        notes: 'Reativação de pernas e equilíbrio unilateral.'
+      },
+      {
+        exerciseId: 'plank',
+        sets: 2,
+        targetHoldSeconds: 30,
+        restSeconds: 45,
+        notes: 'Ativação do core sem fadiga residual excessiva.'
+      }
+    ]
+  },
+  {
+    id: 'prog-casa-improvisos',
+    title: 'Treino em Casa: Móveis & Improvisos Seguros',
+    description: 'Treine sem gastar com equipamentos usando móveis comuns com rigorosos critérios de estabilidade e segurança.',
+    category: 'Full Body',
+    difficulty: 'Iniciante',
+    targetAudience: 'casa_sem_equipamento',
+    estimatedMinutes: 30,
+    safetyNotes: 'ATENÇÃO: Trave a cadeira contra a parede. Na porta, verifique se fecha na direção contrária da tração.',
+    exercises: [
+      {
+        exerciseId: 'pushup',
+        sets: 3,
+        targetReps: 10,
+        restSeconds: 60,
+        notes: 'Mãos no chão ou elevadas na borda de uma cama/mesa firme.'
+      },
+      {
+        exerciseId: 'dips',
+        sets: 3,
+        targetReps: 8,
+        restSeconds: 75,
+        notes: 'Feito na borda de uma cadeira firme e encostada na parede.'
+      },
+      {
+        exerciseId: 'australian_pullup',
+        sets: 3,
+        targetReps: 8,
+        restSeconds: 75,
+        notes: 'Embaixo de mesa firme e estável ou toalha bem presa na porta fechada.'
+      },
+      {
+        exerciseId: 'squat',
+        sets: 3,
+        targetReps: 15,
+        restSeconds: 60,
+        notes: 'Peso do próprio corpo com cadência focada.'
+      },
+      {
+        exerciseId: 'plank',
+        sets: 3,
+        targetHoldSeconds: 35,
+        restSeconds: 45,
+        notes: 'No chão com tapete ou toalha para conforto dos cotovelos.'
+      }
+    ]
   }
 ];
 

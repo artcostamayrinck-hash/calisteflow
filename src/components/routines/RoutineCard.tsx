@@ -105,6 +105,15 @@ export const RoutineCard = ({
                 <Zap className="w-2.5 h-2.5" /> Criada
               </span>
             )}
+            {routine.targetAudience && routine.targetAudience !== 'geral' && (
+              <span className="px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
+                {routine.targetAudience === 'iniciante_absoluto' && 'Iniciante Absoluto'}
+                {routine.targetAudience === 'mulheres' && 'Mulheres'}
+                {routine.targetAudience === 'longevidade_40' && '40+ Longevidade'}
+                {routine.targetAudience === 'retorno_pausa' && 'Retorno Pós-Pausa'}
+                {routine.targetAudience === 'casa_sem_equipamento' && 'Móveis / Casa'}
+              </span>
+            )}
           </div>
 
           {/* Routine Options Menu */}
@@ -177,6 +186,12 @@ export const RoutineCard = ({
         <p className="text-xs text-slate-400 mt-1 line-clamp-2 leading-relaxed">
           {routine.description}
         </p>
+        {routine.safetyNotes && (
+          <div className="mt-2.5 flex items-start gap-1.5 p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-300/90 leading-tight">
+            <span className="shrink-0 font-bold">🛡️</span>
+            <span className="line-clamp-2">{routine.safetyNotes}</span>
+          </div>
+        )}
 
         {/* Exercises Preview List */}
         <div className="mt-3.5 space-y-1.5">

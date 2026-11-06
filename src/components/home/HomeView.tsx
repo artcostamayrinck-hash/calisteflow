@@ -17,6 +17,7 @@ import {
   Settings,
   CheckCircle2,
   ArrowRight,
+  ShieldCheck,
 } from 'lucide-react';
 
 interface HomeViewProps {
@@ -26,6 +27,7 @@ interface HomeViewProps {
   onStartRoutine: (routine: Routine) => void;
   onNavigateTo: (tab: 'routines' | 'planner' | 'exercises' | 'history') => void;
   onOpenOnboarding: () => void;
+  onOpenSafeExecution?: () => void;
 }
 
 /** Greeting based on the hour of the day */
@@ -55,6 +57,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
   onStartRoutine,
   onNavigateTo,
   onOpenOnboarding,
+  onOpenSafeExecution,
 }) => {
   const [settings, setSettings] = useState<AppSettings>(getAppSettings);
   const [showSettings, setShowSettings] = useState(false);
@@ -425,6 +428,37 @@ export const HomeView: React.FC<HomeViewProps> = ({
         </div>
       )}
 
+      {/* ── SAFETY & CREF BIOMECHANICS BANNER ── */}
+      {onOpenSafeExecution && (
+        <button
+          type="button"
+          onClick={() => {
+            soundManager.triggerHaptic([30]);
+            onOpenSafeExecution();
+          }}
+          className="w-full p-4 rounded-3xl glass-card border border-emerald-500/20 hover:border-emerald-500/40 bg-emerald-500/5 transition flex items-center justify-between gap-3 text-left active:scale-98"
+          style={{ direction: 'ltr' }}
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0 glow-emerald">
+              <ShieldCheck className="w-5 h-5 stroke-[2.5]" />
+            </div>
+            <div>
+              <span className="text-[10px] uppercase font-bold tracking-wider text-emerald-400 block">
+                Saúde & Biomecânica
+              </span>
+              <p className="font-bold text-xs sm:text-sm text-slate-100">
+                Guia de Execução Segura & Checklist CREF
+              </p>
+              <p className="text-[11px] text-slate-400 mt-0.5">
+                Regra de ouro da dor, móveis em casa e programas por público.
+              </p>
+            </div>
+          </div>
+          <ChevronRight className="w-5 h-5 text-emerald-400 shrink-0" />
+        </button>
+      )}
+
       {/* ── QUICK-START ROUTINES ── */}
       {routines.length > 0 && (
         <div className="space-y-3" style={{ direction: 'ltr' }}>
@@ -505,3 +539,4 @@ export const HomeView: React.FC<HomeViewProps> = ({
     </div>
   );
 };
+

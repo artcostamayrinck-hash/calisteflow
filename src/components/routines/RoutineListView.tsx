@@ -39,9 +39,12 @@ export const RoutineListView = ({
   ];
 
   const filteredRoutines = routines.filter(r => {
+    const query = searchQuery.toLowerCase();
     const matchesSearch =
-      r.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      r.description.toLowerCase().includes(searchQuery.toLowerCase());
+      r.title.toLowerCase().includes(query) ||
+      r.description.toLowerCase().includes(query) ||
+      (r.targetAudience && r.targetAudience.toLowerCase().includes(query)) ||
+      (r.safetyNotes && r.safetyNotes.toLowerCase().includes(query));
     const matchesCategory = selectedCategory === 'Todos' || r.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
