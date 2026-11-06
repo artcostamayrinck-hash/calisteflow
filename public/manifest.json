@@ -1,0 +1,19 @@
+{
+  "name": "CalisteFlow • Rotinas de Calistenia",
+  "short_name": "CalisteFlow",
+  "description": "Aplicativo web completo para rotinas, postura biomecânica e temporizadores de calistenia.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#020617",
+  "theme_color": "#020617",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
+
