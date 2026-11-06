@@ -1,5 +1,5 @@
-import React from 'react';
 import { Dumbbell, BookOpen, Trophy, Play } from 'lucide-react';
+import { soundManager } from '../../utils/audio';
 
 export type NavTab = 'routines' | 'exercises' | 'history';
 
@@ -10,71 +10,90 @@ interface BottomNavProps {
   onResumeWorkout?: () => void;
 }
 
-export const BottomNav: React.FC<BottomNavProps> = ({
+export const BottomNav = ({
   activeTab,
   onTabChange,
   activeWorkoutRoutineTitle,
   onResumeWorkout,
-}) => {
+}: BottomNavProps) => {
+  const handleTabClick = (tab: NavTab) => {
+    soundManager.triggerHaptic([30]);
+    onTabChange(tab);
+  };
+
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 bg-slate-950/90 backdrop-blur-lg border-t border-slate-800/80 px-4 py-2 flex flex-col items-center">
-      {/* Active Workout Floating Pill if minimized */}
+    <div className="fixed bottom-3 sm:bottom-5 left-0 right-0 z-40 px-3 sm:px-4 pointer-events-none flex flex-col items-center">
+      {/* Active Workout Floating Banner */}
       {activeWorkoutRoutineTitle && onResumeWorkout && (
-        <div className="w-full max-w-md -mt-6 mb-2">
+        <div className="w-full max-w-sm mb-2 pointer-events-auto animate-in fade-in slide-in-from-bottom-2 duration-300">
           <button
-            onClick={onResumeWorkout}
-            className="w-full py-2 px-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-bold text-xs flex items-center justify-between shadow-xl shadow-emerald-500/30 animate-pulse"
+            onClick={() => {
+              soundManager.triggerHaptic([50]);
+              onResumeWorkout();
+            }}
+            className="w-full py-2.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 text-slate-950 font-extrabold text-xs flex items-center justify-between shadow-xl shadow-emerald-500/25 active:scale-98 transition glow-emerald"
           >
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-slate-950 animate-ping" />
-              <span>Treino em Andamento: {activeWorkoutRoutineTitle}</span>
+            <div className="flex items-center gap-2.5">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-slate-950 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-slate-950" />
+              </span>
+              <span className="truncate max-w-[200px]">Treino Ativo: {activeWorkoutRoutineTitle}</span>
             </div>
-            <span className="flex items-center gap-1 font-extrabold uppercase text-[10px]">
-              Retomar <Play className="w-3 h-3 fill-current" />
+            <span className="flex items-center gap-1 uppercase tracking-wider text-[11px] bg-slate-950/15 px-2 py-0.5 rounded-lg">
+              Retomar <Play className="w-3 h-3 fill-current ml-0.5" />
             </span>
           </button>
         </div>
       )}
 
-      {/* Main Tab Buttons */}
-      <div className="w-full max-w-md grid grid-cols-3 gap-2">
+      {/* Floating Modern Glass Pill Dock */}
+      <nav className="w-full max-w-md pointer-events-auto glass-panel rounded-3xl p-1.5 shadow-2xl border border-white/10 grid grid-cols-3 gap-1 backdrop-blur-2xl">
         <button
-          onClick={() => onTabChange('routines')}
-          className={`flex flex-col items-center justify-center py-1.5 rounded-2xl transition active:scale-95 ${
+          onClick={() => handleTabClick('routines')}
+          className={`relative flex flex-col items-center justify-center py-2 px-3 rounded-2xl transition-all duration-200 active:scale-95 ${
             activeTab === 'routines'
-              ? 'text-emerald-400 bg-emerald-500/10 font-bold'
-              : 'text-slate-400 hover:text-slate-200'
+              ? 'text-emerald-400 font-bold bg-white/[0.06] shadow-inner'
+              : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.02]'
           }`}
         >
-          <Dumbbell className="w-5 h-5 mb-0.5" />
-          <span className="text-[11px]">Rotinas</span>
+          <Dumbbell className={`w-5 h-5 mb-1 transition-transform ${activeTab === 'routines' ? 'scale-110 stroke-[2.5]' : 'stroke-[1.8]'}`} />
+          <span className="text-[11px] tracking-wide">Rotinas</span>
+          {activeTab === 'routines' && (
+            <span className="absolute bottom-1 w-4 h-0.5 bg-emerald-400 rounded-full glow-emerald" />
+          )}
         </button>
 
         <button
-          onClick={() => onTabChange('exercises')}
-          className={`flex flex-col items-center justify-center py-1.5 rounded-2xl transition active:scale-95 ${
+          onClick={() => handleTabClick('exercises')}
+          className={`relative flex flex-col items-center justify-center py-2 px-3 rounded-2xl transition-all duration-200 active:scale-95 ${
             activeTab === 'exercises'
-              ? 'text-emerald-400 bg-emerald-500/10 font-bold'
-              : 'text-slate-400 hover:text-slate-200'
+              ? 'text-emerald-400 font-bold bg-white/[0.06] shadow-inner'
+              : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.02]'
           }`}
         >
-          <BookOpen className="w-5 h-5 mb-0.5" />
-          <span className="text-[11px]">Exercícios</span>
+          <BookOpen className={`w-5 h-5 mb-1 transition-transform ${activeTab === 'exercises' ? 'scale-110 stroke-[2.5]' : 'stroke-[1.8]'}`} />
+          <span className="text-[11px] tracking-wide">Exercícios</span>
+          {activeTab === 'exercises' && (
+            <span className="absolute bottom-1 w-4 h-0.5 bg-emerald-400 rounded-full glow-emerald" />
+          )}
         </button>
 
         <button
-          onClick={() => onTabChange('history')}
-          className={`flex flex-col items-center justify-center py-1.5 rounded-2xl transition active:scale-95 ${
+          onClick={() => handleTabClick('history')}
+          className={`relative flex flex-col items-center justify-center py-2 px-3 rounded-2xl transition-all duration-200 active:scale-95 ${
             activeTab === 'history'
-              ? 'text-emerald-400 bg-emerald-500/10 font-bold'
-              : 'text-slate-400 hover:text-slate-200'
+              ? 'text-emerald-400 font-bold bg-white/[0.06] shadow-inner'
+              : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.02]'
           }`}
         >
-          <Trophy className="w-5 h-5 mb-0.5" />
-          <span className="text-[11px]">Histórico</span>
+          <Trophy className={`w-5 h-5 mb-1 transition-transform ${activeTab === 'history' ? 'scale-110 stroke-[2.5]' : 'stroke-[1.8]'}`} />
+          <span className="text-[11px] tracking-wide">Progresso</span>
+          {activeTab === 'history' && (
+            <span className="absolute bottom-1 w-4 h-0.5 bg-emerald-400 rounded-full glow-emerald" />
+          )}
         </button>
-      </div>
+      </nav>
     </div>
   );
 };
-

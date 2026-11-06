@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import type { Routine, ExerciseCategory } from '../../types';
 import { RoutineCard } from './RoutineCard';
-import { Plus, Search, Dumbbell, RotateCcw, X } from 'lucide-react';
+import { soundManager } from '../../utils/audio';
+import { Plus, Search, Dumbbell, RotateCcw, X, Sparkles } from 'lucide-react';
 
 interface RoutineListViewProps {
   routines: Routine[];
@@ -14,7 +15,7 @@ interface RoutineListViewProps {
   onResetDefaults: () => void;
 }
 
-export const RoutineListView: React.FC<RoutineListViewProps> = ({
+export const RoutineListView = ({
   routines,
   onStartRoutine,
   onEditRoutine,
@@ -23,7 +24,7 @@ export const RoutineListView: React.FC<RoutineListViewProps> = ({
   onViewDetails,
   onCreateNewRoutine,
   onResetDefaults,
-}) => {
+}: RoutineListViewProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<ExerciseCategory | 'Todos'>('Todos');
 
@@ -46,58 +47,70 @@ export const RoutineListView: React.FC<RoutineListViewProps> = ({
   });
 
   return (
-    <div className="space-y-6 pb-20">
-      {/* Top Banner & Quick Create */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-100 flex items-center gap-2">
-            <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent">
-              CalisteFlow
-            </span>
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Escolha uma rotina ou monte seu plano personalizado de calistenia.
-          </p>
-        </div>
+    <div className="space-y-6 pb-24">
+      {/* Hero Welcome Banner */}
+      <div className="relative glass-card rounded-3xl p-5 sm:p-7 overflow-hidden border border-white/10 shadow-2xl">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none -ml-16 -mb-16" />
 
-        <button
-          onClick={onCreateNewRoutine}
-          className="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 hover:brightness-110 active:scale-95 transition"
-        >
-          <Plus className="w-4 h-4 stroke-[3]" /> Criar Nova Rotina
-        </button>
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1.5">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+              <Sparkles className="w-3.5 h-3.5" /> Calistenia & Força Funcional
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-100 tracking-tight">
+              Domine Seu <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent">Peso Corporal</span>
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-400 max-w-lg leading-relaxed">
+              Rotinas estruturadas para hipertrofia, força e habilidades estáticas sem necessidade de equipamentos pesados.
+            </p>
+          </div>
+
+          <button
+            onClick={() => {
+              soundManager.triggerHaptic([40]);
+              onCreateNewRoutine();
+            }}
+            className="px-5 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xl shadow-emerald-500/25 hover:brightness-110 active:scale-95 transition glow-emerald shrink-0"
+          >
+            <Plus className="w-4 h-4 stroke-[3]" /> Nova Rotina
+          </button>
+        </div>
       </div>
 
-      {/* Search Bar */}
+      {/* Search Input Bar */}
       <div className="relative">
-        <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+        <Search className="w-4 h-4 text-slate-400 absolute left-4 top-3.5" />
         <input
           type="text"
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
-          placeholder="Buscar rotina por nome ou objetivo (ex: Push, Costas, Iniciante)..."
-          className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-slate-900 border border-slate-800 text-slate-100 text-xs sm:text-sm focus:outline-none focus:border-emerald-500 placeholder:text-slate-500 shadow-sm"
+          placeholder="Buscar rotina por título ou foco muscular (ex: Push, Costas, Iniciante)..."
+          className="w-full pl-11 pr-10 py-3 rounded-2xl glass-card text-slate-100 text-xs sm:text-sm focus:outline-none focus:border-emerald-500/60 placeholder:text-slate-500 shadow-md transition"
         />
         {searchQuery && (
           <button
             onClick={() => setSearchQuery('')}
-            className="absolute right-3 top-3 text-slate-400 hover:text-white"
+            className="absolute right-3.5 top-3.5 text-slate-400 hover:text-white"
           >
             <X className="w-4 h-4" />
           </button>
         )}
       </div>
 
-      {/* Category Pills */}
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+      {/* Category Filter Pills */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
         {categories.map(cat => (
           <button
             key={cat}
-            onClick={() => setSelectedCategory(cat)}
-            className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
+            onClick={() => {
+              soundManager.triggerHaptic([20]);
+              setSelectedCategory(cat);
+            }}
+            className={`px-3.5 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition-all active:scale-95 ${
               selectedCategory === cat
-                ? 'bg-emerald-500 text-slate-950 shadow-sm shadow-emerald-500/30'
-                : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200'
+                ? 'bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 shadow-lg shadow-emerald-500/20'
+                : 'glass-card text-slate-400 hover:text-slate-200'
             }`}
           >
             {cat}
@@ -105,8 +118,8 @@ export const RoutineListView: React.FC<RoutineListViewProps> = ({
         ))}
       </div>
 
-      {/* Grid of Routines */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Grid of Routine Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
         {filteredRoutines.map(routine => (
           <RoutineCard
             key={routine.id}
@@ -122,10 +135,10 @@ export const RoutineListView: React.FC<RoutineListViewProps> = ({
 
       {/* Empty State */}
       {filteredRoutines.length === 0 && (
-        <div className="p-12 text-center bg-slate-900 rounded-3xl border border-slate-800 space-y-3">
-          <Dumbbell className="w-8 h-8 text-slate-600 mx-auto" />
-          <h4 className="text-sm font-semibold text-slate-300">Nenhuma rotina encontrada</h4>
-          <p className="text-xs text-slate-500 max-w-xs mx-auto">
+        <div className="p-12 text-center glass-card rounded-3xl border border-white/10 space-y-3">
+          <Dumbbell className="w-10 h-10 text-slate-600 mx-auto" />
+          <h4 className="text-base font-bold text-slate-200">Nenhuma rotina encontrada</h4>
+          <p className="text-xs text-slate-400 max-w-xs mx-auto">
             Não encontramos rotinas correspondentes ao filtro atual.
           </p>
           <button
@@ -133,24 +146,24 @@ export const RoutineListView: React.FC<RoutineListViewProps> = ({
               setSearchQuery('');
               setSelectedCategory('Todos');
             }}
-            className="text-xs text-emerald-400 hover:underline font-semibold"
+            className="text-xs text-emerald-400 hover:underline font-bold"
           >
-            Limpar filtros
+            Limpar todos os filtros
           </button>
         </div>
       )}
 
-      {/* Reset to defaults helper button */}
-      <div className="pt-4 flex justify-center">
+      {/* Restore defaults helper */}
+      <div className="pt-2 flex justify-center">
         <button
           onClick={() => {
             if (confirm('Deseja restaurar as rotinas pré-carregadas originais? Suas rotinas personalizadas serão mantidas.')) {
               onResetDefaults();
             }
           }}
-          className="text-[11px] text-slate-500 hover:text-slate-400 flex items-center gap-1 transition"
+          className="text-[11px] text-slate-500 hover:text-slate-400 flex items-center gap-1.5 transition"
         >
-          <RotateCcw className="w-3 h-3" /> Restaurar Rotinas Padrão
+          <RotateCcw className="w-3 h-3" /> Restaurar Rotinas Padrão de Calistenia
         </button>
       </div>
     </div>

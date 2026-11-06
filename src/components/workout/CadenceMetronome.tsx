@@ -203,3 +203,4 @@ export const CadenceMetronome = ({ onTempoTick }: CadenceMetronomeProps) => {
     </div>
   );
 };
+

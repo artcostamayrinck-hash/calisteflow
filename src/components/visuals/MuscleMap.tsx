@@ -1,4 +1,3 @@
-import React from 'react';
 import type { MuscleGroup } from '../../types';
 import { MUSCLE_LABELS } from '../../data/exercisesData';
 
@@ -11,14 +10,14 @@ interface MuscleMapProps {
   size?: 'sm' | 'md' | 'lg';
 }
 
-export const MuscleMap: React.FC<MuscleMapProps> = ({
+export const MuscleMap = ({
   primaryMuscles = [],
   secondaryMuscles = [],
   selectedMuscle = null,
   onSelectMuscle,
   className = '',
   size = 'md',
-}) => {
+}: MuscleMapProps) => {
   const getMuscleColor = (muscle: MuscleGroup) => {
     if (selectedMuscle === muscle) {
       return '#f59e0b'; // Amber for currently selected
@@ -56,17 +55,22 @@ export const MuscleMap: React.FC<MuscleMapProps> = ({
   return (
     <div className={`w-full flex flex-col items-center select-none ${className}`}>
       {/* Front and Back Human Body SVG Silhouettes */}
-      <div className={`w-full ${containerSizes[size]} grid grid-cols-2 gap-3 bg-slate-900/80 p-4 rounded-2xl border border-slate-800 shadow-inner`}>
+      <div className={`w-full ${containerSizes[size]} grid grid-cols-2 gap-3 glass-card p-4 sm:p-5 rounded-3xl border border-white/10 shadow-2xl`}>
         {/* Front View */}
         <div className="flex flex-col items-center">
-          <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+          <span className="text-[11px] font-black uppercase tracking-wider text-slate-400 mb-2.5">
             Vista Frontal
           </span>
           <svg
             viewBox="0 0 100 200"
-            className="w-full h-auto drop-shadow-md filter"
+            className="w-full h-auto drop-shadow-lg filter"
             aria-label="Mapa Muscular Frontal"
           >
+            <defs>
+              <filter id="neonGlowFront" x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="0" dy="0" stdDeviation="2.5" floodColor="#10b981" floodOpacity="0.4" />
+              </filter>
+            </defs>
             {/* Head */}
             <circle cx="50" cy="18" r="10" fill="#475569" opacity="0.6" />
             {/* Neck */}
@@ -165,14 +169,19 @@ export const MuscleMap: React.FC<MuscleMapProps> = ({
 
         {/* Back View */}
         <div className="flex flex-col items-center">
-          <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+          <span className="text-[11px] font-black uppercase tracking-wider text-slate-400 mb-2.5">
             Vista Posterior
           </span>
           <svg
             viewBox="0 0 100 200"
-            className="w-full h-auto drop-shadow-md filter"
+            className="w-full h-auto drop-shadow-lg filter"
             aria-label="Mapa Muscular Posterior"
           >
+            <defs>
+              <filter id="neonGlowBack" x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="0" dy="0" stdDeviation="2.5" floodColor="#06b6d4" floodOpacity="0.4" />
+              </filter>
+            </defs>
             {/* Head Back */}
             <circle cx="50" cy="18" r="10" fill="#475569" opacity="0.6" />
             {/* Trapezius & Upper Back */}
@@ -266,25 +275,25 @@ export const MuscleMap: React.FC<MuscleMapProps> = ({
       </div>
 
       {/* Color Code Legend & Targeted Muscle Badges */}
-      <div className="w-full mt-3 flex flex-wrap items-center justify-center gap-3 text-xs">
-        <div className="flex items-center gap-1.5 bg-slate-900/60 px-2.5 py-1 rounded-full border border-emerald-500/20">
-          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50" />
-          <span className="text-emerald-300 font-medium">Primário (Alvo)</span>
+      <div className="w-full mt-3.5 flex flex-wrap items-center justify-center gap-3 text-xs">
+        <div className="flex items-center gap-1.5 glass-card px-3 py-1 rounded-full border border-emerald-500/30">
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 glow-emerald" />
+          <span className="text-emerald-300 font-bold text-[11px]">Primário (Alvo)</span>
         </div>
-        <div className="flex items-center gap-1.5 bg-slate-900/60 px-2.5 py-1 rounded-full border border-cyan-500/20">
-          <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400/50" />
-          <span className="text-cyan-300 font-medium">Secundário (Sinergista)</span>
+        <div className="flex items-center gap-1.5 glass-card px-3 py-1 rounded-full border border-cyan-500/30">
+          <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 glow-cyan" />
+          <span className="text-cyan-300 font-bold text-[11px]">Secundário (Sinergista)</span>
         </div>
       </div>
 
       {/* Chips for Active Muscles */}
       {(primaryMuscles.length > 0 || secondaryMuscles.length > 0) && (
-        <div className="w-full mt-2.5 flex flex-wrap justify-center gap-1.5">
+        <div className="w-full mt-3 flex flex-wrap justify-center gap-1.5">
           {primaryMuscles.map(m => (
             <span
               key={`p-${m}`}
               onClick={() => handleMuscleClick(m)}
-              className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 cursor-default"
+              className="px-2.5 py-1 rounded-xl text-[11px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 cursor-default shadow-sm glow-emerald"
             >
               {MUSCLE_LABELS[m] || m}
             </span>
@@ -293,7 +302,7 @@ export const MuscleMap: React.FC<MuscleMapProps> = ({
             <span
               key={`s-${m}`}
               onClick={() => handleMuscleClick(m)}
-              className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 cursor-default"
+              className="px-2.5 py-1 rounded-xl text-[11px] font-bold bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 cursor-default shadow-sm glow-cyan"
             >
               {MUSCLE_LABELS[m] || m}
             </span>

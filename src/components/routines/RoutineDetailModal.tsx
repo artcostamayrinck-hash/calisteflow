@@ -1,4 +1,3 @@
-import React from 'react';
 import type { Routine, MuscleGroup } from '../../types';
 import { EXERCISES_DATABASE } from '../../data/exercisesData';
 import { MuscleMap } from '../visuals/MuscleMap';
@@ -11,12 +10,12 @@ interface RoutineDetailModalProps {
   onSelectExerciseToInspect: (exerciseId: string) => void;
 }
 
-export const RoutineDetailModal: React.FC<RoutineDetailModalProps> = ({
+export const RoutineDetailModal = ({
   routine,
   onClose,
   onStart,
   onSelectExerciseToInspect,
-}) => {
+}: RoutineDetailModalProps) => {
   if (!routine) return null;
 
   // Aggregate all muscles worked across this routine
@@ -41,21 +40,21 @@ export const RoutineDetailModal: React.FC<RoutineDetailModalProps> = ({
   const totalSets = routine.exercises.reduce((acc, curr) => acc + curr.sets, 0);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="w-full max-w-2xl max-h-[92vh] sm:max-h-[88vh] bg-slate-900 border border-slate-800 rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
+      <div className="w-full max-w-2xl max-h-[92vh] sm:max-h-[88vh] glass-panel border border-white/10 rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden">
         {/* Modal Header */}
-        <div className="p-4 sm:p-5 border-b border-slate-800 flex items-center justify-between shrink-0 bg-slate-900/90 backdrop-blur-md">
+        <div className="p-4 sm:p-5 border-b border-white/10 flex items-center justify-between shrink-0 glass-panel">
           <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-md text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+            <span className="px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-widest bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
               {routine.category}
             </span>
-            <span className="px-2 py-0.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300 border border-slate-700">
+            <span className="px-2.5 py-0.5 rounded-lg text-xs font-bold bg-white/[0.06] text-slate-300 border border-white/10">
               {routine.difficulty}
             </span>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-full text-slate-400 hover:text-white hover:bg-slate-800 transition"
+            className="p-2 rounded-full text-slate-400 hover:text-white hover:bg-white/[0.08] transition"
           >
             <X className="w-5 h-5" />
           </button>
@@ -65,28 +64,28 @@ export const RoutineDetailModal: React.FC<RoutineDetailModalProps> = ({
         <div className="overflow-y-auto p-4 sm:p-6 space-y-6">
           {/* Title & Stats */}
           <div>
-            <h2 className="text-xl sm:text-2xl font-bold text-slate-100">{routine.title}</h2>
-            <p className="text-sm text-slate-400 mt-1 leading-relaxed">{routine.description}</p>
+            <h2 className="text-xl sm:text-2xl font-black text-slate-100 tracking-tight">{routine.title}</h2>
+            <p className="text-sm text-slate-400 mt-1 leading-relaxed font-medium">{routine.description}</p>
 
-            <div className="flex flex-wrap items-center gap-4 mt-4 pt-3 border-t border-slate-800 text-xs text-slate-300">
-              <div className="flex items-center gap-1.5 bg-slate-950/70 px-3 py-1.5 rounded-xl border border-slate-800">
+            <div className="flex flex-wrap items-center gap-3 mt-4 pt-4 border-t border-white/10 text-xs text-slate-300">
+              <div className="flex items-center gap-1.5 glass-card px-3 py-1.5 rounded-2xl border border-white/5">
                 <Clock className="w-4 h-4 text-emerald-400" />
-                <span>{routine.estimatedMinutes} minutos estimados</span>
+                <span className="font-semibold">{routine.estimatedMinutes} minutos</span>
               </div>
-              <div className="flex items-center gap-1.5 bg-slate-950/70 px-3 py-1.5 rounded-xl border border-slate-800">
+              <div className="flex items-center gap-1.5 glass-card px-3 py-1.5 rounded-2xl border border-white/5">
                 <Dumbbell className="w-4 h-4 text-cyan-400" />
-                <span>{routine.exercises.length} exercícios</span>
+                <span className="font-semibold">{routine.exercises.length} exercícios</span>
               </div>
-              <div className="flex items-center gap-1.5 bg-slate-950/70 px-3 py-1.5 rounded-xl border border-slate-800">
+              <div className="flex items-center gap-1.5 glass-card px-3 py-1.5 rounded-2xl border border-white/5">
                 <Shield className="w-4 h-4 text-amber-400" />
-                <span>{totalSets} séries totais</span>
+                <span className="font-semibold">{totalSets} séries totais</span>
               </div>
             </div>
           </div>
 
           {/* Muscle Anatomy Diagram for this Routine */}
-          <div className="bg-slate-950/60 p-4 rounded-2xl border border-slate-800/80">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-1.5">
+          <div className="glass-card p-5 rounded-3xl border border-white/10 shadow-lg">
+            <h3 className="text-xs font-black uppercase tracking-wider text-slate-300 mb-3 flex items-center gap-1.5">
               <span>Mapa Muscular Deste Treino</span>
             </h3>
             <MuscleMap
@@ -98,7 +97,7 @@ export const RoutineDetailModal: React.FC<RoutineDetailModalProps> = ({
 
           {/* Exercises Sequence */}
           <div className="space-y-3">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+            <h3 className="text-xs font-black uppercase tracking-wider text-slate-400">
               Sequência de Exercícios ({routine.exercises.length})
             </h3>
 
@@ -108,33 +107,33 @@ export const RoutineDetailModal: React.FC<RoutineDetailModalProps> = ({
                 return (
                   <div
                     key={index}
-                    className="p-3.5 bg-slate-950/70 rounded-2xl border border-slate-800/80 hover:border-slate-700 transition flex items-center justify-between gap-3"
+                    className="p-4 glass-card rounded-2xl border border-white/5 hover:border-white/15 transition flex items-center justify-between gap-3 shadow-md"
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="w-7 h-7 rounded-xl bg-slate-800 text-slate-300 font-bold text-xs flex items-center justify-center shrink-0">
+                    <div className="flex items-center gap-3.5">
+                      <div className="w-8 h-8 rounded-xl bg-white/[0.06] text-slate-300 font-black text-xs flex items-center justify-center shrink-0 border border-white/10 font-mono">
                         {index + 1}
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="font-semibold text-sm text-slate-200">
+                          <span className="font-extrabold text-sm text-slate-100">
                             {ex ? ex.name : re.exerciseId}
                           </span>
                           {ex && (
-                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">
+                            <span className="text-[10px] px-2 py-0.5 rounded-md bg-white/[0.06] text-slate-300 border border-white/5">
                               {ex.type === 'isometric' ? 'Isometria' : 'Repetições'}
                             </span>
                           )}
                         </div>
-                        <div className="text-xs text-emerald-400 mt-0.5 flex items-center gap-2">
+                        <div className="text-xs text-emerald-400 mt-0.5 flex items-center gap-2 font-mono">
                           <span>
                             {re.sets} séries × {re.targetReps ? `${re.targetReps} reps` : `${re.targetHoldSeconds}s`}
                           </span>
-                          <span className="text-slate-500">•</span>
+                          <span className="text-slate-600">•</span>
                           <span className="text-slate-400">{re.restSeconds}s descanso</span>
                         </div>
                         {re.notes && (
-                          <p className="text-[11px] text-slate-400 mt-1 italic">
-                            Nota: {re.notes}
+                          <p className="text-[11px] text-amber-300/80 mt-1 italic font-medium">
+                            💡 Nota: {re.notes}
                           </p>
                         )}
                       </div>
@@ -143,7 +142,7 @@ export const RoutineDetailModal: React.FC<RoutineDetailModalProps> = ({
                     {ex && (
                       <button
                         onClick={() => onSelectExerciseToInspect(ex.id)}
-                        className="p-2 rounded-xl text-slate-400 hover:text-emerald-400 hover:bg-slate-800 transition shrink-0"
+                        className="p-2.5 rounded-xl text-slate-400 hover:text-emerald-400 hover:bg-white/[0.08] transition shrink-0"
                         title="Ver instruções de postura"
                       >
                         <Info className="w-4 h-4" />
@@ -157,10 +156,10 @@ export const RoutineDetailModal: React.FC<RoutineDetailModalProps> = ({
         </div>
 
         {/* Modal Bottom CTA */}
-        <div className="p-4 border-t border-slate-800 bg-slate-900/90 backdrop-blur-md flex items-center justify-end gap-3 shrink-0">
+        <div className="p-4 sm:p-5 border-t border-white/10 glass-panel flex items-center justify-end gap-3 shrink-0">
           <button
             onClick={onClose}
-            className="px-4 py-2.5 rounded-xl border border-slate-700 text-slate-300 text-xs font-medium hover:bg-slate-800 transition"
+            className="px-5 py-2.5 rounded-2xl glass-card text-slate-300 text-xs font-bold hover:bg-white/[0.08] transition"
           >
             Voltar
           </button>
@@ -169,7 +168,7 @@ export const RoutineDetailModal: React.FC<RoutineDetailModalProps> = ({
               onClose();
               onStart(routine);
             }}
-            className="flex-1 sm:flex-none px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-lg shadow-emerald-900/40 hover:brightness-110 active:scale-95 transition"
+            className="flex-1 sm:flex-none px-7 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 text-slate-950 text-xs font-black flex items-center justify-center gap-2 shadow-xl shadow-emerald-500/25 hover:brightness-110 active:scale-95 transition glow-emerald"
           >
             <Play className="w-4 h-4 fill-current" /> Iniciar Treino Agora
           </button>

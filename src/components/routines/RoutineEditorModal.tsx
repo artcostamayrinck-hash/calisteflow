@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import type { Routine, RoutineExercise, ExerciseCategory, ExerciseDifficulty } from '../../types';
 import { EXERCISES_DATABASE } from '../../data/exercisesData';
+import { soundManager } from '../../utils/audio';
 import { X, Plus, Trash2, ArrowUp, ArrowDown, Save, Dumbbell } from 'lucide-react';
 
 interface RoutineEditorModalProps {
@@ -10,12 +11,12 @@ interface RoutineEditorModalProps {
   onSave: (routine: Routine) => void;
 }
 
-export const RoutineEditorModal: React.FC<RoutineEditorModalProps> = ({
+export const RoutineEditorModal = ({
   routineToEdit,
   isOpen,
   onClose,
   onSave,
-}) => {
+}: RoutineEditorModalProps) => {
   if (!isOpen) return null;
 
   const [title, setTitle] = useState(routineToEdit?.title || '');
@@ -91,22 +92,23 @@ export const RoutineEditorModal: React.FC<RoutineEditorModalProps> = ({
       updatedAt: new Date().toISOString(),
     };
 
+    soundManager.triggerHaptic([40]);
     onSave(savedRoutine);
     onClose();
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="w-full max-w-2xl max-h-[94vh] sm:max-h-[90vh] bg-slate-900 border border-slate-800 rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
+      <div className="w-full max-w-2xl max-h-[94vh] sm:max-h-[90vh] glass-panel border border-white/10 rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="p-4 sm:p-5 border-b border-slate-800 flex items-center justify-between shrink-0 bg-slate-900/90 backdrop-blur-md">
-          <h2 className="text-lg font-bold text-slate-100 flex items-center gap-2">
+        <div className="p-4 sm:p-5 border-b border-white/10 flex items-center justify-between shrink-0 glass-panel">
+          <h2 className="text-lg font-black text-slate-100 flex items-center gap-2.5 tracking-tight">
             <Dumbbell className="w-5 h-5 text-emerald-400" />
             {routineToEdit ? 'Editar Rotina' : 'Criar Nova Rotina'}
           </h2>
           <button
             onClick={onClose}
-            className="p-2 rounded-full text-slate-400 hover:text-white hover:bg-slate-800 transition"
+            className="p-2 rounded-full text-slate-400 hover:text-white hover:bg-white/[0.08] transition"
           >
             <X className="w-5 h-5" />
           </button>
@@ -115,9 +117,9 @@ export const RoutineEditorModal: React.FC<RoutineEditorModalProps> = ({
         {/* Form Body */}
         <form onSubmit={handleSave} className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5">
           {/* Title & Description */}
-          <div className="space-y-3">
+          <div className="space-y-3.5">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">
+              <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-1.5">
                 Nome da Rotina *
               </label>
               <input
@@ -126,12 +128,12 @@ export const RoutineEditorModal: React.FC<RoutineEditorModalProps> = ({
                 value={title}
                 onChange={e => setTitle(e.target.value)}
                 placeholder="Ex: Treino de Peito & Ombros Calistênico"
-                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 text-sm focus:outline-none focus:border-emerald-500"
+                className="w-full px-4 py-3 rounded-2xl glass-card border border-white/10 text-slate-100 text-sm focus:outline-none focus:border-emerald-500 shadow-md font-medium"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">
+              <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-1.5">
                 Descrição ou Objetivo
               </label>
               <textarea
@@ -139,7 +141,7 @@ export const RoutineEditorModal: React.FC<RoutineEditorModalProps> = ({
                 value={description}
                 onChange={e => setDescription(e.target.value)}
                 placeholder="Objetivo principal, orientações de intensidade ou aquecimento..."
-                className="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 text-sm focus:outline-none focus:border-emerald-500"
+                className="w-full px-4 py-2.5 rounded-2xl glass-card border border-white/10 text-slate-100 text-sm focus:outline-none focus:border-emerald-500 shadow-md font-medium"
               />
             </div>
           </div>
@@ -147,13 +149,13 @@ export const RoutineEditorModal: React.FC<RoutineEditorModalProps> = ({
           {/* Category, Difficulty & Estimated Time Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">
+              <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-1.5">
                 Categoria
               </label>
               <select
                 value={category}
                 onChange={e => setCategory(e.target.value as ExerciseCategory)}
-                className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-sm focus:outline-none focus:border-emerald-500"
+                className="w-full px-3.5 py-2.5 rounded-2xl glass-card border border-white/10 text-slate-200 text-sm focus:outline-none focus:border-emerald-500 font-semibold"
               >
                 <option value="Push">Push (Empurrar)</option>
                 <option value="Pull">Pull (Puxar)</option>
@@ -165,13 +167,13 @@ export const RoutineEditorModal: React.FC<RoutineEditorModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">
+              <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-1.5">
                 Dificuldade
               </label>
               <select
                 value={difficulty}
                 onChange={e => setDifficulty(e.target.value as ExerciseDifficulty)}
-                className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-sm focus:outline-none focus:border-emerald-500"
+                className="w-full px-3.5 py-2.5 rounded-2xl glass-card border border-white/10 text-slate-200 text-sm focus:outline-none focus:border-emerald-500 font-semibold"
               >
                 <option value="Iniciante">Iniciante</option>
                 <option value="Intermediário">Intermediário</option>
@@ -181,8 +183,8 @@ export const RoutineEditorModal: React.FC<RoutineEditorModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">
-                Duração Estimada (min)
+              <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-1.5">
+                Duração (min)
               </label>
               <input
                 type="number"
@@ -190,21 +192,21 @@ export const RoutineEditorModal: React.FC<RoutineEditorModalProps> = ({
                 max="180"
                 value={estimatedMinutes}
                 onChange={e => setEstimatedMinutes(Math.max(5, parseInt(e.target.value) || 30))}
-                className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-sm focus:outline-none focus:border-emerald-500"
+                className="w-full px-3.5 py-2.5 rounded-2xl glass-card border border-white/10 text-slate-200 text-sm focus:outline-none focus:border-emerald-500 font-mono font-bold"
               />
             </div>
           </div>
 
           {/* Exercises List Editor */}
-          <div className="space-y-3 pt-2">
+          <div className="space-y-3.5 pt-2">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-400">
+              <label className="text-xs font-black uppercase tracking-wider text-slate-400">
                 Exercícios da Rotina ({exercises.length})
               </label>
               <button
                 type="button"
                 onClick={() => setShowAddDrawer(true)}
-                className="px-3 py-1.5 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-semibold flex items-center gap-1.5 hover:bg-emerald-500/30 transition"
+                className="px-3.5 py-2 rounded-2xl bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 text-xs font-bold flex items-center gap-1.5 hover:bg-emerald-500/25 transition active:scale-95 glow-emerald"
               >
                 <Plus className="w-3.5 h-3.5" /> Adicionar Exercício
               </button>
@@ -219,17 +221,17 @@ export const RoutineEditorModal: React.FC<RoutineEditorModalProps> = ({
                 return (
                   <div
                     key={index}
-                    className="p-3.5 bg-slate-950/80 rounded-2xl border border-slate-800 space-y-3"
+                    className="p-4 glass-card rounded-2xl border border-white/5 space-y-3 shadow-md"
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2">
-                        <span className="w-6 h-6 rounded-lg bg-slate-800 text-slate-300 font-bold text-xs flex items-center justify-center">
+                      <div className="flex items-center gap-2.5">
+                        <span className="w-7 h-7 rounded-xl bg-white/[0.08] text-slate-300 font-black text-xs flex items-center justify-center font-mono">
                           {index + 1}
                         </span>
-                        <span className="font-semibold text-sm text-slate-100">
+                        <span className="font-bold text-sm text-slate-100">
                           {exData ? exData.name : re.exerciseId}
                         </span>
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">
+                        <span className="text-[10px] px-2 py-0.5 rounded-md bg-white/[0.06] text-slate-300 font-medium">
                           {isIsometric ? 'Isometria' : 'Repetições'}
                         </span>
                       </div>
@@ -240,7 +242,7 @@ export const RoutineEditorModal: React.FC<RoutineEditorModalProps> = ({
                           type="button"
                           disabled={index === 0}
                           onClick={() => handleMoveExercise(index, 'up')}
-                          className="p-1 rounded text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition"
                           title="Subir"
                         >
                           <ArrowUp className="w-3.5 h-3.5" />
@@ -249,7 +251,7 @@ export const RoutineEditorModal: React.FC<RoutineEditorModalProps> = ({
                           type="button"
                           disabled={index === exercises.length - 1}
                           onClick={() => handleMoveExercise(index, 'down')}
-                          className="p-1 rounded text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition"
                           title="Descer"
                         >
                           <ArrowDown className="w-3.5 h-3.5" />
@@ -257,7 +259,7 @@ export const RoutineEditorModal: React.FC<RoutineEditorModalProps> = ({
                         <button
                           type="button"
                           onClick={() => handleRemoveExercise(index)}
-                          className="p-1 rounded text-rose-400 hover:bg-rose-500/20 ml-1 transition"
+                          className="p-1.5 rounded-lg text-rose-400 hover:bg-rose-500/20 ml-1 transition"
                           title="Remover"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -266,22 +268,22 @@ export const RoutineEditorModal: React.FC<RoutineEditorModalProps> = ({
                     </div>
 
                     {/* Exercise settings grid */}
-                    <div className="grid grid-cols-3 gap-2.5 text-xs">
+                    <div className="grid grid-cols-3 gap-2.5 text-xs font-mono">
                       <div>
-                        <label className="text-[11px] text-slate-400 block mb-1">Séries</label>
+                        <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Séries</label>
                         <input
                           type="number"
                           min="1"
                           max="20"
                           value={re.sets}
                           onChange={e => handleUpdateExercise(index, { sets: Math.max(1, parseInt(e.target.value) || 1) })}
-                          className="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-200 text-center"
+                          className="w-full px-2.5 py-1.5 rounded-xl bg-slate-950/80 border border-white/5 text-slate-100 text-center font-bold"
                         />
                       </div>
 
                       {isIsometric ? (
                         <div>
-                          <label className="text-[11px] text-slate-400 block mb-1">Tempo (s)</label>
+                          <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Tempo (s)</label>
                           <input
                             type="number"
                             min="5"
@@ -289,25 +291,25 @@ export const RoutineEditorModal: React.FC<RoutineEditorModalProps> = ({
                             step="5"
                             value={re.targetHoldSeconds || 30}
                             onChange={e => handleUpdateExercise(index, { targetHoldSeconds: Math.max(5, parseInt(e.target.value) || 5) })}
-                            className="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-200 text-center"
+                            className="w-full px-2.5 py-1.5 rounded-xl bg-slate-950/80 border border-white/5 text-slate-100 text-center font-bold"
                           />
                         </div>
                       ) : (
                         <div>
-                          <label className="text-[11px] text-slate-400 block mb-1">Reps / Série</label>
+                          <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Reps</label>
                           <input
                             type="number"
                             min="1"
                             max="100"
                             value={re.targetReps || 10}
                             onChange={e => handleUpdateExercise(index, { targetReps: Math.max(1, parseInt(e.target.value) || 1) })}
-                            className="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-200 text-center"
+                            className="w-full px-2.5 py-1.5 rounded-xl bg-slate-950/80 border border-white/5 text-slate-100 text-center font-bold"
                           />
                         </div>
                       )}
 
                       <div>
-                        <label className="text-[11px] text-slate-400 block mb-1">Descanso (s)</label>
+                        <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Descanso (s)</label>
                         <input
                           type="number"
                           min="10"
@@ -315,7 +317,7 @@ export const RoutineEditorModal: React.FC<RoutineEditorModalProps> = ({
                           step="5"
                           value={re.restSeconds}
                           onChange={e => handleUpdateExercise(index, { restSeconds: Math.max(10, parseInt(e.target.value) || 60) })}
-                          className="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-200 text-center"
+                          className="w-full px-2.5 py-1.5 rounded-xl bg-slate-950/80 border border-white/5 text-slate-100 text-center font-bold"
                         />
                       </div>
                     </div>
@@ -324,10 +326,10 @@ export const RoutineEditorModal: React.FC<RoutineEditorModalProps> = ({
                     <div>
                       <input
                         type="text"
-                        placeholder="Nota de execução (ex: cotovelos fechados, pausar 1s embaixo...)"
+                        placeholder="Nota técnica (ex: cotovelos fechados, pausar 1s embaixo...)"
                         value={re.notes || ''}
                         onChange={e => handleUpdateExercise(index, { notes: e.target.value })}
-                        className="w-full px-2.5 py-1.5 rounded-lg bg-slate-900/60 border border-slate-800 text-slate-300 text-xs placeholder:text-slate-600"
+                        className="w-full px-3 py-2 rounded-xl bg-slate-950/60 border border-white/5 text-slate-300 text-xs placeholder:text-slate-600 font-medium"
                       />
                     </div>
                   </div>
@@ -338,10 +340,10 @@ export const RoutineEditorModal: React.FC<RoutineEditorModalProps> = ({
 
           {/* Exercise Picker Modal / Drawer */}
           {showAddDrawer && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
-              <div className="w-full max-w-lg max-h-[80vh] bg-slate-900 border border-slate-800 rounded-3xl p-4 sm:p-6 shadow-2xl flex flex-col">
-                <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-                  <h3 className="font-bold text-slate-100 text-sm">Biblioteca de Calistenia</h3>
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+              <div className="w-full max-w-lg max-h-[80vh] glass-panel border border-white/10 rounded-3xl p-5 sm:p-6 shadow-2xl flex flex-col">
+                <div className="flex items-center justify-between pb-3.5 border-b border-white/10">
+                  <h3 className="font-black text-slate-100 text-sm">Biblioteca de Calistenia</h3>
                   <button
                     type="button"
                     onClick={() => setShowAddDrawer(false)}
@@ -356,11 +358,11 @@ export const RoutineEditorModal: React.FC<RoutineEditorModalProps> = ({
                       key={ex.id}
                       type="button"
                       onClick={() => handleAddExercise(ex.id)}
-                      className="w-full text-left p-3 rounded-xl bg-slate-950/70 hover:bg-slate-800/80 border border-slate-800 transition flex items-center justify-between"
+                      className="w-full text-left p-3.5 rounded-2xl glass-card hover:bg-white/[0.08] border border-white/5 transition flex items-center justify-between active:scale-98"
                     >
                       <div>
-                        <div className="font-semibold text-xs text-slate-200">{ex.name}</div>
-                        <div className="text-[11px] text-slate-400 mt-0.5">
+                        <div className="font-extrabold text-xs text-slate-200">{ex.name}</div>
+                        <div className="text-[11px] text-slate-400 mt-0.5 font-medium">
                           {ex.category} • {ex.difficulty} • {ex.type === 'isometric' ? 'Isométrico' : 'Repetições'}
                         </div>
                       </div>
@@ -373,17 +375,17 @@ export const RoutineEditorModal: React.FC<RoutineEditorModalProps> = ({
           )}
 
           {/* Footer Save Actions */}
-          <div className="pt-4 border-t border-slate-800 flex items-center justify-end gap-3">
+          <div className="pt-4 border-t border-white/10 flex items-center justify-end gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2.5 rounded-xl border border-slate-700 text-slate-300 text-xs font-medium hover:bg-slate-800 transition"
+              className="px-5 py-2.5 rounded-2xl glass-card text-slate-300 text-xs font-bold hover:bg-white/[0.08] transition"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 text-white text-xs font-bold flex items-center gap-2 shadow-lg shadow-emerald-900/40 hover:brightness-110 active:scale-95 transition"
+              className="px-7 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 text-slate-950 text-xs font-black flex items-center gap-2 shadow-xl shadow-emerald-500/25 hover:brightness-110 active:scale-95 transition glow-emerald"
             >
               <Save className="w-4 h-4" /> Salvar Rotina
             </button>

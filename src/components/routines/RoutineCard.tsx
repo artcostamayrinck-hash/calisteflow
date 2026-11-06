@@ -1,7 +1,8 @@
-import React from 'react';
+import { useState } from 'react';
 import type { Routine, MuscleGroup } from '../../types';
 import { EXERCISES_DATABASE, MUSCLE_LABELS } from '../../data/exercisesData';
-import { Play, Clock, Dumbbell, MoreVertical, Edit2, Copy, Trash2 } from 'lucide-react';
+import { soundManager } from '../../utils/audio';
+import { Play, Clock, Dumbbell, MoreVertical, Edit2, Copy, Trash2, Zap } from 'lucide-react';
 
 interface RoutineCardProps {
   routine: Routine;
@@ -12,15 +13,15 @@ interface RoutineCardProps {
   onViewDetails: (routine: Routine) => void;
 }
 
-export const RoutineCard: React.FC<RoutineCardProps> = ({
+export const RoutineCard = ({
   routine,
   onStart,
   onEdit,
   onDuplicate,
   onDelete,
   onViewDetails,
-}) => {
-  const [menuOpen, setMenuOpen] = React.useState(false);
+}: RoutineCardProps) => {
+  const [menuOpen, setMenuOpen] = useState(false);
 
   // Compute targeted muscles across all exercises
   const primaryMuscles = Array.from(
@@ -35,50 +36,73 @@ export const RoutineCard: React.FC<RoutineCardProps> = ({
   const getDifficultyColor = (diff: Routine['difficulty']) => {
     switch (diff) {
       case 'Iniciante':
-        return 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30';
+        return 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30';
       case 'Intermediário':
-        return 'bg-amber-500/15 text-amber-400 border-amber-500/30';
+        return 'bg-amber-500/10 text-amber-300 border-amber-500/30';
       case 'Avançado':
-        return 'bg-orange-500/15 text-orange-400 border-orange-500/30';
+        return 'bg-orange-500/10 text-orange-300 border-orange-500/30';
       case 'Elite':
-        return 'bg-rose-500/15 text-rose-400 border-rose-500/30';
+        return 'bg-rose-500/10 text-rose-300 border-rose-500/30';
       default:
-        return 'bg-slate-700 text-slate-300';
+        return 'bg-slate-800 text-slate-300 border-slate-700';
     }
   };
 
-  const getCategoryColor = (cat: Routine['category']) => {
+  const getCategoryTheme = (cat: Routine['category']) => {
     switch (cat) {
       case 'Push':
-        return 'text-rose-400 border-rose-500/30 bg-rose-500/10';
+        return {
+          pill: 'text-rose-300 border-rose-500/30 bg-rose-500/10',
+          gradientBar: 'from-rose-500 via-pink-500 to-transparent',
+        };
       case 'Pull':
-        return 'text-sky-400 border-sky-500/30 bg-sky-500/10';
+        return {
+          pill: 'text-sky-300 border-sky-500/30 bg-sky-500/10',
+          gradientBar: 'from-sky-500 via-cyan-400 to-transparent',
+        };
       case 'Legs':
-        return 'text-amber-400 border-amber-500/30 bg-amber-500/10';
+        return {
+          pill: 'text-amber-300 border-amber-500/30 bg-amber-500/10',
+          gradientBar: 'from-amber-500 via-orange-400 to-transparent',
+        };
       case 'Core':
-        return 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10';
+        return {
+          pill: 'text-emerald-300 border-emerald-500/30 bg-emerald-500/10',
+          gradientBar: 'from-emerald-500 via-teal-400 to-transparent',
+        };
       case 'Skill':
-        return 'text-purple-400 border-purple-500/30 bg-purple-500/10';
+        return {
+          pill: 'text-purple-300 border-purple-500/30 bg-purple-500/10',
+          gradientBar: 'from-purple-500 via-violet-400 to-transparent',
+        };
       default:
-        return 'text-indigo-400 border-indigo-500/30 bg-indigo-500/10';
+        return {
+          pill: 'text-indigo-300 border-indigo-500/30 bg-indigo-500/10',
+          gradientBar: 'from-indigo-500 via-blue-400 to-transparent',
+        };
     }
   };
 
+  const theme = getCategoryTheme(routine.category);
+
   return (
-    <div className="bg-slate-900 rounded-2xl border border-slate-800 p-4 sm:p-5 shadow-lg hover:border-slate-700 transition flex flex-col justify-between relative group">
+    <div className="glass-card rounded-3xl p-5 shadow-xl hover:border-white/15 transition-all duration-300 flex flex-col justify-between relative group overflow-hidden">
+      {/* Top Ambient Glow Edge Bar */}
+      <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${theme.gradientBar}`} />
+
       {/* Top Meta Header */}
       <div>
-        <div className="flex items-center justify-between gap-2 mb-2">
+        <div className="flex items-center justify-between gap-2 mb-3">
           <div className="flex items-center gap-1.5 flex-wrap">
-            <span className={`px-2 py-0.5 rounded-md text-[11px] font-semibold uppercase tracking-wider border ${getCategoryColor(routine.category)}`}>
+            <span className={`px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold uppercase tracking-widest border ${theme.pill}`}>
               {routine.category}
             </span>
-            <span className={`px-2 py-0.5 rounded-md text-[11px] font-medium border ${getDifficultyColor(routine.difficulty)}`}>
+            <span className={`px-2.5 py-0.5 rounded-lg text-[11px] font-semibold border ${getDifficultyColor(routine.difficulty)}`}>
               {routine.difficulty}
             </span>
             {routine.isCustom && (
-              <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-                Personalizada
+              <span className="px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1">
+                <Zap className="w-2.5 h-2.5" /> Criada
               </span>
             )}
           </div>
@@ -87,7 +111,7 @@ export const RoutineCard: React.FC<RoutineCardProps> = ({
           <div className="relative">
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition"
+              className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/[0.08] transition active:scale-95"
               title="Opções"
             >
               <MoreVertical className="w-4 h-4" />
@@ -96,13 +120,13 @@ export const RoutineCard: React.FC<RoutineCardProps> = ({
             {menuOpen && (
               <>
                 <div className="fixed inset-0 z-30" onClick={() => setMenuOpen(false)} />
-                <div className="absolute right-0 top-8 z-40 w-44 bg-slate-950 border border-slate-800 rounded-xl shadow-2xl py-1 text-xs">
+                <div className="absolute right-0 top-8 z-40 w-44 glass-panel border border-white/10 rounded-2xl shadow-2xl py-1 text-xs backdrop-blur-xl animate-in fade-in zoom-in-95 duration-150">
                   <button
                     onClick={() => {
                       setMenuOpen(false);
                       onViewDetails(routine);
                     }}
-                    className="w-full px-3 py-2 text-left text-slate-300 hover:bg-slate-800 flex items-center gap-2"
+                    className="w-full px-3 py-2 text-left text-slate-300 hover:bg-white/[0.06] flex items-center gap-2"
                   >
                     <Dumbbell className="w-3.5 h-3.5 text-slate-400" /> Ver Detalhes
                   </button>
@@ -111,7 +135,7 @@ export const RoutineCard: React.FC<RoutineCardProps> = ({
                       setMenuOpen(false);
                       onEdit(routine);
                     }}
-                    className="w-full px-3 py-2 text-left text-slate-300 hover:bg-slate-800 flex items-center gap-2"
+                    className="w-full px-3 py-2 text-left text-slate-300 hover:bg-white/[0.06] flex items-center gap-2"
                   >
                     <Edit2 className="w-3.5 h-3.5 text-cyan-400" /> Editar Rotina
                   </button>
@@ -120,7 +144,7 @@ export const RoutineCard: React.FC<RoutineCardProps> = ({
                       setMenuOpen(false);
                       onDuplicate(routine);
                     }}
-                    className="w-full px-3 py-2 text-left text-slate-300 hover:bg-slate-800 flex items-center gap-2"
+                    className="w-full px-3 py-2 text-left text-slate-300 hover:bg-white/[0.06] flex items-center gap-2"
                   >
                     <Copy className="w-3.5 h-3.5 text-amber-400" /> Duplicar Rotina
                   </button>
@@ -132,7 +156,7 @@ export const RoutineCard: React.FC<RoutineCardProps> = ({
                           onDelete(routine.id);
                         }
                       }}
-                      className="w-full px-3 py-2 text-left text-rose-400 hover:bg-rose-500/10 flex items-center gap-2 border-t border-slate-800"
+                      className="w-full px-3 py-2 text-left text-rose-400 hover:bg-rose-500/10 flex items-center gap-2 border-t border-white/5"
                     >
                       <Trash2 className="w-3.5 h-3.5" /> Excluir Rotina
                     </button>
@@ -146,7 +170,7 @@ export const RoutineCard: React.FC<RoutineCardProps> = ({
         {/* Title & Description */}
         <h3
           onClick={() => onViewDetails(routine)}
-          className="text-lg font-bold text-slate-100 hover:text-emerald-400 transition cursor-pointer"
+          className="text-lg font-extrabold text-slate-100 hover:text-emerald-400 transition cursor-pointer tracking-tight"
         >
           {routine.title}
         </h3>
@@ -159,11 +183,14 @@ export const RoutineCard: React.FC<RoutineCardProps> = ({
           {routine.exercises.slice(0, 3).map((re, idx) => {
             const ex = EXERCISES_DATABASE.find(e => e.id === re.exerciseId);
             return (
-              <div key={idx} className="flex items-center justify-between text-xs text-slate-300 bg-slate-950/60 px-2.5 py-1.5 rounded-lg border border-slate-800/60">
-                <span className="truncate max-w-[180px] font-medium text-slate-200">
+              <div
+                key={idx}
+                className="flex items-center justify-between text-xs text-slate-300 bg-slate-950/50 hover:bg-slate-950/80 px-3 py-1.5 rounded-xl border border-white/[0.04] transition"
+              >
+                <span className="truncate max-w-[190px] font-medium text-slate-200">
                   {ex ? ex.name : re.exerciseId}
                 </span>
-                <span className="text-slate-400 shrink-0 text-[11px]">
+                <span className="text-slate-400 shrink-0 text-[11px] font-mono">
                   {re.sets} × {re.targetReps ? `${re.targetReps} reps` : `${re.targetHoldSeconds}s`}
                 </span>
               </div>
@@ -171,16 +198,19 @@ export const RoutineCard: React.FC<RoutineCardProps> = ({
           })}
           {routine.exercises.length > 3 && (
             <p className="text-[11px] text-slate-400 pl-1 font-medium">
-              + {routine.exercises.length - 3} outros exercícios
+              + {routine.exercises.length - 3} outros exercícios na rotina
             </p>
           )}
         </div>
 
         {/* Muscle Focus Chips */}
         {primaryMuscles.length > 0 && (
-          <div className="mt-3 flex flex-wrap gap-1">
+          <div className="mt-3.5 flex flex-wrap gap-1">
             {primaryMuscles.slice(0, 4).map(m => (
-              <span key={m} className="px-1.5 py-0.5 rounded text-[10px] bg-slate-800 text-slate-300 border border-slate-700/60">
+              <span
+                key={m}
+                className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-white/[0.04] text-slate-300 border border-white/[0.06]"
+              >
                 {MUSCLE_LABELS[m] || m}
               </span>
             ))}
@@ -189,19 +219,22 @@ export const RoutineCard: React.FC<RoutineCardProps> = ({
       </div>
 
       {/* Card Footer: Duration, Exercise count & Start Workout CTA */}
-      <div className="mt-4 pt-3.5 border-t border-slate-800/80 flex items-center justify-between gap-3">
+      <div className="mt-4 pt-3.5 border-t border-white/[0.06] flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 text-xs text-slate-400">
-          <span className="flex items-center gap-1">
+          <span className="flex items-center gap-1.5">
             <Clock className="w-3.5 h-3.5 text-slate-400" /> {routine.estimatedMinutes} min
           </span>
-          <span className="flex items-center gap-1">
+          <span className="flex items-center gap-1.5">
             <Dumbbell className="w-3.5 h-3.5 text-slate-400" /> {routine.exercises.length} exerc.
           </span>
         </div>
 
         <button
-          onClick={() => onStart(routine)}
-          className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 text-white font-semibold text-xs flex items-center gap-1.5 shadow-md shadow-emerald-900/30 hover:brightness-110 active:scale-95 transition"
+          onClick={() => {
+            soundManager.triggerHaptic([40]);
+            onStart(routine);
+          }}
+          className="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-lg shadow-emerald-500/20 hover:brightness-110 active:scale-95 transition glow-emerald"
         >
           <Play className="w-3.5 h-3.5 fill-current" /> Treinar
         </button>

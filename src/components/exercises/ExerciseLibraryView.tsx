@@ -1,17 +1,18 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import type { Exercise, MuscleGroup, ExerciseCategory } from '../../types';
 import { EXERCISES_DATABASE, MUSCLE_LABELS } from '../../data/exercisesData';
 import { ExercisePostureVisual } from '../visuals/ExercisePostureVisual';
 import { MuscleMap } from '../visuals/MuscleMap';
+import { soundManager } from '../../utils/audio';
 import { Search, Filter, Dumbbell, Sparkles, X, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface ExerciseLibraryViewProps {
   initialExerciseId?: string | null;
 }
 
-export const ExerciseLibraryView: React.FC<ExerciseLibraryViewProps> = ({
+export const ExerciseLibraryView = ({
   initialExerciseId = null,
-}) => {
+}: ExerciseLibraryViewProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<ExerciseCategory | 'Todos'>('Todos');
   const [selectedMuscle, setSelectedMuscle] = useState<MuscleGroup | null>(null);
@@ -49,33 +50,40 @@ export const ExerciseLibraryView: React.FC<ExerciseLibraryViewProps> = ({
   ];
 
   return (
-    <div className="space-y-6 pb-20">
+    <div className="space-y-6 pb-24">
       {/* Header & Search */}
-      <div className="space-y-3">
-        <div>
-          <h1 className="text-2xl font-black text-slate-100 flex items-center gap-2">
-            <Dumbbell className="w-6 h-6 text-emerald-400" />
-            Exercícios & Guia de Postura
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Biblioteca anatômica com orientações biomecânicas passo a passo, músculos alvos e prevenção de lesões.
-          </p>
+      <div className="space-y-4">
+        {/* Banner */}
+        <div className="relative glass-card rounded-3xl p-5 sm:p-7 overflow-hidden border border-white/10 shadow-2xl">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
+          <div className="space-y-1.5 relative z-10">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
+              <Sparkles className="w-3.5 h-3.5" /> Biomecânica & Anatomia
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-100 tracking-tight flex items-center gap-2">
+              <Dumbbell className="w-7 h-7 text-emerald-400" />
+              Exercícios & Guia Postural
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-400 max-w-lg leading-relaxed font-medium">
+              Biblioteca anatômica com vetores de força passo a passo, ativação muscular direcionada e prevenção de lesões.
+            </p>
+          </div>
         </div>
 
         {/* Search input */}
         <div className="relative">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+          <Search className="w-4 h-4 text-slate-400 absolute left-4 top-3.5" />
           <input
             type="text"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Buscar por exercício ou músculo (ex: flexão, peito, barra, costas)..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-slate-900 border border-slate-800 text-slate-100 text-xs sm:text-sm focus:outline-none focus:border-emerald-500 placeholder:text-slate-500 shadow-sm"
+            className="w-full pl-11 pr-10 py-3 rounded-2xl glass-card text-slate-100 text-xs sm:text-sm focus:outline-none focus:border-emerald-500/60 placeholder:text-slate-500 shadow-md transition"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="absolute right-3 top-3 text-slate-400 hover:text-white"
+              className="absolute right-3.5 top-3.5 text-slate-400 hover:text-white"
             >
               <X className="w-4 h-4" />
             </button>
@@ -83,15 +91,18 @@ export const ExerciseLibraryView: React.FC<ExerciseLibraryViewProps> = ({
         </div>
 
         {/* Category Pill Filters */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
           {categories.map(cat => (
             <button
               key={cat}
-              onClick={() => setSelectedCategory(cat)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
+              onClick={() => {
+                soundManager.triggerHaptic([20]);
+                setSelectedCategory(cat);
+              }}
+              className={`px-3.5 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition-all active:scale-95 ${
                 selectedCategory === cat
-                  ? 'bg-emerald-500 text-slate-950 shadow-sm shadow-emerald-500/30'
-                  : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200'
+                  ? 'bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 shadow-lg shadow-emerald-500/20'
+                  : 'glass-card text-slate-400 hover:text-slate-200'
               }`}
             >
               {cat}
@@ -103,43 +114,46 @@ export const ExerciseLibraryView: React.FC<ExerciseLibraryViewProps> = ({
         <div className="flex items-center justify-between gap-2 pt-1">
           <div className="flex items-center gap-2 flex-wrap">
             <button
-              onClick={() => setShowInteractiveMap(!showInteractiveMap)}
-              className="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 text-xs font-medium flex items-center gap-1.5 hover:bg-slate-800 transition"
+              onClick={() => {
+                soundManager.triggerHaptic([20]);
+                setShowInteractiveMap(!showInteractiveMap);
+              }}
+              className="px-3.5 py-2 rounded-2xl glass-card text-slate-300 text-xs font-bold flex items-center gap-2 hover:bg-white/[0.08] transition active:scale-95"
             >
               <Filter className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Filtrar por Músculo no Mapa 3D</span>
+              <span>Filtrar no Mapa Muscular 3D</span>
               {showInteractiveMap ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
             </button>
 
             {selectedMuscle && (
-              <div className="flex items-center gap-1 bg-amber-500/15 border border-amber-500/30 text-amber-300 px-2.5 py-1 rounded-xl text-xs">
+              <div className="flex items-center gap-1.5 bg-amber-500/15 border border-amber-500/30 text-amber-300 px-3 py-1.5 rounded-2xl text-xs font-bold glow-amber">
                 <span>Filtrando por: {MUSCLE_LABELS[selectedMuscle]}</span>
                 <button
                   onClick={() => setSelectedMuscle(null)}
                   className="hover:text-white ml-1"
                 >
-                  <X className="w-3 h-3" />
+                  <X className="w-3.5 h-3.5" />
                 </button>
               </div>
             )}
           </div>
 
-          <span className="text-xs text-slate-400 shrink-0">
-            {filteredExercises.length} exercícios encontrados
+          <span className="text-xs text-slate-400 shrink-0 font-medium">
+            {filteredExercises.length} exercícios
           </span>
         </div>
 
         {/* Interactive Muscle Map Drawer */}
         {showInteractiveMap && (
-          <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-4 sm:p-5 shadow-2xl animate-in fade-in slide-in-from-top-4 duration-200">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-300">
+          <div className="glass-panel border border-white/10 rounded-3xl p-5 sm:p-6 shadow-2xl animate-in fade-in slide-in-from-top-3 duration-200">
+            <div className="flex items-center justify-between mb-3.5">
+              <span className="text-xs font-black uppercase tracking-wider text-slate-300">
                 Toque em um músculo para filtrar exercícios:
               </span>
               {selectedMuscle && (
                 <button
                   onClick={() => setSelectedMuscle(null)}
-                  className="text-xs text-emerald-400 hover:underline"
+                  className="text-xs text-emerald-400 hover:underline font-bold"
                 >
                   Limpar filtro
                 </button>
@@ -155,11 +169,11 @@ export const ExerciseLibraryView: React.FC<ExerciseLibraryViewProps> = ({
       </div>
 
       {/* Grid of Exercises */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
         {filteredExercises.map(ex => (
           <div
             key={ex.id}
-            className="bg-slate-900 rounded-3xl border border-slate-800 p-4 sm:p-5 shadow-lg hover:border-slate-700 transition flex flex-col justify-between space-y-4"
+            className="glass-card rounded-3xl p-5 shadow-xl hover:border-white/15 transition-all duration-300 flex flex-col justify-between space-y-4"
           >
             <div>
               {/* Exercise meta chips */}
@@ -203,15 +217,18 @@ export const ExerciseLibraryView: React.FC<ExerciseLibraryViewProps> = ({
             </div>
 
             {/* Inspect Posture CTA */}
-            <div className="pt-3 border-t border-slate-800 flex items-center justify-between">
-              <span className="text-xs text-slate-400">
-                {ex.executionSteps.length} passos de postura detalhados
+            <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between">
+              <span className="text-xs text-slate-400 font-medium">
+                {ex.executionSteps.length} passos de postura
               </span>
               <button
-                onClick={() => setSelectedExercise(ex)}
-                className="px-3.5 py-1.5 rounded-xl bg-slate-800 text-emerald-400 hover:bg-slate-700 text-xs font-semibold border border-slate-700 flex items-center gap-1.5 transition active:scale-95"
+                onClick={() => {
+                  soundManager.triggerHaptic([20]);
+                  setSelectedExercise(ex);
+                }}
+                className="px-4 py-2 rounded-2xl glass-card text-emerald-300 hover:text-white hover:bg-white/[0.08] text-xs font-bold border border-white/10 flex items-center gap-1.5 transition active:scale-95 glow-emerald"
               >
-                <Sparkles className="w-3.5 h-3.5" /> Ver Ilustração & Postura
+                <Sparkles className="w-3.5 h-3.5" /> Postura & Músculos
               </button>
             </div>
           </div>
@@ -219,10 +236,10 @@ export const ExerciseLibraryView: React.FC<ExerciseLibraryViewProps> = ({
       </div>
 
       {filteredExercises.length === 0 && (
-        <div className="p-12 text-center bg-slate-900 rounded-3xl border border-slate-800">
-          <Dumbbell className="w-8 h-8 text-slate-600 mx-auto mb-2" />
-          <h4 className="text-sm font-semibold text-slate-300">Nenhum exercício encontrado</h4>
-          <p className="text-xs text-slate-500 mt-1">
+        <div className="p-12 text-center glass-card rounded-3xl border border-white/10 space-y-3">
+          <Dumbbell className="w-10 h-10 text-slate-600 mx-auto" />
+          <h4 className="text-base font-bold text-slate-200">Nenhum exercício encontrado</h4>
+          <p className="text-xs text-slate-400 mt-1">
             Tente buscar com outro termo ou limpe os filtros de categoria e músculo.
           </p>
         </div>
@@ -230,19 +247,19 @@ export const ExerciseLibraryView: React.FC<ExerciseLibraryViewProps> = ({
 
       {/* Full Exercise Posture Inspection Modal */}
       {selectedExercise && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="w-full max-w-2xl max-h-[92vh] sm:max-h-[88vh] bg-slate-900 border border-slate-800 rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="w-full max-w-2xl max-h-[92vh] sm:max-h-[88vh] glass-panel border border-white/10 rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden">
             {/* Modal Header */}
-            <div className="p-4 sm:p-5 border-b border-slate-800 flex items-center justify-between shrink-0 bg-slate-900/90 backdrop-blur-md">
+            <div className="p-4 sm:p-5 border-b border-white/10 flex items-center justify-between shrink-0 glass-panel">
               <div>
-                <span className="text-[11px] font-semibold text-emerald-400 uppercase tracking-wider">
+                <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400">
                   {selectedExercise.category} • {selectedExercise.difficulty}
                 </span>
-                <h2 className="text-lg font-bold text-slate-100">{selectedExercise.name}</h2>
+                <h2 className="text-lg sm:text-xl font-black text-slate-100 tracking-tight">{selectedExercise.name}</h2>
               </div>
               <button
                 onClick={() => setSelectedExercise(null)}
-                className="p-2 rounded-full text-slate-400 hover:text-white hover:bg-slate-800 transition"
+                className="p-2 rounded-full text-slate-400 hover:text-white hover:bg-white/[0.08] transition"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -254,8 +271,8 @@ export const ExerciseLibraryView: React.FC<ExerciseLibraryViewProps> = ({
               <ExercisePostureVisual exercise={selectedExercise} />
 
               {/* Targeted Muscle Map */}
-              <div className="bg-slate-950/60 p-4 rounded-2xl border border-slate-800">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 text-center">
+              <div className="glass-card p-4 rounded-3xl border border-white/10 shadow-lg">
+                <h4 className="text-xs font-black uppercase tracking-wider text-slate-300 mb-3 text-center">
                   Músculos Ativados em {selectedExercise.name}
                 </h4>
                 <MuscleMap
@@ -266,28 +283,28 @@ export const ExerciseLibraryView: React.FC<ExerciseLibraryViewProps> = ({
               </div>
 
               {/* Recommended Default Prescription */}
-              <div className="p-4 bg-slate-950/70 rounded-2xl border border-slate-800 text-xs flex items-center justify-around text-center">
+              <div className="p-4 glass-card rounded-3xl border border-white/10 text-xs flex items-center justify-around text-center shadow-md">
                 <div>
-                  <div className="text-slate-400 text-[11px]">Séries Sugeridas</div>
-                  <div className="text-base font-bold text-slate-100 mt-0.5">
+                  <div className="text-slate-400 text-[11px] font-semibold">Séries Sugeridas</div>
+                  <div className="text-lg font-black text-slate-100 mt-0.5 font-mono">
                     {selectedExercise.defaultSets}
                   </div>
                 </div>
-                <div className="border-r border-slate-800 h-8" />
+                <div className="border-r border-white/10 h-8" />
                 <div>
-                  <div className="text-slate-400 text-[11px]">
+                  <div className="text-slate-400 text-[11px] font-semibold">
                     {selectedExercise.type === 'isometric' ? 'Sustentação' : 'Repetições'}
                   </div>
-                  <div className="text-base font-bold text-slate-100 mt-0.5">
+                  <div className="text-lg font-black text-slate-100 mt-0.5 font-mono">
                     {selectedExercise.type === 'isometric'
                       ? `${selectedExercise.defaultHoldSeconds}s`
                       : `${selectedExercise.defaultReps} reps`}
                   </div>
                 </div>
-                <div className="border-r border-slate-800 h-8" />
+                <div className="border-r border-white/10 h-8" />
                 <div>
-                  <div className="text-slate-400 text-[11px]">Descanso Ideal</div>
-                  <div className="text-base font-bold text-slate-100 mt-0.5">
+                  <div className="text-slate-400 text-[11px] font-semibold">Descanso Ideal</div>
+                  <div className="text-lg font-black text-slate-100 mt-0.5 font-mono">
                     {selectedExercise.defaultRestSeconds}s
                   </div>
                 </div>
@@ -295,10 +312,10 @@ export const ExerciseLibraryView: React.FC<ExerciseLibraryViewProps> = ({
             </div>
 
             {/* Footer */}
-            <div className="p-4 border-t border-slate-800 bg-slate-900/90 flex justify-end">
+            <div className="p-4 border-t border-white/10 glass-panel flex justify-end">
               <button
                 onClick={() => setSelectedExercise(null)}
-                className="px-6 py-2.5 rounded-xl bg-emerald-500 text-slate-950 font-bold text-xs"
+                className="px-6 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 text-slate-950 font-black text-xs shadow-lg shadow-emerald-500/25 glow-emerald"
               >
                 Fechar Guia
               </button>

@@ -18,7 +18,7 @@ import { WorkoutSummaryModal } from './components/workout/WorkoutSummaryModal';
 import { ExerciseLibraryView } from './components/exercises/ExerciseLibraryView';
 import { HistoryView } from './components/history/HistoryView';
 import { BottomNav, type NavTab } from './components/layout/BottomNav';
-import { Dumbbell, ShieldCheck, Flame } from 'lucide-react';
+import { Dumbbell, Flame } from 'lucide-react';
 
 export function App() {
   // App Navigation
@@ -128,44 +128,44 @@ export function App() {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between selection:bg-emerald-500/20 selection:text-emerald-300">
       {/* Top Main Navigation Header */}
-      <header className="sticky top-0 z-30 bg-slate-950/85 backdrop-blur-md border-b border-slate-900/90 px-4 py-3 sm:px-6">
+      <header className="sticky top-0 z-30 glass-panel border-b border-white/[0.08] px-4 py-3 sm:px-6 backdrop-blur-2xl">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <div
             onClick={() => setActiveTab('routines')}
-            className="flex items-center gap-2.5 cursor-pointer group"
+            className="flex items-center gap-2.5 cursor-pointer group active:scale-98 transition"
           >
-            <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-slate-950 shadow-md shadow-emerald-500/20 group-hover:scale-105 transition">
+            <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-emerald-400 via-teal-400 to-cyan-400 flex items-center justify-center text-slate-950 shadow-md shadow-emerald-500/25 group-hover:scale-105 transition glow-emerald">
               <Dumbbell className="w-5 h-5 stroke-[2.5]" />
             </div>
             <div>
               <span className="font-extrabold text-base tracking-tight text-slate-100 flex items-center gap-1.5">
                 CalisteFlow
-                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 uppercase tracking-widest">
+                <span className="text-[10px] font-black px-1.5 py-0.2 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 uppercase tracking-widest">
                   PRO
                 </span>
               </span>
-              <span className="text-[10px] text-slate-400 block -mt-0.5">
+              <span className="text-[10px] text-slate-400 block -mt-0.5 font-medium">
                 Rotinas de Calistenia & Postura
               </span>
             </div>
           </div>
 
           {/* Header Quick Status */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
             {stats.currentStreakDays > 0 && (
               <div
                 onClick={() => setActiveTab('history')}
-                className="flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-xl text-amber-300 text-xs font-bold cursor-pointer hover:bg-amber-500/20 transition"
+                className="flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/30 px-3 py-1.5 rounded-2xl text-amber-300 text-xs font-bold cursor-pointer hover:bg-amber-500/20 transition active:scale-95 glow-amber"
                 title={`${stats.currentStreakDays} dias de streak`}
               >
-                <Flame className="w-4 h-4 fill-current text-amber-400" />
+                <Flame className="w-4 h-4 fill-current text-amber-400 animate-bounce" />
                 <span>{stats.currentStreakDays} {stats.currentStreakDays === 1 ? 'dia' : 'dias'}</span>
               </div>
             )}
 
-            <div className="hidden sm:flex items-center gap-1 text-[11px] text-slate-400 bg-slate-900 px-2.5 py-1 rounded-xl border border-slate-800">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Armazenamento Local Ativo</span>
+            <div className="hidden sm:flex items-center gap-1.5 text-[11px] text-slate-300 bg-white/[0.04] px-3 py-1.5 rounded-2xl border border-white/[0.06]">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 glow-emerald animate-pulse" />
+              <span>Offline & Local</span>
             </div>
           </div>
         </div>
