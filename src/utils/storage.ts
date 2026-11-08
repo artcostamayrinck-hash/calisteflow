@@ -11,6 +11,7 @@ import type {
 } from '../types';
 import { DEFAULT_ROUTINES } from '../data/routinesData';
 import { createPresetWeeklyPlan } from './workoutGenerator';
+import { idbStorage } from './indexedDb';
 
 const STORAGE_KEYS = {
   ROUTINES: 'calistheflow_routines_v1',
@@ -44,6 +45,8 @@ export const getStoredRoutines = (): Routine[] => {
 export const saveRoutines = (routines: Routine[]): void => {
   try {
     localStorage.setItem(STORAGE_KEYS.ROUTINES, JSON.stringify(routines));
+    // Assíncrono para IndexedDB
+    routines.forEach(r => idbStorage.put('routines', r).catch(() => {}));
   } catch (error) {
     console.error('Failed to save routines to storage:', error);
   }
@@ -100,6 +103,8 @@ export const saveWorkoutSession = (session: WorkoutSession): WorkoutSession[] =>
     const current = getWorkoutHistory();
     const updated = [session, ...current];
     localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(updated));
+    // Persistência assíncrona robusta no IndexedDB
+    idbStorage.put('sessions', session).catch(() => {});
     return updated;
   } catch (error) {
     console.error('Failed to save workout session to storage:', error);
@@ -112,10 +117,35 @@ export const deleteWorkoutSession = (sessionId: string): WorkoutSession[] => {
     const current = getWorkoutHistory();
     const updated = current.filter(s => s.id !== sessionId);
     localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(updated));
+    // Exclui também do IndexedDB
+    idbStorage.delete('sessions', sessionId).catch(() => {});
     return updated;
   } catch (error) {
     console.error('Failed to delete workout session:', error);
     return getWorkoutHistory();
+  }
+};
+
+/**
+ * Restaura sessões a partir do IndexedDB se o Safari tiver purgado o localStorage
+ */
+export const syncHistoryFromIndexedDB = async (): Promise<WorkoutSession[] | null> => {
+  try {
+    const sessions = await idbStorage.getAll<WorkoutSession>('sessions');
+    if (sessions && sessions.length > 0) {
+      const current = getWorkoutHistory();
+      if (current.length === 0 && sessions.length > 0) {
+        // Safari purgiu localStorage: recupera do IndexedDB!
+        const sorted = sessions.sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime());
+        localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(sorted));
+        console.log(`[Storage] Recuperadas ${sorted.length} sessões do IndexedDB após purga do Safari.`);
+        return sorted;
+      }
+    }
+    return null;
+  } catch (err) {
+    console.warn('[Storage] Erro ao sincronizar do IndexedDB:', err);
+    return null;
   }
 };
 

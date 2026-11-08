@@ -25,6 +25,7 @@ let totalRaw = 0;
 
 files.forEach(file => {
   const filePath = path.join(DIST_DIR, file);
+  if (!fs.statSync(filePath).isFile()) return;
   const content = fs.readFileSync(filePath);
   const rawSizeKb = (content.length / 1024).toFixed(2);
   const gzipSize = zlib.gzipSync(content).length;

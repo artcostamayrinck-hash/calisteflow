@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#020617" />
+      <stop offset="50%" stop-color="#060913" />
+      <stop offset="100%" stop-color="#020617" />
+    </linearGradient>
+    <radialGradient id="cyanGlow" cx="22%" cy="50%" r="45%">
+      <stop offset="0%" stop-color="#22D3EE" stop-opacity="0.18" />
+      <stop offset="100%" stop-color="#020617" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="cfCyanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#22D3EE" />
+      <stop offset="60%" stop-color="#18EEFF" />
+      <stop offset="100%" stop-color="#38BDF8" />
+    </linearGradient>
+    <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="100%" stop-color="#E2E8F0" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bgGrad)" />
+  <rect width="1200" height="630" fill="url(#cyanGlow)" />
+
+  <!-- Subtle grid accent lines -->
+  <line x1="80" y1="80" x2="1120" y2="80" stroke="#1e293b" stroke-width="1" opacity="0.6" />
+  <line x1="80" y1="550" x2="1120" y2="550" stroke="#1e293b" stroke-width="1" opacity="0.6" />
+
+  <!-- Monogram Symbol Left Side (scaled down to fit 380x380 at x=100, y=125) -->
+  <g transform="translate(100, 125) scale(0.37)">
+    <!-- Barra fixa horizontal -->
+    <rect x="112" y="160" width="800" height="52" rx="26" fill="url(#cfCyanGrad)" />
+    <!-- Apoios verticais -->
+    <rect x="156" y="120" width="36" height="120" rx="18" fill="url(#cfCyanGrad)" opacity="0.95" />
+    <rect x="832" y="120" width="36" height="120" rx="18" fill="url(#cfCyanGrad)" opacity="0.95" />
+    <rect x="148" y="196" width="52" height="18" rx="6" fill="#38BDF8" opacity="0.8" />
+    <rect x="824" y="196" width="52" height="18" rx="6" fill="#38BDF8" opacity="0.8" />
+
+    <!-- Letra C -->
+    <path
+      d="
+        M 480 258 L 340 258 A 170 170 0 0 0 170 428 L 170 690 A 170 170 0 0 0 340 860 L 480 860
+        A 14 14 0 0 0 494 846 L 494 770 A 14 14 0 0 0 480 756 L 340 756 A 66 66 0 0 1 274 690
+        L 274 428 A 66 66 0 0 1 340 362 L 480 362 A 14 14 0 0 0 494 348 L 494 272 A 14 14 0 0 0 480 258 Z
+      "
+      fill="url(#cfCyanGrad)"
+    />
+
+    <!-- Letra F -->
+    <path
+      d="
+        M 524 258 L 830 258 A 14 14 0 0 1 844 272 L 844 348 A 14 14 0 0 1 830 362 L 628 362
+        L 628 494 L 776 494 A 14 14 0 0 1 790 508 L 790 584 A 14 14 0 0 1 776 598 L 628 598
+        L 628 846 A 14 14 0 0 1 614 860 L 538 860 A 14 14 0 0 1 524 846 L 524 258 Z
+      "
+      fill="url(#cfCyanGrad)"
+    />
+  </g>
+
+  <!-- Vertical Divider -->
+  <line x1="510" y1="170" x2="510" y2="460" stroke="#334155" stroke-width="2" opacity="0.6" />
+
+  <!-- Typography Right Side (in modern curved sans) -->
+  <g transform="translate(560, 210)">
+    <!-- Brand Name: CalisteFlow -->
+    <text x="0" y="70" font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" font-weight="900" font-size="76" letter-spacing="-2" fill="#FFFFFF">
+      Caliste<tspan fill="#22D3EE">Flow</tspan>
+    </text>
+
+    <!-- Category Pill Badge -->
+    <g transform="translate(0, 105)">
+      <rect width="360" height="34" rx="17" fill="rgba(34, 211, 238, 0.12)" stroke="rgba(34, 211, 238, 0.3)" stroke-width="1.5" />
+      <text x="16" y="22" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-weight="800" font-size="13" letter-spacing="2" fill="#22D3EE">
+        CALISTENIA &amp; POSTURA BIOMECÂNICA
+      </text>
+    </g>
+
+    <!-- Subtitle / Value Proposition -->
+    <text x="0" y="195" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-weight="500" font-size="22" fill="#94A3B8" letter-spacing="-0.3">
+      Treinos Guiados • Cronômetro Inteligente
+    </text>
+    <text x="0" y="230" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-weight="700" font-size="22" fill="#38BDF8" letter-spacing="-0.3">
+      100% Offline • Sem Anúncios • Local-First
+    </text>
+
+    <!-- Safe / Health Disclaimer Tag -->
+    <text x="0" y="295" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-weight="500" font-size="13" fill="#64748B">
+      ✓ Revisão Técnica Biomecânica CREF • Adaptações de Proteção Articular
+    </text>
+  </g>
+</svg>

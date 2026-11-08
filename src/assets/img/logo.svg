@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="cfCyanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#22D3EE" />
+      <stop offset="60%" stop-color="#18EEFF" />
+      <stop offset="100%" stop-color="#38BDF8" />
+    </linearGradient>
+    <filter id="cfGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="16" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  
+
+  <g  id="monogram-symbol">
+    
+    <!-- Barra fixa horizontal -->
+    <rect x="112" y="160" width="800" height="48" rx="24" fill="url(#cfCyanGrad)" />
+
+    
+    <!-- Apoio vertical esquerdo (poste esquerdo) -->
+    <rect x="156" y="120" width="36" height="120" rx="18" fill="url(#cfCyanGrad)" opacity="0.95" />
+    <!-- Apoio vertical direito (poste direito) -->
+    <rect x="832" y="120" width="36" height="120" rx="18" fill="url(#cfCyanGrad)" opacity="0.95" />
+    <!-- Flange de fixação / anel esquerdo -->
+    <rect x="148" y="196" width="52" height="18" rx="6" fill="#38BDF8" opacity="0.8" />
+    <!-- Flange de fixação / anel direito -->
+    <rect x="824" y="196" width="52" height="18" rx="6" fill="#38BDF8" opacity="0.8" />
+    
+
+    
+    <!-- Letra C -->
+    <path
+      d="
+        M 480 258
+        L 340 258
+        A 170 170 0 0 0 170 428
+        L 170 690
+        A 170 170 0 0 0 340 860
+        L 480 860
+        A 14 14 0 0 0 494 846
+        L 494 770
+        A 14 14 0 0 0 480 756
+        L 340 756
+        A 66 66 0 0 1 274 690
+        L 274 428
+        A 66 66 0 0 1 340 362
+        L 480 362
+        A 14 14 0 0 0 494 348
+        L 494 272
+        A 14 14 0 0 0 480 258
+        Z
+      "
+      fill="url(#cfCyanGrad)"
+    />
+
+    <!-- Letra F -->
+    <path
+      d="
+        M 524 258
+        L 830 258
+        A 14 14 0 0 1 844 272
+        L 844 348
+        A 14 14 0 0 1 830 362
+        L 628 362
+        L 628 494
+        L 776 494
+        A 14 14 0 0 1 790 508
+        L 790 584
+        A 14 14 0 0 1 776 598
+        L 628 598
+        L 628 846
+        A 14 14 0 0 1 614 860
+        L 538 860
+        A 14 14 0 0 1 524 846
+        L 524 258
+        Z
+      "
+      fill="url(#cfCyanGrad)"
+    />
+  </g>
+</svg>

@@ -13,7 +13,9 @@ import {
   saveWeeklyPlan,
   getActiveWorkoutBackup,
   clearActiveWorkoutBackup,
+  syncHistoryFromIndexedDB,
 } from './utils/storage';
+import { idbStorage } from './utils/indexedDb';
 import { trackEvent } from './utils/analytics';
 import { HomeView } from './components/home/HomeView';
 import { RoutineListView } from './components/routines/RoutineListView';
@@ -34,6 +36,7 @@ import { StorageRobustnessBanner } from './components/pwa/StorageRobustnessBanne
 import { BottomNav, type NavTab } from './components/layout/BottomNav';
 import { soundManager } from './utils/audio';
 import { requestPersistentStorage } from './utils/platform';
+import { pwaManager } from './utils/pwaManager';
 import { Flame, ShieldCheck } from 'lucide-react';
 import logoImg from './assets/img/logo.png';
 
@@ -106,6 +109,23 @@ export function App() {
   useEffect(() => {
     trackEvent('app_opened');
     requestPersistentStorage();
+    pwaManager.checkForUpdate();
+
+    // Migração e resiliência com IndexedDB (proteção contra o descarte de 7 dias do Safari)
+    idbStorage.migrateFromLocalStorage().then(() => {
+      syncHistoryFromIndexedDB().then((restored) => {
+        if (restored) setHistory(restored);
+      });
+    });
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        pwaManager.checkForUpdate();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
 
   const handleResumeActiveBackup = () => {
@@ -227,7 +247,7 @@ export function App() {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between selection:bg-emerald-500/20 selection:text-emerald-300">
       {/* Top Main Navigation Header */}
-      <header className="sticky top-0 z-30 bg-[#020617]/95 border-b border-white/[0.08] px-4 py-3 sm:px-6 backdrop-blur-2xl">
+      <header className="sticky top-0 z-30 bg-[#020617]/95 border-b border-white/[0.08] px-4 pt-[max(0.75rem,env(safe-area-inset-top,0.75rem))] pb-3 sm:px-6 backdrop-blur-2xl">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           {/* Logo Brand Link */}
           <a

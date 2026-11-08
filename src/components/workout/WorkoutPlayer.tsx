@@ -679,7 +679,7 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
   return (
     <div className="fixed inset-0 z-50 bg-[#060913] text-slate-100 flex flex-col justify-between h-[100dvh] max-h-[100dvh] w-full overflow-hidden select-none box-border">
       {/* Top HUD Bar */}
-      <header className="px-3 py-2.5 sm:px-4 sm:py-3 glass-panel border-b border-white/[0.08] backdrop-blur-2xl flex items-center justify-between gap-2 shrink-0 w-full min-w-0">
+      <header className="px-3 pt-[max(0.625rem,env(safe-area-inset-top,0.625rem))] pb-2.5 sm:px-4 sm:py-3 glass-panel border-b border-white/[0.08] backdrop-blur-2xl flex items-center justify-between gap-2 shrink-0 w-full min-w-0">
         {/* Workout elapsed timer & Pause */}
         <div className="flex items-center gap-2 min-w-0 flex-1">
           <button

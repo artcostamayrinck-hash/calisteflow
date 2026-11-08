@@ -1,7 +1,7 @@
 {
   "name": "CalisteFlow",
   "short_name": "CalisteFlow",
-  "description": "App mobile-first de calistenia: treinos guiados, cronômetro inteligente de descanso, postura biomecânica e mapa muscular 100% offline.",
+  "description": "App mobile-first de calistenia e peso corporal: treinos guiados, cronômetro de descanso, postura biomecânica e mapa muscular 100% offline.",
   "start_url": "/calisteflow/",
   "scope": "/calisteflow/",
   "id": "/calisteflow/",
@@ -13,28 +13,40 @@
   "categories": ["fitness", "health", "sports", "lifestyle"],
   "icons": [
     {
-      "src": "/calisteflow/assets/img/icon-192.png?v=3",
+      "src": "/calisteflow/assets/img/icon-192.png?v=4",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/calisteflow/assets/img/logo-512.png?v=3",
+      "src": "/calisteflow/assets/img/icon-512.png?v=4",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/calisteflow/icon-192.png?v=3",
+      "src": "/calisteflow/assets/img/icon-maskable-512.png?v=4",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/calisteflow/icon-192.png?v=4",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/calisteflow/logo-512.png?v=3",
+      "src": "/calisteflow/icon-512.png?v=4",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
+    },
+    {
+      "src": "/calisteflow/icon-maskable-512.png?v=4",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
   "shortcuts": [
@@ -43,21 +55,21 @@
       "short_name": "Treinar",
       "description": "Iniciar a rotina agendada para hoje",
       "url": "/calisteflow/?shortcut=today",
-      "icons": [{ "src": "/calisteflow/assets/img/icon-192.png?v=3", "sizes": "192x192" }]
+      "icons": [{ "src": "/calisteflow/assets/img/icon-192.png?v=4", "sizes": "192x192" }]
     },
     {
       "name": "Cronômetro de Descanso",
       "short_name": "Cronômetro",
       "description": "Abrir temporizador inteligente com feedback tátil",
       "url": "/calisteflow/?shortcut=timer",
-      "icons": [{ "src": "/calisteflow/assets/img/icon-192.png?v=3", "sizes": "192x192" }]
+      "icons": [{ "src": "/calisteflow/assets/img/icon-192.png?v=4", "sizes": "192x192" }]
     },
     {
       "name": "Biblioteca de Exercícios",
       "short_name": "Exercícios",
       "description": "Explorar biomecânica, variações e mapa muscular",
       "url": "/calisteflow/?shortcut=exercises",
-      "icons": [{ "src": "/calisteflow/assets/img/icon-192.png?v=3", "sizes": "192x192" }]
+      "icons": [{ "src": "/calisteflow/assets/img/icon-192.png?v=4", "sizes": "192x192" }]
     }
   ]
 }

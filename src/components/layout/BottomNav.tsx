@@ -22,7 +22,7 @@ export const BottomNav = ({
   };
 
   return (
-    <div className="fixed bottom-3 sm:bottom-5 left-0 right-0 z-40 px-3 sm:px-4 pointer-events-none flex flex-col items-center">
+    <div className="fixed bottom-[max(0.75rem,env(safe-area-inset-bottom,0.75rem))] sm:bottom-5 left-0 right-0 z-40 px-3 sm:px-4 pointer-events-none flex flex-col items-center">
       {/* Active Workout Floating Banner */}
       {activeWorkoutRoutineTitle && onResumeWorkout && (
         <div className="w-full max-w-sm mb-2 pointer-events-auto animate-in fade-in slide-in-from-bottom-2 duration-300">
