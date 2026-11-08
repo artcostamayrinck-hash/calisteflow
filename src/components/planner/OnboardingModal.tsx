@@ -21,6 +21,7 @@ import {
   clearOnboardingDraft,
 } from '../../utils/storage';
 import { soundManager } from '../../utils/audio';
+import { isIOS, isStandalone } from '../../utils/platform';
 import {
   Sparkles,
   Calendar,
@@ -36,6 +37,7 @@ import {
   AlertTriangle,
   RotateCcw,
   Award,
+  Info,
 } from 'lucide-react';
 
 interface OnboardingModalProps {
@@ -819,7 +821,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ onComplete, on
               </p>
             </div>
 
-            <div className="p-4 rounded-2xl glass-card border border-white/10 space-y-2.5">
+            <div className="p-4 rounded-2xl glass-card border border-white/10 space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Bell className="w-4 h-4 text-emerald-400" />
@@ -836,15 +838,40 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ onComplete, on
                 )}
               </div>
 
-              {!notificationsEnabled && (
-                <button
-                  type="button"
-                  onClick={handleRequestNotification}
-                  className="w-full py-3 px-4 rounded-xl bg-white/10 hover:bg-white/15 text-slate-200 font-bold text-xs flex items-center justify-center gap-2 transition active:scale-98"
-                >
-                  <Bell className="w-4 h-4 text-emerald-400" />
-                  <span>{notifRequested ? 'Permissão Solicitada' : 'Permitir Notificações de Treino'}</span>
-                </button>
+              {/* iOS Safari requirement notice */}
+              {isIOS() && !isStandalone() ? (
+                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs space-y-2">
+                  <div className="flex items-center gap-2 text-amber-300 font-bold">
+                    <Info className="w-3.5 h-3.5 shrink-0" />
+                    <span>Disponível no iPhone via Tela de Início</span>
+                  </div>
+                  <p className="text-[11px] text-slate-300 leading-relaxed">
+                    No iOS, a Apple exige que o aplicativo seja adicionado à <strong>Tela de Início</strong> para habilitar notificações sonoras e push:
+                  </p>
+                  <ol className="text-[11px] text-slate-400 list-decimal list-inside space-y-1 pl-1">
+                    <li>Toque no ícone <strong className="text-slate-200">Compartilhar</strong> (abaixo no Safari)</li>
+                    <li>Role e selecione <strong className="text-slate-200">Adicionar à Tela de Início</strong></li>
+                    <li>Abra o CalisteFlow por lá para ativar os lembretes diários</li>
+                  </ol>
+                </div>
+              ) : (
+                <>
+                  {!notificationsEnabled ? (
+                    <button
+                      type="button"
+                      onClick={handleRequestNotification}
+                      className="w-full py-3 px-4 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 font-bold text-xs flex items-center justify-center gap-2 transition active:scale-98"
+                    >
+                      <Bell className="w-4 h-4 text-emerald-400" />
+                      <span>{notifRequested ? 'Permissão Solicitada' : 'Permitir Notificações de Treino'}</span>
+                    </button>
+                  ) : (
+                    <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-2 text-emerald-400 text-xs">
+                      <CheckCircle2 className="w-4 h-4 shrink-0" />
+                      <span>Notificações ativadas! Você receberá o alerta diário.</span>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>

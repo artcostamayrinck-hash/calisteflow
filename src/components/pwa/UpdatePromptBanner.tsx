@@ -1,29 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import { soundManager } from '../../utils/audio';
+import { pwaManager } from '../../utils/pwaManager';
 import { RefreshCw, Sparkles, X } from 'lucide-react';
 
-export const UpdatePromptBanner: React.FC = () => {
+interface UpdatePromptBannerProps {
+  isWorkoutActive?: boolean;
+}
+
+export const UpdatePromptBanner: React.FC<UpdatePromptBannerProps> = ({ isWorkoutActive = false }) => {
   const [hasUpdate, setHasUpdate] = useState(false);
 
   useEffect(() => {
-    // Listen for custom service worker update events or version checks
-    const handleServiceWorkerUpdate = () => {
+    // Inscreve no gerenciador oficial do PWA para detectar worker em espera (waiting)
+    const unsubscribe = pwaManager.onUpdateAvailable(() => {
       setHasUpdate(true);
-    };
-
-    window.addEventListener('sw_update_available', handleServiceWorkerUpdate);
+    });
 
     return () => {
-      window.removeEventListener('sw_update_available', handleServiceWorkerUpdate);
+      unsubscribe();
     };
   }, []);
 
-  if (!hasUpdate) return null;
+  // REGRA DE OURO: Nunca exibir ou aplicar atualização enquanto o usuário está em um treino ativo
+  if (!hasUpdate || isWorkoutActive) return null;
 
   const handleApplyUpdate = () => {
     soundManager.triggerHaptic([30, 50]);
-    // Smooth reload to fetch updated assets without touching user data in localStorage/IndexedDB
-    window.location.reload();
+    // Instruímos o worker via postMessage (skipWaiting) e ele recarrega no controllerchange
+    pwaManager.applyUpdate();
   };
 
   return (

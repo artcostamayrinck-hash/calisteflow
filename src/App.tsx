@@ -30,9 +30,12 @@ import { SafeExecutionModal } from './components/safety/SafeExecutionModal';
 import { FeedbackModal } from './components/retention/FeedbackModal';
 import { ChangelogFaqModal } from './components/retention/ChangelogFaqModal';
 import { UpdatePromptBanner } from './components/pwa/UpdatePromptBanner';
+import { StorageRobustnessBanner } from './components/pwa/StorageRobustnessBanner';
 import { BottomNav, type NavTab } from './components/layout/BottomNav';
 import { soundManager } from './utils/audio';
-import { Dumbbell, Flame, ShieldCheck } from 'lucide-react';
+import { requestPersistentStorage } from './utils/platform';
+import { Flame, ShieldCheck } from 'lucide-react';
+import logoImg from './assets/img/logo-512x512.png';
 
 export function App() {
   // App Navigation — default to 'home'
@@ -102,10 +105,12 @@ export function App() {
 
   useEffect(() => {
     trackEvent('app_opened');
+    requestPersistentStorage();
   }, []);
 
   const handleResumeActiveBackup = () => {
     if (!activeBackup) return;
+    soundManager.unlockAudio();
     const routine = routines.find(r => r.id === activeBackup.routine.id) || activeBackup.routine;
     setActiveWorkoutRoutine(routine);
     setIsPlayerFullscreen(true);
@@ -130,6 +135,7 @@ export function App() {
 
   // Routine Handlers
   const handleStartRoutine = (routine: Routine) => {
+    soundManager.unlockAudio();
     setActiveWorkoutRoutine(routine);
     setIsPlayerFullscreen(true);
     setDetailRoutine(null);
@@ -221,19 +227,33 @@ export function App() {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between selection:bg-emerald-500/20 selection:text-emerald-300">
       {/* Top Main Navigation Header */}
-      <header className="sticky top-0 z-30 glass-panel border-b border-white/[0.08] px-4 py-3 sm:px-6 backdrop-blur-2xl">
+      <header className="sticky top-0 z-30 bg-[#020412]/95 border-b border-white/[0.08] px-4 py-3 sm:px-6 backdrop-blur-2xl">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <div
-            onClick={() => setActiveTab('routines')}
-            className="flex items-center gap-2.5 cursor-pointer group active:scale-98 transition"
+          {/* Logo Brand Link */}
+          <a
+            href="/calisteflow/"
+            onClick={(e) => {
+              if (!e.metaKey && !e.ctrlKey) {
+                e.preventDefault();
+                setActiveTab('routines');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }
+            }}
+            className="flex items-center gap-2.5 sm:gap-3 cursor-pointer group active:scale-95 transition"
+            aria-label="CalisteFlow"
           >
-            <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-emerald-400 via-teal-400 to-cyan-400 flex items-center justify-center text-slate-950 shadow-md shadow-emerald-500/25 group-hover:scale-105 transition glow-emerald">
-              <Dumbbell className="w-5 h-5 stroke-[2.5]" />
-            </div>
+            <img
+              src={logoImg}
+              alt="CalisteFlow"
+              width="44"
+              height="44"
+              className="h-9 w-9 sm:h-11 sm:w-11 rounded-xl object-contain shadow-md shadow-cyan-500/15 group-hover:scale-105 transition-transform duration-200"
+              loading="eager"
+            />
             <div>
-              <span className="font-extrabold text-base tracking-tight text-slate-100 flex items-center gap-1.5">
-                CalisteFlow
-                <span className="text-[10px] font-black px-1.5 py-0.2 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 uppercase tracking-widest">
+              <span className="font-extrabold text-base sm:text-lg tracking-tight text-slate-100 flex items-center gap-1.5">
+                Caliste<span className="text-cyan-400">Flow</span>
+                <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 uppercase tracking-widest">
                   PRO
                 </span>
               </span>
@@ -241,7 +261,7 @@ export function App() {
                 Rotinas de Calistenia & Postura
               </span>
             </div>
-          </div>
+          </a>
 
           {/* Header Quick Status */}
           <div className="flex items-center gap-2">
@@ -274,8 +294,11 @@ export function App() {
         </div>
       </header>
 
-      {/* PWA Update Banner */}
-      <UpdatePromptBanner />
+      {/* PWA Update Banner - Protegido contra recarga em treino ativo */}
+      <UpdatePromptBanner isWorkoutActive={Boolean(activeWorkoutRoutine || isPlayerFullscreen)} />
+
+      {/* Safari 7-Day Inactivity & Proactive Storage Banner */}
+      <StorageRobustnessBanner workoutCount={history.length} />
 
       {/* Crash Recovery Notification Banner */}
       {activeBackup && !isPlayerFullscreen && (
@@ -284,7 +307,8 @@ export function App() {
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping shrink-0" />
               <span className="text-xs text-amber-200 font-bold">
-                Treino interrompido detectado: <strong className="text-white">{activeBackup.routine.title}</strong> (Ex. {activeBackup.exerciseIndex + 1}, Série {activeBackup.setIndex + 1})
+                Treino interrompido detectado ({Math.max(1, Math.round((Date.now() - activeBackup.timestamp) / 60000))} min atrás):{' '}
+                <strong className="text-white">{activeBackup.routine.title}</strong> (Ex. {activeBackup.exerciseIndex + 1}, Série {activeBackup.setIndex + 1})
               </span>
             </div>
             <div className="flex items-center gap-2 w-full sm:w-auto">

@@ -3,11 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#020617" />
+    <meta name="theme-color" content="#020412" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="CalisteFlow" />
-    <link rel="manifest" href="/manifest.json" />
+    <link rel="manifest" href="./manifest.json" />
     
     <!-- SEO & Metadata -->
     <title>CalisteFlow • Calistenia & Postura Biomecânica</title>
@@ -17,20 +17,35 @@
 
     <!-- Open Graph / Facebook / WhatsApp -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://calistenflow.vercel.app/" />
+    <meta property="og:url" content="https://artcostamayrinck-hash.github.io/calisteflow/" />
+    <meta property="og:site_name" content="CalisteFlow" />
+    <meta property="og:locale" content="pt_BR" />
     <meta property="og:title" content="CalisteFlow • Calistenia & Postura Biomecânica" />
     <meta property="og:description" content="Treinos guiados de calistenia com cronômetro de descanso, feedback sonoro e mapa muscular 100% offline." />
-    <meta property="og:image" content="https://calistenflow.vercel.app/favicon.svg" />
+    <meta property="og:image" content="https://artcostamayrinck-hash.github.io/calisteflow/assets/img/logo.png" />
+    <meta property="og:image:secure_url" content="https://artcostamayrinck-hash.github.io/calisteflow/assets/img/logo.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1024" />
+    <meta property="og:image:height" content="1024" />
+    <meta property="og:image:alt" content="CalisteFlow - Monograma CF em ciano neon com barra fixa de calistenia" />
 
     <!-- Twitter -->
-    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://artcostamayrinck-hash.github.io/calisteflow/" />
     <meta name="twitter:title" content="CalisteFlow • Calistenia & Postura Biomecânica" />
     <meta name="twitter:description" content="Treinos guiados de calistenia com cronômetro de descanso, feedback sonoro e mapa muscular 100% offline." />
-    <meta name="twitter:image" content="https://calistenflow.vercel.app/favicon.svg" />
+    <meta name="twitter:image" content="https://artcostamayrinck-hash.github.io/calisteflow/assets/img/logo.png" />
+    <meta name="twitter:image:alt" content="CalisteFlow - Monograma CF em ciano neon com barra fixa de calistenia" />
 
-    <!-- Icons -->
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="apple-touch-icon" href="/favicon.svg" />
+    <!-- Canonical & Robots -->
+    <link rel="canonical" href="https://artcostamayrinck-hash.github.io/calisteflow/" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+
+    <!-- Icons & Favicon -->
+    <link rel="icon" type="image/x-icon" href="./favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png" />
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -38,7 +53,38 @@
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   </head>
   <body class="bg-slate-950 text-slate-100 min-h-screen">
-    <div id="root"></div>
+    <!-- Conteúdo para navegadores e crawlers sem JavaScript -->
+    <noscript>
+      <div style="max-width: 680px; margin: 40px auto; padding: 24px; background: #0f172a; border-radius: 16px; border: 1px solid #1e293b; font-family: system-ui, sans-serif; color: #f8fafc;">
+        <h1 style="color: #10b981; margin-bottom: 8px;">CalisteFlow • Calistenia & Postura Biomecânica</h1>
+        <p style="color: #94a3b8; font-size: 15px; line-height: 1.6;">
+          O CalisteFlow é um aplicativo mobile-first e 100% offline projetado para treinos guiados de calistenia, peso corporal, progressões ginásticas e correção postural.
+        </p>
+        <div style="margin: 20px 0; padding: 16px; background: #1e293b; border-radius: 12px; border-left: 4px solid #10b981;">
+          <h3 style="margin-top: 0; font-size: 16px;">Para utilizar o aplicativo completo:</h3>
+          <p style="font-size: 14px; color: #cbd5e1; margin-bottom: 0;">
+            Por favor, habilite o JavaScript no seu navegador. O CalisteFlow funciona diretamente no seu aparelho (local-first) sem enviar dados para servidores externos.
+          </p>
+        </div>
+        <h2 style="font-size: 18px; margin-top: 24px;">Diretrizes de Segurança & Isenção Médica:</h2>
+        <ul style="font-size: 14px; color: #94a3b8; line-height: 1.6;">
+          <li>Interrompa imediatamente qualquer exercício ao sinal de dor aguda ou pontadas articulares.</li>
+          <li>Respeite o descanso prescrito e nunca treine com desconforto em tendões.</li>
+          <li>Este aplicativo não substitui orientação médica ou profissional de Educação Física habilitado (CREF).</li>
+        </ul>
+      </div>
+    </noscript>
+
+    <!-- Shell de carregamento inicial (Splash/Skeleton) substituído pelo React -->
+    <div id="root">
+      <div id="app-loading" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; background-color: #020412; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif;">
+        <div style="position: relative; width: 64px; height: 64px; margin-bottom: 20px;">
+          <img src="./assets/img/logo-512x512.png" alt="CalisteFlow" width="64" height="64" style="width: 64px; height: 64px; border-radius: 16px; object-fit: contain; box-shadow: 0 10px 25px -5px rgba(24, 238, 255, 0.25);" />
+        </div>
+        <span style="font-size: 20px; font-weight: 800; letter-spacing: -0.025em; color: #f8fafc;">Caliste<span style="color: #18eeff;">Flow</span></span>
+        <span style="font-size: 12px; font-weight: 600; color: #64748b; margin-top: 6px; letter-spacing: 0.05em; text-transform: uppercase;">Carregando ambiente offline...</span>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

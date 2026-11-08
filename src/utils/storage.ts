@@ -22,6 +22,8 @@ const STORAGE_KEYS = {
   ACTIVE_WORKOUT_BACKUP: 'calistheflow_active_workout_backup_v1',
   JOURNEY_PROGRESS: 'calistheflow_journey_progress_v1',
   AUTO_BACKUPS: 'calistheflow_auto_backups_v1',
+  LAST_BACKUP_EXPORT: 'calistheflow_last_backup_export_date_v1',
+  SAFARI_BANNER_DISMISSED: 'calistheflow_safari_banner_dismissed_v1',
 };
 
 export const getStoredRoutines = (): Routine[] => {
@@ -437,6 +439,86 @@ export const restoreDataBackup = (backupId: string): boolean => {
     return false;
   }
 };
+
+// ================= I1: SAFARI & PROACTIVE BACKUP HELPERS =================
+export const getLastBackupExportDate = (): string | null => {
+  try {
+    return localStorage.getItem(STORAGE_KEYS.LAST_BACKUP_EXPORT);
+  } catch {
+    return null;
+  }
+};
+
+export const recordBackupExport = (): void => {
+  try {
+    localStorage.setItem(STORAGE_KEYS.LAST_BACKUP_EXPORT, new Date().toISOString());
+  } catch {
+    // ignore
+  }
+};
+
+export const isSafariBannerDismissed = (): boolean => {
+  try {
+    return localStorage.getItem(STORAGE_KEYS.SAFARI_BANNER_DISMISSED) === 'true';
+  } catch {
+    return false;
+  }
+};
+
+export const setSafariBannerDismissed = (dismissed: boolean): void => {
+  try {
+    if (dismissed) {
+      localStorage.setItem(STORAGE_KEYS.SAFARI_BANNER_DISMISSED, 'true');
+    } else {
+      localStorage.removeItem(STORAGE_KEYS.SAFARI_BANNER_DISMISSED);
+    }
+  } catch {
+    // ignore
+  }
+};
+
+export interface FullBackupBundle {
+  version: string;
+  exportedAt: string;
+  routines: Routine[];
+  history: WorkoutSession[];
+  weeklyPlan: WeeklyPlan;
+  profile: UserOnboardingProfile | null;
+  journeyProgress: UserJourneyProgress;
+}
+
+export const generateFullBackupBundle = (): FullBackupBundle => {
+  return {
+    version: '1.0.0',
+    exportedAt: new Date().toISOString(),
+    routines: getStoredRoutines(),
+    history: getWorkoutHistory(),
+    weeklyPlan: getStoredWeeklyPlan(),
+    profile: getStoredUserProfile(),
+    journeyProgress: getUserJourneyProgress(),
+  };
+};
+
+export const downloadFullBackupFile = (): boolean => {
+  try {
+    const bundle = generateFullBackupBundle();
+    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(bundle, null, 2));
+    const downloadAnchor = document.createElement('a');
+    downloadAnchor.setAttribute('href', dataStr);
+    const dateStr = new Date().toISOString().split('T')[0];
+    downloadAnchor.setAttribute('download', `calisteflow-backup-${dateStr}.json`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+
+    recordBackupExport();
+    return true;
+  } catch (err) {
+    console.error('Failed to export backup file:', err);
+    return false;
+  }
+};
+
 
 
 

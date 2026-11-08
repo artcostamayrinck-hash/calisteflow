@@ -1,118 +1,251 @@
-import { useState } from 'react';
-import type { Exercise, MuscleGroup, ExerciseCategory } from '../../types';
-import { EXERCISES_DATABASE, MUSCLE_LABELS } from '../../data/exercisesData';
+import { useState, useMemo } from 'react';
+import type { Exercise, MuscleGroup, MovementPattern, ExerciseDifficulty, EquipmentType } from '../../types';
+import { EXERCISES_DATABASE, MUSCLE_LABELS, getExerciseById, CREF_REVIEWER_SPECIALIST } from '../../data/exercisesData';
 import { MuscleMap } from '../visuals/MuscleMap';
 import { ExerciseVideoPlayer } from '../workout/ExerciseVideoPlayer';
 import { soundManager } from '../../utils/audio';
-import { Search, Filter, Dumbbell, Sparkles, X, ChevronDown, ChevronUp } from 'lucide-react';
+import {
+  Search,
+  Filter,
+  Dumbbell,
+  Sparkles,
+  X,
+  ChevronDown,
+  ChevronUp,
+  AlertTriangle,
+  CheckCircle2,
+  ArrowRight,
+  ArrowLeft,
+  ShieldCheck,
+  Timer,
+  Activity,
+  Layers
+} from 'lucide-react';
 
 interface ExerciseLibraryViewProps {
   initialExerciseId?: string | null;
+  onSelectExerciseToSwap?: (exercise: Exercise) => void;
 }
+
+type ModalTab = 'como_fazer' | 'erros' | 'regressoes' | 'progressoes' | 'variacoes' | 'adaptacoes' | 'revisao';
+
+const MOVEMENT_PATTERN_LABELS: Record<MovementPattern, string> = {
+  'empurrar-horizontal': 'Empurrar Horizontal',
+  'empurrar-vertical': 'Empurrar Vertical',
+  'mergulhos': 'Mergulhos',
+  'puxar-vertical': 'Puxar Vertical',
+  'puxar-horizontal': 'Puxar Horizontal',
+  'core-anterior': 'Core Anterior',
+  'core-lateral': 'Core Lateral',
+  'costas-baixa': 'Cadeia Posterior',
+  'agachamento-pernas': 'Pernas & Agachamentos',
+  'skills': 'Skills & Isometrias',
+  'aquecimento': 'Aquecimento & Mobilidade',
+  'alongamento': 'Alongamento & Relaxamento'
+};
 
 export const ExerciseLibraryView = ({
   initialExerciseId = null,
+  onSelectExerciseToSwap
 }: ExerciseLibraryViewProps) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<ExerciseCategory | 'Todos'>('Todos');
+  const [selectedPattern, setSelectedPattern] = useState<MovementPattern | 'Todos'>('Todos');
+  const [selectedDifficulty, setSelectedDifficulty] = useState<ExerciseDifficulty | 'Todos'>('Todos');
+  const [selectedEquipment, setSelectedEquipment] = useState<EquipmentType | 'Todos'>('Todos');
+  const [selectedJointSafety, setSelectedJointSafety] = useState<'punho' | 'ombro' | 'joelho' | 'lombar' | 'sem-equipamento' | 'Todos'>('Todos');
   const [selectedMuscle, setSelectedMuscle] = useState<MuscleGroup | null>(null);
+
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(() => {
     if (initialExerciseId) {
-      return EXERCISES_DATABASE.find(e => e.id === initialExerciseId) || null;
+      return getExerciseById(initialExerciseId) || null;
     }
     return null;
   });
+
+  const [activeTab, setActiveTab] = useState<ModalTab>('como_fazer');
   const [showInteractiveMap, setShowInteractiveMap] = useState<boolean>(false);
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState<boolean>(false);
 
-  // Filter exercises
-  const filteredExercises = EXERCISES_DATABASE.filter(ex => {
-    const matchesSearch =
-      ex.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      ex.description.toLowerCase().includes(searchQuery.toLowerCase());
+  // Normalização de texto para busca com acentos
+  const normalize = (str: string) =>
+    str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
-    const matchesCategory = selectedCategory === 'Todos' || ex.category === selectedCategory;
+  // Filtragem multifatorial com busca inteligente por sinônimos
+  const filteredExercises = useMemo(() => {
+    const query = normalize(searchQuery.trim());
 
-    const matchesMuscle =
-      !selectedMuscle ||
-      ex.primaryMuscles.includes(selectedMuscle) ||
-      ex.secondaryMuscles.includes(selectedMuscle);
+    return EXERCISES_DATABASE.filter(ex => {
+      // 1. Busca textual por nome, descrição, músculos ou sinônimos
+      if (query) {
+        const nameMatch = normalize(ex.name).includes(query);
+        const descMatch = normalize(ex.description).includes(query);
+        const synonymMatch = ex.sinonimos?.some(s => normalize(s).includes(query));
+        const muscleMatch = ex.primaryMuscles.some(m => normalize(MUSCLE_LABELS[m] || m).includes(query));
+        const patternMatch = ex.padrao ? normalize(MOVEMENT_PATTERN_LABELS[ex.padrao] || ex.padrao).includes(query) : false;
 
-    return matchesSearch && matchesCategory && matchesMuscle;
-  });
+        if (!nameMatch && !descMatch && !synonymMatch && !muscleMatch && !patternMatch) {
+          return false;
+        }
+      }
 
-  const categories: Array<ExerciseCategory | 'Todos'> = [
+      // 2. Filtro por Padrão de Movimento
+      if (selectedPattern !== 'Todos' && ex.padrao !== selectedPattern) {
+        return false;
+      }
+
+      // 3. Filtro por Nível de Dificuldade
+      if (selectedDifficulty !== 'Todos' && ex.difficulty !== selectedDifficulty) {
+        return false;
+      }
+
+      // 4. Filtro por Equipamento
+      if (selectedEquipment !== 'Todos') {
+        const equips = ex.equipamento || ['nenhum'];
+        if (!equips.includes(selectedEquipment)) {
+          return false;
+        }
+      }
+
+      // 5. Filtro por Adaptação de Articulação / Sem equipamento
+      if (selectedJointSafety !== 'Todos') {
+        if (!ex.adaptacoes || !ex.adaptacoes[selectedJointSafety]) {
+          return false;
+        }
+      }
+
+      // 6. Filtro por Músculo selecionado no Mapa 3D
+      if (selectedMuscle) {
+        const isPrimary = ex.primaryMuscles.includes(selectedMuscle);
+        const isSecondary = ex.secondaryMuscles.includes(selectedMuscle);
+        if (!isPrimary && !isSecondary) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  }, [
+    searchQuery,
+    selectedPattern,
+    selectedDifficulty,
+    selectedEquipment,
+    selectedJointSafety,
+    selectedMuscle
+  ]);
+
+  const patterns: Array<MovementPattern | 'Todos'> = [
     'Todos',
-    'Push',
-    'Pull',
-    'Legs',
-    'Core',
-    'Skill',
+    'empurrar-horizontal',
+    'empurrar-vertical',
+    'mergulhos',
+    'puxar-vertical',
+    'puxar-horizontal',
+    'core-anterior',
+    'core-lateral',
+    'costas-baixa',
+    'agachamento-pernas',
+    'skills',
+    'aquecimento',
+    'alongamento'
   ];
+
+  const handleOpenExerciseModal = (ex: Exercise, defaultTab: ModalTab = 'como_fazer') => {
+    soundManager.triggerHaptic([20]);
+    setSelectedExercise(ex);
+    setActiveTab(defaultTab);
+  };
+
+  const handleNavigateToExerciseId = (id: string, defaultTab: ModalTab = 'como_fazer') => {
+    const target = getExerciseById(id);
+    if (target) {
+      soundManager.triggerHaptic([25]);
+      setSelectedExercise(target);
+      setActiveTab(defaultTab);
+    }
+  };
 
   return (
     <div className="space-y-6 pb-24">
-      {/* Header & Search */}
-      <div className="space-y-4">
-        {/* Banner */}
-        <div className="relative glass-card rounded-3xl p-5 sm:p-7 overflow-hidden border border-white/10 shadow-2xl">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
-          <div className="space-y-1.5 relative z-10">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
-              <Sparkles className="w-3.5 h-3.5" /> Biomecânica & Anatomia
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-slate-100 tracking-tight flex items-center gap-2">
-              <Dumbbell className="w-7 h-7 text-emerald-400" />
-              Exercícios & Guia Postural
-            </h1>
-            <p className="text-xs sm:text-sm text-slate-400 max-w-lg leading-relaxed font-medium">
-              Biblioteca anatômica com vetores de força passo a passo, ativação muscular direcionada e prevenção de lesões.
-            </p>
+      {/* Banner de Cabeçalho */}
+      <div className="relative glass-card rounded-3xl p-5 sm:p-7 overflow-hidden border border-white/10 shadow-2xl">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
+        <div className="space-y-1.5 relative z-10">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
+            <Sparkles className="w-3.5 h-3.5" /> 140+ Exercícios • Auditoria CREF
           </div>
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-100 tracking-tight flex items-center gap-2">
+            <Dumbbell className="w-7 h-7 text-emerald-400" />
+            Biblioteca & Progressões
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-400 max-w-lg leading-relaxed font-medium">
+            Progressões calistênicas do iniciante à elite com biomecânica detalhada, erros comuns, critérios de avanço e adaptações para dores e ambiente.
+          </p>
         </div>
+      </div>
 
-        {/* Search input */}
+      {/* Barra de Busca com Sinônimos */}
+      <div className="space-y-3">
         <div className="relative">
           <Search className="w-4 h-4 text-slate-400 absolute left-4 top-3.5" />
           <input
             type="text"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            placeholder="Buscar por exercício ou músculo (ex: flexão, peito, barra, costas)..."
-            className="w-full pl-11 pr-10 py-3 rounded-2xl glass-card text-slate-100 text-xs sm:text-sm focus:outline-none focus:border-emerald-500/60 placeholder:text-slate-500 shadow-md transition"
+            placeholder="Buscar por nome, sinônimo ou músculo (ex: barra fixa, chin-up, flexão diamante, psoas)..."
+            className="w-full pl-11 pr-10 py-3.5 rounded-2xl glass-card text-slate-100 text-xs sm:text-sm focus:outline-none focus:border-emerald-500/60 placeholder:text-slate-500 shadow-md transition"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
               className="absolute right-3.5 top-3.5 text-slate-400 hover:text-white"
+              aria-label="Limpar busca"
             >
               <X className="w-4 h-4" />
             </button>
           )}
         </div>
 
-        {/* Category Pill Filters */}
+        {/* Padrões de Movimento em Carrossel */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-          {categories.map(cat => (
-            <button
-              key={cat}
-              onClick={() => {
-                soundManager.triggerHaptic([20]);
-                setSelectedCategory(cat);
-              }}
-              className={`px-3.5 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition-all active:scale-95 ${
-                selectedCategory === cat
-                  ? 'bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 shadow-lg shadow-emerald-500/20'
-                  : 'glass-card text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
+          {patterns.map(pat => {
+            const label = pat === 'Todos' ? 'Todos os Padrões' : MOVEMENT_PATTERN_LABELS[pat];
+            const isSelected = selectedPattern === pat;
+            return (
+              <button
+                key={pat}
+                onClick={() => {
+                  soundManager.triggerHaptic([20]);
+                  setSelectedPattern(pat);
+                }}
+                className={`px-3.5 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition-all active:scale-95 ${
+                  isSelected
+                    ? 'bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 shadow-lg shadow-emerald-500/20'
+                    : 'glass-card text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                {label}
+              </button>
+            );
+          })}
         </div>
 
-        {/* Muscle Filter Toggle / Active Muscle Bar */}
-        <div className="flex items-center justify-between gap-2 pt-1">
+        {/* Barra de Controle de Filtros Avançados & Mapa */}
+        <div className="flex items-center justify-between gap-2 pt-1 flex-wrap">
           <div className="flex items-center gap-2 flex-wrap">
+            <button
+              onClick={() => {
+                soundManager.triggerHaptic([20]);
+                setShowAdvancedFilters(!showAdvancedFilters);
+              }}
+              className={`px-3.5 py-2 rounded-2xl glass-card text-xs font-bold flex items-center gap-1.5 transition active:scale-95 ${
+                showAdvancedFilters ? 'text-emerald-400 border-emerald-500/40 bg-emerald-500/10' : 'text-slate-300'
+              }`}
+            >
+              <Filter className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Filtros Específicos</span>
+              {showAdvancedFilters ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+            </button>
+
             <button
               onClick={() => {
                 soundManager.triggerHaptic([20]);
@@ -120,42 +253,110 @@ export const ExerciseLibraryView = ({
               }}
               className="px-3.5 py-2 rounded-2xl glass-card text-slate-300 text-xs font-bold flex items-center gap-2 hover:bg-white/[0.08] transition active:scale-95"
             >
-              <Filter className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Filtrar no Mapa Muscular 3D</span>
+              <Activity className="w-3.5 h-3.5 text-cyan-400" />
+              <span>Mapa Muscular 3D</span>
               {showInteractiveMap ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
             </button>
 
             {selectedMuscle && (
               <div className="flex items-center gap-1.5 bg-amber-500/15 border border-amber-500/30 text-amber-300 px-3 py-1.5 rounded-2xl text-xs font-bold glow-amber">
-                <span>Filtrando por: {MUSCLE_LABELS[selectedMuscle]}</span>
-                <button
-                  onClick={() => setSelectedMuscle(null)}
-                  className="hover:text-white ml-1"
-                >
+                <span>Músculo: {MUSCLE_LABELS[selectedMuscle]}</span>
+                <button onClick={() => setSelectedMuscle(null)} className="hover:text-white ml-1">
                   <X className="w-3.5 h-3.5" />
                 </button>
               </div>
             )}
           </div>
 
-          <span className="text-xs text-slate-400 shrink-0 font-medium">
-            {filteredExercises.length} exercícios
+          <span className="text-xs text-slate-400 shrink-0 font-medium font-mono">
+            {filteredExercises.length} exercícios encontrados
           </span>
         </div>
 
-        {/* Interactive Muscle Map Drawer */}
+        {/* Gaveta de Filtros Avançados */}
+        {showAdvancedFilters && (
+          <div className="glass-panel border border-white/10 rounded-3xl p-4 sm:p-5 space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
+            {/* Nível */}
+            <div>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-2">
+                Nível de Experiência:
+              </span>
+              <div className="flex flex-wrap gap-1.5">
+                {(['Todos', 'Iniciante', 'Intermediário', 'Avançado', 'Elite'] as const).map(lvl => (
+                  <button
+                    key={lvl}
+                    onClick={() => setSelectedDifficulty(lvl)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition ${
+                      selectedDifficulty === lvl
+                        ? 'bg-emerald-500 text-slate-950 font-bold'
+                        : 'bg-white/[0.05] text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    {lvl}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Equipamento */}
+            <div>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-2">
+                Equipamento Disponível:
+              </span>
+              <div className="flex flex-wrap gap-1.5">
+                {(['Todos', 'nenhum', 'barra', 'paralelas', 'argolas', 'banco', 'parede', 'cadeira', 'toalha'] as const).map(eq => (
+                  <button
+                    key={eq}
+                    onClick={() => setSelectedEquipment(eq)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold capitalize transition ${
+                      selectedEquipment === eq
+                        ? 'bg-cyan-500 text-slate-950 font-bold'
+                        : 'bg-white/[0.05] text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    {eq === 'nenhum' ? 'Sem Equipamento (Solo)' : eq}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Limitações Articulares com Adaptações Prontas */}
+            <div>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-2 flex items-center gap-1.5">
+                <ShieldCheck className="w-3.5 h-3.5 text-amber-400" /> Possui Adaptação Segura Para:
+              </span>
+              <div className="flex flex-wrap gap-1.5">
+                {(['Todos', 'punho', 'ombro', 'joelho', 'lombar', 'sem-equipamento'] as const).map(safety => (
+                  <button
+                    key={safety}
+                    onClick={() => setSelectedJointSafety(safety)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition ${
+                      selectedJointSafety === safety
+                        ? 'bg-amber-400 text-slate-950 font-bold'
+                        : 'bg-white/[0.05] text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    {safety === 'Todos' ? 'Qualquer articulação' : `Dor no ${safety}`}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Mapa Muscular Interativo */}
         {showInteractiveMap && (
           <div className="glass-panel border border-white/10 rounded-3xl p-5 sm:p-6 shadow-2xl animate-in fade-in slide-in-from-top-3 duration-200">
             <div className="flex items-center justify-between mb-3.5">
               <span className="text-xs font-black uppercase tracking-wider text-slate-300">
-                Toque em um músculo para filtrar exercícios:
+                Toque no músculo para filtrar exercícios alvo:
               </span>
               {selectedMuscle && (
                 <button
                   onClick={() => setSelectedMuscle(null)}
                   className="text-xs text-emerald-400 hover:underline font-bold"
                 >
-                  Limpar filtro
+                  Limpar seleção
                 </button>
               )}
             </div>
@@ -168,7 +369,7 @@ export const ExerciseLibraryView = ({
         )}
       </div>
 
-      {/* Grid of Exercises */}
+      {/* Grade de Exercícios */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
         {filteredExercises.map(ex => (
           <div
@@ -176,11 +377,11 @@ export const ExerciseLibraryView = ({
             className="glass-card rounded-3xl p-5 shadow-xl hover:border-white/15 transition-all duration-300 flex flex-col justify-between space-y-4"
           >
             <div>
-              {/* Exercise meta chips */}
-              <div className="flex items-center justify-between gap-2 mb-2">
+              {/* Chips de Metadados */}
+              <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
                 <div className="flex items-center gap-1.5">
                   <span className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-                    {ex.category}
+                    {ex.padrao ? MOVEMENT_PATTERN_LABELS[ex.padrao] || ex.category : ex.category}
                   </span>
                   <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-slate-800 text-slate-300">
                     {ex.difficulty}
@@ -189,9 +390,14 @@ export const ExerciseLibraryView = ({
                     {ex.type === 'isometric' ? 'Isometria' : 'Repetições'}
                   </span>
                 </div>
+                {ex.cadencia && (
+                  <span className="text-[10px] font-mono text-slate-400 flex items-center gap-1">
+                    <Timer className="w-3 h-3 text-cyan-400" /> {ex.cadencia}
+                  </span>
+                )}
               </div>
 
-              {/* Title & Description & Thumbnail */}
+              {/* Título & Descrição */}
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1">
                   <h3 className="text-base sm:text-lg font-bold text-slate-100">{ex.name}</h3>
@@ -207,7 +413,7 @@ export const ExerciseLibraryView = ({
                 )}
               </div>
 
-              {/* Muscle pills */}
+              {/* Músculos Alvo */}
               <div className="flex flex-wrap gap-1 mt-3">
                 {ex.primaryMuscles.map(m => (
                   <span
@@ -217,31 +423,35 @@ export const ExerciseLibraryView = ({
                     Alvo: {MUSCLE_LABELS[m] || m}
                   </span>
                 ))}
-                {ex.secondaryMuscles.map(m => (
-                  <span
-                    key={m}
-                    className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-slate-800 text-slate-400"
-                  >
+                {ex.secondaryMuscles.slice(0, 2).map(m => (
+                  <span key={m} className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-slate-800 text-slate-400">
                     {MUSCLE_LABELS[m] || m}
                   </span>
                 ))}
               </div>
             </div>
 
-            {/* Inspect Posture CTA */}
+            {/* Ações do Card */}
             <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between">
               <span className="text-xs text-slate-400 font-medium">
-                {ex.executionSteps.length} passos de postura
+                {ex.executionSteps.length} passos biomecânicos
               </span>
-              <button
-                onClick={() => {
-                  soundManager.triggerHaptic([20]);
-                  setSelectedExercise(ex);
-                }}
-                className="px-4 py-2 rounded-2xl glass-card text-emerald-300 hover:text-white hover:bg-white/[0.08] text-xs font-bold border border-white/10 flex items-center gap-1.5 transition active:scale-95 glow-emerald"
-              >
-                <Sparkles className="w-3.5 h-3.5" /> Postura & Músculos
-              </button>
+              <div className="flex items-center gap-2">
+                {onSelectExerciseToSwap && (
+                  <button
+                    onClick={() => onSelectExerciseToSwap(ex)}
+                    className="px-3 py-2 rounded-2xl bg-emerald-500 text-slate-950 font-bold text-xs shadow-md active:scale-95 transition"
+                  >
+                    Selecionar
+                  </button>
+                )}
+                <button
+                  onClick={() => handleOpenExerciseModal(ex)}
+                  className="px-4 py-2 rounded-2xl glass-card text-emerald-300 hover:text-white hover:bg-white/[0.08] text-xs font-bold border border-white/10 flex items-center gap-1.5 transition active:scale-95 glow-emerald min-h-[44px]"
+                >
+                  <Sparkles className="w-3.5 h-3.5" /> Detalhes & Progressões
+                </button>
+              </div>
             </div>
           </div>
         ))}
@@ -251,83 +461,414 @@ export const ExerciseLibraryView = ({
         <div className="p-12 text-center glass-card rounded-3xl border border-white/10 space-y-3">
           <Dumbbell className="w-10 h-10 text-slate-600 mx-auto" />
           <h4 className="text-base font-bold text-slate-200">Nenhum exercício encontrado</h4>
-          <p className="text-xs text-slate-400 mt-1">
-            Tente buscar com outro termo ou limpe os filtros de categoria e músculo.
+          <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
+            Tente buscar com outro termo ou limpe os filtros de padrão de movimento, nível ou músculo.
           </p>
         </div>
       )}
 
-      {/* Full Exercise Posture Inspection Modal */}
+      {/* MODAL MULTI-ABAS DE DETALHES COMPLETOS DO EXERCÍCIO */}
       {selectedExercise && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
           <div className="w-full max-w-2xl max-h-[92vh] sm:max-h-[88vh] glass-panel border border-white/10 rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden">
-            {/* Modal Header */}
+            {/* Cabeçalho do Modal */}
             <div className="p-4 sm:p-5 border-b border-white/10 flex items-center justify-between shrink-0 glass-panel">
-              <div>
+              <div className="pr-4">
                 <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400">
-                  {selectedExercise.category} • {selectedExercise.difficulty}
+                  {selectedExercise.padrao ? MOVEMENT_PATTERN_LABELS[selectedExercise.padrao] || selectedExercise.category : selectedExercise.category} • {selectedExercise.difficulty}
                 </span>
-                <h2 className="text-lg sm:text-xl font-black text-slate-100 tracking-tight">{selectedExercise.name}</h2>
+                <h2 className="text-lg sm:text-xl font-black text-slate-100 tracking-tight leading-snug">
+                  {selectedExercise.name}
+                </h2>
               </div>
               <button
                 onClick={() => setSelectedExercise(null)}
-                className="p-2 rounded-full text-slate-400 hover:text-white hover:bg-white/[0.08] transition"
+                className="p-2.5 rounded-full text-slate-400 hover:text-white hover:bg-white/[0.08] transition shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                aria-label="Fechar"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Modal Content */}
-            <div className="overflow-y-auto p-4 sm:p-6 space-y-5">
-              {/* Looping Video Illustration & Biomechanical Visual */}
-              <ExerciseVideoPlayer exercise={selectedExercise} autoLoop={true} />
-
-              {/* Targeted Muscle Map */}
-              <div className="glass-card p-4 rounded-3xl border border-white/10 shadow-lg">
-                <h4 className="text-xs font-black uppercase tracking-wider text-slate-300 mb-3 text-center">
-                  Músculos Ativados em {selectedExercise.name}
-                </h4>
-                <MuscleMap
-                  primaryMuscles={selectedExercise.primaryMuscles}
-                  secondaryMuscles={selectedExercise.secondaryMuscles}
-                  size="sm"
-                />
-              </div>
-
-              {/* Recommended Default Prescription */}
-              <div className="p-4 glass-card rounded-3xl border border-white/10 text-xs flex items-center justify-around text-center shadow-md">
-                <div>
-                  <div className="text-slate-400 text-[11px] font-semibold">Séries Sugeridas</div>
-                  <div className="text-lg font-black text-slate-100 mt-0.5 font-mono">
-                    {selectedExercise.defaultSets}
-                  </div>
-                </div>
-                <div className="border-r border-white/10 h-8" />
-                <div>
-                  <div className="text-slate-400 text-[11px] font-semibold">
-                    {selectedExercise.type === 'isometric' ? 'Sustentação' : 'Repetições'}
-                  </div>
-                  <div className="text-lg font-black text-slate-100 mt-0.5 font-mono">
-                    {selectedExercise.type === 'isometric'
-                      ? `${selectedExercise.defaultHoldSeconds}s`
-                      : `${selectedExercise.defaultReps} reps`}
-                  </div>
-                </div>
-                <div className="border-r border-white/10 h-8" />
-                <div>
-                  <div className="text-slate-400 text-[11px] font-semibold">Descanso Ideal</div>
-                  <div className="text-lg font-black text-slate-100 mt-0.5 font-mono">
-                    {selectedExercise.defaultRestSeconds}s
-                  </div>
-                </div>
-              </div>
+            {/* Abas Superiores de Navegação */}
+            <div className="flex items-center gap-1 overflow-x-auto px-4 py-2.5 border-b border-white/[0.08] bg-black/20 scrollbar-none shrink-0">
+              <button
+                onClick={() => setActiveTab('como_fazer')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap min-h-[40px] flex items-center gap-1.5 ${
+                  activeTab === 'como_fazer' ? 'bg-emerald-500 text-slate-950' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <Activity className="w-3.5 h-3.5" /> Como Fazer
+              </button>
+              <button
+                onClick={() => setActiveTab('erros')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap min-h-[40px] flex items-center gap-1.5 ${
+                  activeTab === 'erros' ? 'bg-amber-400 text-slate-950' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <AlertTriangle className="w-3.5 h-3.5" /> Erros Comuns
+              </button>
+              <button
+                onClick={() => setActiveTab('regressoes')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap min-h-[40px] flex items-center gap-1.5 ${
+                  activeTab === 'regressoes' ? 'bg-cyan-400 text-slate-950' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <ArrowLeft className="w-3.5 h-3.5" /> Regressões
+              </button>
+              <button
+                onClick={() => setActiveTab('progressoes')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap min-h-[40px] flex items-center gap-1.5 ${
+                  activeTab === 'progressoes' ? 'bg-purple-400 text-slate-950' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <ArrowRight className="w-3.5 h-3.5" /> Progressões
+              </button>
+              <button
+                onClick={() => setActiveTab('variacoes')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap min-h-[40px] flex items-center gap-1.5 ${
+                  activeTab === 'variacoes' ? 'bg-teal-400 text-slate-950' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <Layers className="w-3.5 h-3.5" /> Variações
+              </button>
+              <button
+                onClick={() => setActiveTab('adaptacoes')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap min-h-[40px] flex items-center gap-1.5 ${
+                  activeTab === 'adaptacoes' ? 'bg-rose-400 text-slate-950' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <ShieldCheck className="w-3.5 h-3.5" /> Adaptações
+              </button>
+              <button
+                onClick={() => setActiveTab('revisao')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap min-h-[40px] flex items-center gap-1.5 ${
+                  activeTab === 'revisao' ? 'bg-indigo-400 text-slate-950' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <ShieldCheck className="w-3.5 h-3.5" /> Auditoria CREF
+              </button>
             </div>
 
-            {/* Footer */}
-            <div className="p-4 border-t border-white/10 glass-panel flex justify-end">
+            {/* Conteúdo da Aba */}
+            <div className="overflow-y-auto p-4 sm:p-6 space-y-5 flex-1">
+              {/* Visualização de Vídeo ou SVG Biomecânico */}
+              <ExerciseVideoPlayer exercise={selectedExercise} autoLoop={true} />
+
+              {/* ABA 1: COMO FAZER */}
+              {activeTab === 'como_fazer' && (
+                <div className="space-y-4 animate-in fade-in duration-200">
+                  <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-medium bg-white/[0.03] p-4 rounded-2xl border border-white/5">
+                    {selectedExercise.description}
+                  </p>
+
+                  {/* Passos de Execução */}
+                  <div className="space-y-2.5">
+                    <h4 className="text-xs font-black uppercase tracking-wider text-slate-300">
+                      Passo a Passo Biomecânico
+                    </h4>
+                    {selectedExercise.executionSteps.map(step => (
+                      <div
+                        key={step.step}
+                        className="glass-card p-3.5 rounded-2xl border border-white/5 flex items-start gap-3"
+                      >
+                        <span className="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-black flex items-center justify-center shrink-0 mt-0.5">
+                          {step.step}
+                        </span>
+                        <div>
+                          <h5 className="text-xs font-bold text-slate-100">{step.title}</h5>
+                          <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">{step.description}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Dica de Respiração */}
+                  {selectedExercise.breathingTip && (
+                    <div className="p-3.5 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-200 text-xs">
+                      <span className="font-bold">Respiração Ideal: </span>
+                      {selectedExercise.breathingTip}
+                    </div>
+                  )}
+
+                  {/* Metadados de Prescrição */}
+                  <div className="p-4 glass-card rounded-2xl border border-white/10 text-xs flex items-center justify-around text-center shadow-md">
+                    <div>
+                      <div className="text-slate-400 text-[11px] font-semibold">Séries Padrão</div>
+                      <div className="text-base font-black text-slate-100 font-mono mt-0.5">{selectedExercise.defaultSets}</div>
+                    </div>
+                    <div className="border-r border-white/10 h-7" />
+                    <div>
+                      <div className="text-slate-400 text-[11px] font-semibold">
+                        {selectedExercise.type === 'isometric' ? 'Isometria' : 'Repetições'}
+                      </div>
+                      <div className="text-base font-black text-slate-100 font-mono mt-0.5">
+                        {selectedExercise.type === 'isometric'
+                          ? `${selectedExercise.defaultHoldSeconds}s`
+                          : `${selectedExercise.defaultReps} reps`}
+                      </div>
+                    </div>
+                    <div className="border-r border-white/10 h-7" />
+                    <div>
+                      <div className="text-slate-400 text-[11px] font-semibold">Descanso</div>
+                      <div className="text-base font-black text-slate-100 font-mono mt-0.5">
+                        {selectedExercise.defaultRestSeconds}s
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ABA 2: ERROS COMUNS */}
+              {activeTab === 'erros' && (
+                <div className="space-y-3 animate-in fade-in duration-200">
+                  <h4 className="text-xs font-black uppercase tracking-wider text-slate-300 mb-2">
+                    Principais Falhas Técnicas & Como Corrigir
+                  </h4>
+                  {selectedExercise.commonMistakes.map((m, idx) => (
+                    <div
+                      key={idx}
+                      className="glass-card p-4 rounded-2xl border border-rose-500/20 bg-rose-500/[0.04] space-y-2"
+                    >
+                      <div className="flex items-start gap-2 text-rose-300 text-xs font-bold">
+                        <AlertTriangle className="w-4 h-4 shrink-0 text-rose-400 mt-0.5" />
+                        <span>Erro: {m.mistake}</span>
+                      </div>
+                      <div className="flex items-start gap-2 text-emerald-300 text-xs pl-6">
+                        <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400 mt-0.5" />
+                        <span>Correção: {m.correction}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* ABA 3: REGRESSÕES */}
+              {activeTab === 'regressoes' && (
+                <div className="space-y-3 animate-in fade-in duration-200">
+                  <h4 className="text-xs font-black uppercase tracking-wider text-slate-300 mb-1">
+                    Regressões Diretas (Mais Fáceis)
+                  </h4>
+                  <p className="text-xs text-slate-400 mb-3">
+                    Se este exercício estiver gerando fadiga excessiva ou perda de alinhamento, dê um passo atrás em:
+                  </p>
+                  {selectedExercise.regressoes && selectedExercise.regressoes.length > 0 ? (
+                    <div className="space-y-2">
+                      {selectedExercise.regressoes.map(regId => {
+                        const target = getExerciseById(regId);
+                        if (!target) return null;
+                        return (
+                          <div
+                            key={regId}
+                            className="glass-card p-3.5 rounded-2xl border border-white/10 flex items-center justify-between gap-3 hover:border-cyan-400/40 transition"
+                          >
+                            <div>
+                              <div className="text-xs font-bold text-slate-100">{target.name}</div>
+                              <div className="text-[11px] text-slate-400">{target.difficulty} • {target.category}</div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {onSelectExerciseToSwap && (
+                                <button
+                                  onClick={() => onSelectExerciseToSwap(target)}
+                                  className="px-3 py-1.5 rounded-xl bg-cyan-500 text-slate-950 font-bold text-xs"
+                                >
+                                  Trocar no Treino
+                                </button>
+                              )}
+                              <button
+                                onClick={() => handleNavigateToExerciseId(regId, 'como_fazer')}
+                                className="px-3 py-1.5 rounded-xl glass-card text-xs font-semibold text-cyan-300 hover:text-white"
+                              >
+                                Ver Guia
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="p-6 text-center glass-card rounded-2xl text-xs text-slate-400">
+                      Este é o exercício base fundamental deste padrão motor.
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ABA 4: PROGRESSÕES */}
+              {activeTab === 'progressoes' && (
+                <div className="space-y-3 animate-in fade-in duration-200">
+                  <h4 className="text-xs font-black uppercase tracking-wider text-slate-300 mb-1">
+                    Próximas Progressões de Força
+                  </h4>
+                  {selectedExercise.criterioAvanco && (
+                    <div className="p-3.5 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-purple-200 text-xs mb-3">
+                      <span className="font-bold">Critério Para Avançar: </span>
+                      {selectedExercise.criterioAvanco}
+                    </div>
+                  )}
+                  {selectedExercise.progressoes && selectedExercise.progressoes.length > 0 ? (
+                    <div className="space-y-2">
+                      {selectedExercise.progressoes.map(progId => {
+                        const target = getExerciseById(progId);
+                        if (!target) return null;
+                        return (
+                          <div
+                            key={progId}
+                            className="glass-card p-3.5 rounded-2xl border border-white/10 flex items-center justify-between gap-3 hover:border-purple-400/40 transition"
+                          >
+                            <div>
+                              <div className="text-xs font-bold text-slate-100">{target.name}</div>
+                              <div className="text-[11px] text-slate-400">{target.difficulty} • {target.category}</div>
+                            </div>
+                            <button
+                              onClick={() => handleNavigateToExerciseId(progId, 'como_fazer')}
+                              className="px-3 py-1.5 rounded-xl glass-card text-xs font-semibold text-purple-300 hover:text-white flex items-center gap-1"
+                            >
+                              Ver Desafio <ArrowRight className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="p-6 text-center glass-card rounded-2xl text-xs text-slate-400">
+                      🏆 Você está no topo da cadeia evolutiva deste movimento!
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ABA 5: VARIAÇÕES */}
+              {activeTab === 'variacoes' && (
+                <div className="space-y-3 animate-in fade-in duration-200">
+                  <h4 className="text-xs font-black uppercase tracking-wider text-slate-300 mb-1">
+                    Variações de Estímulo & Ângulo
+                  </h4>
+                  <p className="text-xs text-slate-400 mb-3">
+                    Modificações de pegada, ritmo e apoio para quebrar platôs musculares:
+                  </p>
+                  {selectedExercise.variacoes && selectedExercise.variacoes.length > 0 ? (
+                    <div className="space-y-2">
+                      {selectedExercise.variacoes.map(varId => {
+                        const target = getExerciseById(varId);
+                        if (!target) return null;
+                        return (
+                          <div
+                            key={varId}
+                            className="glass-card p-3.5 rounded-2xl border border-white/10 flex items-center justify-between gap-3 hover:border-teal-400/40 transition"
+                          >
+                            <div>
+                              <div className="text-xs font-bold text-slate-100">{target.name}</div>
+                              <div className="text-[11px] text-slate-400">{target.difficulty}</div>
+                            </div>
+                            <button
+                              onClick={() => handleNavigateToExerciseId(varId, 'como_fazer')}
+                              className="px-3 py-1.5 rounded-xl glass-card text-xs font-semibold text-teal-300 hover:text-white"
+                            >
+                              Explorar
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="p-6 text-center glass-card rounded-2xl text-xs text-slate-400">
+                      Nenhuma variação secundária cadastrada.
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ABA 6: ADAPTAÇÕES POR DOR / LIMITAÇÃO */}
+              {activeTab === 'adaptacoes' && (
+                <div className="space-y-3 animate-in fade-in duration-200">
+                  <h4 className="text-xs font-black uppercase tracking-wider text-slate-300 mb-1">
+                    Adaptações Clínicas & Articulares
+                  </h4>
+                  <p className="text-xs text-slate-400 mb-3">
+                    Alternativas para treinar com segurança sem interromper o hábito:
+                  </p>
+                  {selectedExercise.adaptacoes && Object.keys(selectedExercise.adaptacoes).length > 0 ? (
+                    <div className="space-y-3">
+                      {Object.entries(selectedExercise.adaptacoes).map(([joint, altIds]) => (
+                        <div key={joint} className="glass-card p-3.5 rounded-2xl border border-white/10 space-y-2">
+                          <span className="text-[11px] font-bold uppercase tracking-wider text-amber-300">
+                            Se sentir desconforto em: {joint}
+                          </span>
+                          <div className="space-y-1.5 pl-2">
+                            {altIds && altIds.map(altId => {
+                              const target = getExerciseById(altId);
+                              if (!target) return null;
+                              return (
+                                <div key={altId} className="flex items-center justify-between gap-2">
+                                  <span className="text-xs text-slate-200">{target.name}</span>
+                                  <button
+                                    onClick={() => handleNavigateToExerciseId(altId, 'como_fazer')}
+                                    className="text-[11px] text-emerald-400 hover:underline font-bold"
+                                  >
+                                    Ver versão segura
+                                  </button>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="p-6 text-center glass-card rounded-2xl text-xs text-slate-400">
+                      Exercício suave com baixo risco biomecânico documentado.
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ABA 7: AUDITORIA CREF & SEGURANÇA */}
+              {activeTab === 'revisao' && (
+                <div className="space-y-4 animate-in fade-in duration-200">
+                  {/* Selo CREF */}
+                  <div className="glass-card p-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/5 space-y-2">
+                    <div className="flex items-center gap-2 text-emerald-400 font-bold text-xs uppercase tracking-wider">
+                      <ShieldCheck className="w-5 h-5 text-emerald-400" />
+                      <span>Revisão Biomecânica Profissional</span>
+                    </div>
+                    <div className="text-xs text-slate-200">
+                      <strong>Especialista Responsável:</strong> {selectedExercise.reviewedBy?.name || CREF_REVIEWER_SPECIALIST.name}
+                    </div>
+                    <div className="text-xs text-slate-300">
+                      <strong>Registro CREF:</strong> {selectedExercise.reviewedBy?.cref || CREF_REVIEWER_SPECIALIST.cref}
+                    </div>
+                    <div className="text-xs text-slate-400">
+                      <strong>Especialidade:</strong> {selectedExercise.reviewedBy?.specialty || CREF_REVIEWER_SPECIALIST.specialty}
+                    </div>
+                    <div className="text-[11px] text-slate-500">
+                      Data da Revisão: {selectedExercise.reviewedBy?.reviewDate || CREF_REVIEWER_SPECIALIST.reviewDate}
+                    </div>
+                  </div>
+
+                  {/* Avisos de Segurança */}
+                  <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/25 text-amber-200 text-xs space-y-1.5">
+                    <span className="font-bold flex items-center gap-1.5">
+                      <AlertTriangle className="w-4 h-4 text-amber-400" /> Diretrizes de Proteção:
+                    </span>
+                    <ul className="list-disc pl-4 space-y-1 text-slate-300">
+                      <li>Interrompa imediatamente se sentir dor aguda, estalo ou pinçamento articular.</li>
+                      <li>Nunca sacrifique a amplitude limpa por número de repetições.</li>
+                      <li>Consulte um profissional de Educação Física ou Fisioterapia antes de treinar skills de alta compressão.</li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Rodapé do Modal */}
+            <div className="p-4 border-t border-white/10 glass-panel flex items-center justify-between shrink-0">
+              <span className="text-[11px] text-slate-400 font-mono hidden sm:inline">
+                ID: {selectedExercise.id}
+              </span>
               <button
                 onClick={() => setSelectedExercise(null)}
-                className="px-6 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 text-slate-950 font-black text-xs shadow-lg shadow-emerald-500/25 glow-emerald"
+                className="px-6 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 text-slate-950 font-black text-xs shadow-lg shadow-emerald-500/25 glow-emerald min-h-[44px]"
               >
                 Fechar Guia
               </button>
@@ -338,4 +879,3 @@ export const ExerciseLibraryView = ({
     </div>
   );
 };
-

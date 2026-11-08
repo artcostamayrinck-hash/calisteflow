@@ -37,6 +37,37 @@ export interface ExerciseReviewer {
   notes?: string;
 }
 
+export type MovementPattern =
+  | 'empurrar-horizontal'
+  | 'empurrar-vertical'
+  | 'mergulhos'
+  | 'puxar-vertical'
+  | 'puxar-horizontal'
+  | 'core-anterior'
+  | 'core-lateral'
+  | 'costas-baixa'
+  | 'agachamento-pernas'
+  | 'skills'
+  | 'aquecimento'
+  | 'alongamento';
+
+export type ExerciseClassType = 'principal' | 'aquecimento' | 'alongamento' | 'skill';
+
+export interface ExerciseAdaptations {
+  punho?: string[];
+  ombro?: string[];
+  cotovelo?: string[];
+  joelho?: string[];
+  lombar?: string[];
+  tornozelo?: string[];
+  quadril?: string[];
+  'sem-equipamento'?: string[];
+  'em-casa'?: string[];
+  elastico?: string[];
+  sobrepeso?: string[];
+  [key: string]: string[] | undefined;
+}
+
 export interface Exercise {
   id: string;
   name: string;
@@ -57,6 +88,17 @@ export interface Exercise {
   videoThumbnail?: string;
   reviewedBy?: ExerciseReviewer;
   safetyCautions?: string[];
+  padrao?: MovementPattern;
+  equipamento?: EquipmentType[];
+  tipoExercicio?: ExerciseClassType;
+  estatico?: boolean;
+  cadencia?: string;
+  regressoes?: string[];
+  progressoes?: string[];
+  variacoes?: string[];
+  adaptacoes?: ExerciseAdaptations;
+  criterioAvanco?: string;
+  sinonimos?: string[];
   animationType:
     | 'pushup'
     | 'pullup'
@@ -72,7 +114,8 @@ export interface Exercise {
     | 'australianpullup'
     | 'frontlever'
     | 'planche'
-    | 'pistolsquat';
+    | 'pistolsquat'
+    | string;
 }
 
 export interface RoutineExercise {
@@ -155,6 +198,10 @@ export interface ActiveWorkoutBackup {
   completedRecords: WorkoutExerciseRecord[];
   sessionStartTime: string;
   timestamp: number;
+  restTargetTimestamp?: number | null;
+  isometricSecondsLeft?: number;
+  isWorkoutPaused?: boolean;
+  currentWeightKg?: number;
 }
 
 export interface UserJourneyProgress {
@@ -174,7 +221,16 @@ export type BodyFocus =
   | 'mobilidade'
   | 'core';
 
-export type EquipmentType = 'nenhum' | 'barra' | 'paralelas' | 'argolas' | 'elastico' | 'banco';
+export type EquipmentType =
+  | 'nenhum'
+  | 'barra'
+  | 'paralelas'
+  | 'argolas'
+  | 'elastico'
+  | 'banco'
+  | 'parede'
+  | 'cadeira'
+  | 'toalha';
 
 export type FitnessGoal = 'forca' | 'hipertrofia' | 'resistencia' | 'skills' | 'perda_gordura' | 'mobilidade';
 

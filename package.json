@@ -9,6 +9,9 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "budget": "node scripts/check-performance-budget.cjs",
+    "test:exercises": "node scripts/validate-exercises.cjs",
+    "test:generator": "node scripts/test-workout-generator.cjs && node scripts/test-generator-e2e.cjs",
+    "test": "npm run test:exercises && npm run test:generator",
     "ship": "node scripts/ship.cjs",
     "commit": "node scripts/ship.cjs"
   },
@@ -27,6 +30,7 @@
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.2",
     "oxlint": "^1.90.0",
+    "sharp": "^0.35.5",
     "typescript": "~7.0.2",
     "vite": "^8.3.6"
   }

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import type { Routine, WorkoutSession, WorkoutExerciseRecord, MuscleGroup, ActiveWorkoutBackup } from '../../types';
-import { EXERCISES_DATABASE } from '../../data/exercisesData';
+import type { Routine, WorkoutSession, WorkoutExerciseRecord, MuscleGroup, ActiveWorkoutBackup, Exercise } from '../../types';
+import { EXERCISES_DATABASE, getExerciseById } from '../../data/exercisesData';
 import { soundManager } from '../../utils/audio';
 import { saveActiveWorkoutBackup, clearActiveWorkoutBackup } from '../../utils/storage';
 import { ExercisePostureVisual } from '../visuals/ExercisePostureVisual';
@@ -24,6 +24,8 @@ import {
   HelpCircle,
   Flame,
   AlertTriangle,
+  ShieldCheck,
+  Sparkles,
 } from 'lucide-react';
 
 interface WorkoutPlayerProps {
@@ -44,29 +46,57 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
   const [setIndex, setSetIndex] = useState<number>(initialBackup?.setIndex || 0);
   const [phase, setPhase] = useState<'exercise' | 'rest'>(initialBackup?.phase || 'exercise');
 
-  // Timers
+  // Timers & Pause timestamp tracking
   const [totalElapsedSeconds, setTotalElapsedSeconds] = useState<number>(initialBackup?.totalElapsedSeconds || 0);
-  const [isWorkoutPaused, setIsWorkoutPaused] = useState<boolean>(false);
+  const [isWorkoutPaused, setIsWorkoutPaused] = useState<boolean>(initialBackup?.isWorkoutPaused || false);
+  const [pausedAtTimestamp, setPausedAtTimestamp] = useState<number | null>(null);
+  const [totalPausedDurationMs, setTotalPausedDurationMs] = useState<number>(0);
 
   // Rest Timer State
-  const [restSecondsLeft, setRestSecondsLeft] = useState<number>(60);
+  const [restSecondsLeft, setRestSecondsLeft] = useState<number>(() => {
+    if (initialBackup?.phase === 'rest' && initialBackup.restTargetTimestamp) {
+      return Math.max(0, Math.ceil((initialBackup.restTargetTimestamp - Date.now()) / 1000));
+    }
+    return 60;
+  });
   const [restInitialSeconds, setRestInitialSeconds] = useState<number>(60);
-  const [restTargetTimestamp, setRestTargetTimestamp] = useState<number | null>(null);
+  const [restTargetTimestamp, setRestTargetTimestamp] = useState<number | null>(() => {
+    if (initialBackup?.phase === 'rest' && initialBackup.restTargetTimestamp && initialBackup.restTargetTimestamp > Date.now()) {
+      return initialBackup.restTargetTimestamp;
+    }
+    return null;
+  });
 
-  // Isometric Exercise Timer State
+  // Isometric Exercise Timer State (Timestamp-based)
   const [isometricTimerRunning, setIsometricTimerRunning] = useState<boolean>(false);
-  const [isometricSecondsLeft, setIsometricSecondsLeft] = useState<number>(30);
-  const [isometricInitialSeconds, setIsometricInitialSeconds] = useState<number>(30);
+  const [isometricTargetTimestamp, setIsometricTargetTimestamp] = useState<number | null>(null);
+  const [isometricSecondsLeft, setIsometricSecondsLeft] = useState<number>(initialBackup?.isometricSecondsLeft || 30);
+  const [isometricInitialSeconds, setIsometricInitialSeconds] = useState<number>(initialBackup?.isometricSecondsLeft || 30);
 
   // Current set reps & load adjustment
   const [currentReps, setCurrentReps] = useState<number>(10);
-  const [currentWeightKg, setCurrentWeightKg] = useState<number>(0);
+  const [currentWeightKg, setCurrentWeightKg] = useState<number>(initialBackup?.currentWeightKg || 0);
 
   // Audio / Sound toggle
   const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
 
+  // Active routine state supporting dynamic in-workout adaptation without session interruption
+  const [activeRoutine, setActiveRoutine] = useState<Routine>(routine);
+
   // Posture modal drawer
   const [showPostureDrawer, setShowPostureDrawer] = useState<boolean>(false);
+
+  // Adaptation / Regression drawer
+  const [showAdaptationModal, setShowAdaptationModal] = useState<boolean>(false);
+
+  // Quick notice banner
+  const [quickNotice, setQuickNotice] = useState<string | null>(null);
+
+  // Unlocked progressions to recommend
+  const [unlockedProgressions, setUnlockedProgressions] = useState<Array<{ from: string; to: string; toName: string }>>([]);
+
+  // Set comfort / effort feedback
+  const [lastSetFeedback, setLastSetFeedback] = useState<'facil' | 'ideal' | 'dificil' | 'dor' | null>(null);
 
   // Confirm exit dialog
   const [showExitConfirm, setShowExitConfirm] = useState<boolean>(false);
@@ -78,7 +108,7 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
       return initialBackup.completedRecords;
     }
     return routine.exercises.map(re => {
-      const ex = EXERCISES_DATABASE.find(e => e.id === re.exerciseId);
+      const ex = getExerciseById(re.exerciseId) || EXERCISES_DATABASE.find(e => e.id === re.exerciseId);
       return {
         exerciseId: re.exerciseId,
         exerciseName: ex ? ex.name : re.exerciseId,
@@ -93,11 +123,219 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
     });
   });
 
-  const currentRoutineExercise = routine.exercises[exerciseIndex];
-  const currentExerciseData = EXERCISES_DATABASE.find(e => e.id === currentRoutineExercise.exerciseId);
+  const currentRoutineExercise = activeRoutine.exercises[exerciseIndex];
+  const currentExerciseData = getExerciseById(currentRoutineExercise.exerciseId) || EXERCISES_DATABASE.find(e => e.id === currentRoutineExercise.exerciseId);
   const isIsometric = currentExerciseData?.type === 'isometric';
 
-  // Request Screen Wake Lock with re-acquisition on visibilitychange
+  // Dynamic on-the-fly exercise adaptation
+  const handleSwapCurrentExercise = (newEx: Exercise) => {
+    soundManager.triggerHaptic([30]);
+    setActiveRoutine(prev => {
+      const nextExs = [...prev.exercises];
+      nextExs[exerciseIndex] = {
+        ...nextExs[exerciseIndex],
+        exerciseId: newEx.id,
+        notes: `Adaptado durante treino: ${newEx.name}`,
+        targetReps: newEx.defaultReps || nextExs[exerciseIndex].targetReps,
+        targetHoldSeconds: newEx.defaultHoldSeconds || nextExs[exerciseIndex].targetHoldSeconds,
+      };
+      return { ...prev, exercises: nextExs };
+    });
+
+    setCompletedRecords(prev => {
+      const copy = [...prev];
+      if (copy[exerciseIndex]) {
+        copy[exerciseIndex].exerciseId = newEx.id;
+        copy[exerciseIndex].exerciseName = newEx.name;
+      }
+      return copy;
+    });
+
+    if (newEx.type === 'isometric') {
+      const sec = newEx.defaultHoldSeconds || 30;
+      setIsometricSecondsLeft(sec);
+      setIsometricInitialSeconds(sec);
+      setIsometricTimerRunning(false);
+      setIsometricTargetTimestamp(null);
+    } else {
+      setCurrentReps(newEx.defaultReps || 10);
+    }
+
+    setShowAdaptationModal(false);
+    setLastSetFeedback(null);
+    setQuickNotice(`Exercício adaptado com sucesso para: ${newEx.name}`);
+    setTimeout(() => setQuickNotice(null), 4000);
+  };
+
+  // Advance to next set or exercise after rest
+  const advanceToNextSetOrExercise = () => {
+    setRestTargetTimestamp(null);
+    if (setIndex < currentRoutineExercise.sets - 1) {
+      // Next set in current exercise
+      setSetIndex(prev => prev + 1);
+      setPhase('exercise');
+    } else if (exerciseIndex < activeRoutine.exercises.length - 1) {
+      // Next exercise
+      setExerciseIndex(prev => prev + 1);
+      setSetIndex(0);
+      setPhase('exercise');
+    } else {
+      // All exercises finished!
+      handleTriggerFinish();
+    }
+  };
+
+  // Record set with load
+  const recordCurrentSet = (reps?: number, seconds?: number, weightKg?: number) => {
+    setCompletedRecords(prev => {
+      const copy = [...prev];
+      if (copy[exerciseIndex] && copy[exerciseIndex].sets[setIndex]) {
+        copy[exerciseIndex].sets[setIndex] = {
+          setNumber: setIndex + 1,
+          completed: true,
+          completedReps: reps,
+          completedSeconds: seconds,
+          weightKg: weightKg || undefined,
+        };
+        const allSetsCompleted = copy[exerciseIndex].sets.every(s => s.completed);
+        copy[exerciseIndex].completed = allSetsCompleted;
+      }
+      return copy;
+    });
+  };
+
+  // Complete Reps Set
+  const handleCompleteRepsSet = () => {
+    recordCurrentSet(currentReps, undefined, currentWeightKg);
+
+    const isLastSet = setIndex >= currentRoutineExercise.sets - 1;
+    const isLastExercise = exerciseIndex >= activeRoutine.exercises.length - 1;
+
+    // Check advancement criterion celebration on completing exercise sets
+    if (isLastSet && currentExerciseData?.progressoes && currentExerciseData.progressoes.length > 0) {
+      const targetReps = currentRoutineExercise.targetReps || currentExerciseData.defaultReps || 10;
+      if (currentReps >= targetReps) {
+        const nextProgId = currentExerciseData.progressoes[0];
+        const nextProgEx = getExerciseById(nextProgId);
+        if (nextProgEx) {
+          setUnlockedProgressions(prev => {
+            if (prev.some(p => p.to === nextProgId)) return prev;
+            return [...prev, { from: currentExerciseData.name, to: nextProgId, toName: nextProgEx.name }];
+          });
+          setQuickNotice(`🎉 Meta atingida em ${currentExerciseData.name}! Próxima progressão sugerida: ${nextProgEx.name}`);
+          setTimeout(() => setQuickNotice(null), 5000);
+        }
+      }
+    }
+
+    if (isLastSet && isLastExercise) {
+      soundManager.playSuccessChime();
+      handleTriggerFinish();
+      return;
+    }
+
+    const restTime = currentRoutineExercise.restSeconds || 60;
+    setRestInitialSeconds(restTime);
+    setRestSecondsLeft(restTime);
+    setRestTargetTimestamp(Date.now() + restTime * 1000);
+    setPhase('rest');
+    soundManager.playCountdownBeep();
+  };
+
+  // Complete Isometric Set
+  const handleCompleteIsometricSet = () => {
+    setIsometricTimerRunning(false);
+    setIsometricTargetTimestamp(null);
+    const elapsedOrCompleted = isometricInitialSeconds - Math.max(0, isometricSecondsLeft);
+    recordCurrentSet(undefined, elapsedOrCompleted || isometricInitialSeconds, currentWeightKg);
+
+    const isLastSet = setIndex >= currentRoutineExercise.sets - 1;
+    const isLastExercise = exerciseIndex >= activeRoutine.exercises.length - 1;
+
+    // Check advancement criterion for isometric
+    if (isLastSet && currentExerciseData?.progressoes && currentExerciseData.progressoes.length > 0) {
+      const targetSec = currentRoutineExercise.targetHoldSeconds || currentExerciseData.defaultHoldSeconds || 20;
+      if (elapsedOrCompleted >= targetSec) {
+        const nextProgId = currentExerciseData.progressoes[0];
+        const nextProgEx = getExerciseById(nextProgId);
+        if (nextProgEx) {
+          setUnlockedProgressions(prev => {
+            if (prev.some(p => p.to === nextProgId)) return prev;
+            return [...prev, { from: currentExerciseData.name, to: nextProgId, toName: nextProgEx.name }];
+          });
+          setQuickNotice(`🎉 Meta atingida em ${currentExerciseData.name}! Próxima progressão: ${nextProgEx.name}`);
+          setTimeout(() => setQuickNotice(null), 5000);
+        }
+      }
+    }
+
+    if (isLastSet && isLastExercise) {
+      soundManager.playSuccessChime();
+      handleTriggerFinish();
+      return;
+    }
+
+    const restTime = currentRoutineExercise.restSeconds || 60;
+    setRestInitialSeconds(restTime);
+    setRestSecondsLeft(restTime);
+    setRestTargetTimestamp(Date.now() + restTime * 1000);
+    setPhase('rest');
+    soundManager.playCountdownBeep();
+  };
+
+  // Workout pause toggle with pause-duration accumulation
+  const toggleWorkoutPause = () => {
+    soundManager.triggerHaptic([30]);
+    if (!isWorkoutPaused) {
+      setIsWorkoutPaused(true);
+      setPausedAtTimestamp(Date.now());
+      if (restTargetTimestamp) {
+        setRestSecondsLeft(Math.max(0, Math.ceil((restTargetTimestamp - Date.now()) / 1000)));
+        setRestTargetTimestamp(null);
+      }
+      if (isometricTargetTimestamp) {
+        setIsometricSecondsLeft(Math.max(0, Math.ceil((isometricTargetTimestamp - Date.now()) / 1000)));
+        setIsometricTargetTimestamp(null);
+      }
+    } else {
+      setIsWorkoutPaused(false);
+      if (pausedAtTimestamp) {
+        setTotalPausedDurationMs(prev => prev + (Date.now() - pausedAtTimestamp));
+        setPausedAtTimestamp(null);
+      }
+      if (phase === 'rest') {
+        setRestTargetTimestamp(Date.now() + restSecondsLeft * 1000);
+      }
+      if (phase === 'exercise' && isIsometric && isometricTimerRunning) {
+        setIsometricTargetTimestamp(Date.now() + isometricSecondsLeft * 1000);
+      }
+    }
+  };
+
+  // Isometric timer controls
+  const toggleIsometricTimer = () => {
+    soundManager.triggerHaptic([30]);
+    if (!isometricTimerRunning) {
+      soundManager.playStartBeep();
+      setIsometricTargetTimestamp(Date.now() + isometricSecondsLeft * 1000);
+      setIsometricTimerRunning(true);
+    } else {
+      if (isometricTargetTimestamp) {
+        setIsometricSecondsLeft(Math.max(0, Math.ceil((isometricTargetTimestamp - Date.now()) / 1000)));
+      }
+      setIsometricTargetTimestamp(null);
+      setIsometricTimerRunning(false);
+    }
+  };
+
+  const resetIsometricTimer = () => {
+    soundManager.triggerHaptic([20]);
+    setIsometricTimerRunning(false);
+    setIsometricTargetTimestamp(null);
+    setIsometricSecondsLeft(isometricInitialSeconds);
+  };
+
+  // Request Screen Wake Lock with re-acquisition on visibilitychange & lock-screen catchup
   useEffect(() => {
     let wakeLock: any = null;
     const requestLock = async () => {
@@ -115,16 +353,103 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
     const handleVisibility = () => {
       if (document.visibilityState === 'visible') {
         requestLock();
+
+        // 1. Re-sync elapsed workout time accurately from timestamps
+        if (!isWorkoutPaused) {
+          const sessionStartMs = new Date(sessionStartTime).getTime();
+          const now = Date.now();
+          const currentPaused = pausedAtTimestamp ? now - pausedAtTimestamp : 0;
+          const actualElapsed = Math.max(
+            0,
+            Math.floor((now - sessionStartMs - totalPausedDurationMs - currentPaused) / 1000)
+          );
+          setTotalElapsedSeconds(actualElapsed);
+        }
+
+        // 2. Re-check rest timer if screen was locked
+        if (phase === 'rest' && !isWorkoutPaused && restTargetTimestamp) {
+          const remaining = Math.max(0, Math.ceil((restTargetTimestamp - Date.now()) / 1000));
+          setRestSecondsLeft(remaining);
+          if (remaining <= 0) {
+            soundManager.playSuccessChime();
+            setRestTargetTimestamp(null);
+            advanceToNextSetOrExercise();
+          }
+        }
+
+        // 3. Re-check isometric timer if screen was locked
+        if (phase === 'exercise' && isIsometric && isometricTimerRunning && isometricTargetTimestamp) {
+          const remaining = Math.max(0, Math.ceil((isometricTargetTimestamp - Date.now()) / 1000));
+          setIsometricSecondsLeft(remaining);
+          if (remaining <= 0) {
+            soundManager.playSuccessChime();
+            setIsometricTimerRunning(false);
+            setIsometricTargetTimestamp(null);
+            handleCompleteIsometricSet();
+          }
+        }
+      } else if (document.visibilityState === 'hidden') {
+        // App going to background: take snapshot immediately for bulletproof recovery
+        saveActiveWorkoutBackup({
+          routine,
+          exerciseIndex,
+          setIndex,
+          phase,
+          totalElapsedSeconds,
+          completedRecords,
+          sessionStartTime,
+          timestamp: Date.now(),
+          restTargetTimestamp,
+          isometricSecondsLeft,
+          isWorkoutPaused,
+          currentWeightKg,
+        });
       }
     };
 
+    const handleBeforeUnload = () => {
+      saveActiveWorkoutBackup({
+        routine,
+        exerciseIndex,
+        setIndex,
+        phase,
+        totalElapsedSeconds,
+        completedRecords,
+        sessionStartTime,
+        timestamp: Date.now(),
+        restTargetTimestamp,
+        isometricSecondsLeft,
+        isWorkoutPaused,
+        currentWeightKg,
+      });
+    };
+
     document.addEventListener('visibilitychange', handleVisibility);
+    window.addEventListener('beforeunload', handleBeforeUnload);
 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
       wakeLock?.release?.().catch(() => {});
     };
-  }, []);
+  }, [
+    isWorkoutPaused,
+    sessionStartTime,
+    pausedAtTimestamp,
+    totalPausedDurationMs,
+    phase,
+    restTargetTimestamp,
+    isIsometric,
+    isometricTimerRunning,
+    isometricTargetTimestamp,
+    routine,
+    exerciseIndex,
+    setIndex,
+    totalElapsedSeconds,
+    completedRecords,
+    isometricSecondsLeft,
+    currentWeightKg,
+  ]);
 
   // Sync state when exercise changes
   useEffect(() => {
@@ -134,13 +459,14 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
       setIsometricSecondsLeft(targetSec);
       setIsometricInitialSeconds(targetSec);
       setIsometricTimerRunning(false);
+      setIsometricTargetTimestamp(null);
     } else {
       setCurrentReps(currentRoutineExercise.targetReps || 10);
     }
     setPhase('exercise');
   }, [exerciseIndex, setIndex]);
 
-  // Overall Workout Elapsed Timer
+  // Overall Workout Elapsed Timer (Interval tick + state tracker)
   useEffect(() => {
     if (isWorkoutPaused) return;
     const interval = setInterval(() => {
@@ -149,7 +475,7 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
     return () => clearInterval(interval);
   }, [isWorkoutPaused]);
 
-  // G3: Auto-save active workout snapshot for crash/tab-close recovery
+  // Active workout snapshot for crash/tab-close recovery
   useEffect(() => {
     saveActiveWorkoutBackup({
       routine,
@@ -160,8 +486,23 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
       completedRecords,
       sessionStartTime,
       timestamp: Date.now(),
+      restTargetTimestamp,
+      isometricSecondsLeft,
+      isWorkoutPaused,
+      currentWeightKg,
     });
-  }, [routine, exerciseIndex, setIndex, phase, totalElapsedSeconds, completedRecords, sessionStartTime]);
+  }, [
+    routine,
+    exerciseIndex,
+    setIndex,
+    phase,
+    isWorkoutPaused,
+    completedRecords,
+    sessionStartTime,
+    restTargetTimestamp,
+    isometricSecondsLeft,
+    currentWeightKg,
+  ]);
 
   // Rest Countdown Timer (Timestamp-based, resilient to background screen lock)
   useEffect(() => {
@@ -188,108 +529,31 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
     return () => clearInterval(timer);
   }, [phase, restTargetTimestamp, isWorkoutPaused]);
 
-  // Isometric Exercise Countdown / Stopwatch
+  // Isometric Exercise Countdown / Stopwatch (Timestamp-based)
   useEffect(() => {
-    if (phase !== 'exercise' || !isometricTimerRunning || isWorkoutPaused) return;
+    if (phase !== 'exercise' || !isometricTimerRunning || isWorkoutPaused || !isometricTargetTimestamp) return;
 
-    if (isometricSecondsLeft <= 0) {
-      soundManager.playSuccessChime();
-      setIsometricTimerRunning(false);
-      handleCompleteIsometricSet();
-      return;
-    }
+    const checkIsometricTime = () => {
+      const remaining = Math.max(0, Math.ceil((isometricTargetTimestamp - Date.now()) / 1000));
+      setIsometricSecondsLeft(remaining);
 
-    if (isometricSecondsLeft <= 3 && isometricSecondsLeft > 0) {
-      soundManager.playCountdownBeep();
-    }
-
-    const timer = setInterval(() => {
-      setIsometricSecondsLeft(prev => prev - 1);
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [phase, isometricTimerRunning, isometricSecondsLeft, isWorkoutPaused]);
-
-  // Advance to next set or exercise after rest
-  const advanceToNextSetOrExercise = () => {
-    if (setIndex < currentRoutineExercise.sets - 1) {
-      // Next set in current exercise
-      setSetIndex(prev => prev + 1);
-      setPhase('exercise');
-    } else if (exerciseIndex < routine.exercises.length - 1) {
-      // Next exercise
-      setExerciseIndex(prev => prev + 1);
-      setSetIndex(0);
-      setPhase('exercise');
-    } else {
-      // All exercises finished!
-      handleTriggerFinish();
-    }
-  };
-
-  // Complete Reps Set
-  const handleCompleteRepsSet = () => {
-    // Record set with load
-    recordCurrentSet(currentReps, undefined, currentWeightKg);
-
-    // Check if this was the last set of the last exercise
-    const isLastSet = setIndex >= currentRoutineExercise.sets - 1;
-    const isLastExercise = exerciseIndex >= routine.exercises.length - 1;
-
-    if (isLastSet && isLastExercise) {
-      soundManager.playSuccessChime();
-      handleTriggerFinish();
-      return;
-    }
-
-    // Trigger Rest Period with timestamp anchor
-    const restTime = currentRoutineExercise.restSeconds || 60;
-    setRestInitialSeconds(restTime);
-    setRestSecondsLeft(restTime);
-    setRestTargetTimestamp(Date.now() + restTime * 1000);
-    setPhase('rest');
-    soundManager.playCountdownBeep();
-  };
-
-  // Complete Isometric Set
-  const handleCompleteIsometricSet = () => {
-    const elapsedOrCompleted = isometricInitialSeconds - Math.max(0, isometricSecondsLeft);
-    recordCurrentSet(undefined, elapsedOrCompleted || isometricInitialSeconds, currentWeightKg);
-
-    const isLastSet = setIndex >= currentRoutineExercise.sets - 1;
-    const isLastExercise = exerciseIndex >= routine.exercises.length - 1;
-
-    if (isLastSet && isLastExercise) {
-      soundManager.playSuccessChime();
-      handleTriggerFinish();
-      return;
-    }
-
-    const restTime = currentRoutineExercise.restSeconds || 60;
-    setRestInitialSeconds(restTime);
-    setRestSecondsLeft(restTime);
-    setRestTargetTimestamp(Date.now() + restTime * 1000);
-    setPhase('rest');
-    soundManager.playCountdownBeep();
-  };
-
-  const recordCurrentSet = (reps?: number, seconds?: number, weightKg?: number) => {
-    setCompletedRecords(prev => {
-      const copy = [...prev];
-      if (copy[exerciseIndex] && copy[exerciseIndex].sets[setIndex]) {
-        copy[exerciseIndex].sets[setIndex] = {
-          setNumber: setIndex + 1,
-          completed: true,
-          completedReps: reps,
-          completedSeconds: seconds,
-          weightKg: weightKg || undefined,
-        };
-        const allSetsCompleted = copy[exerciseIndex].sets.every(s => s.completed);
-        copy[exerciseIndex].completed = allSetsCompleted;
+      if (remaining <= 0) {
+        soundManager.playSuccessChime();
+        setIsometricTimerRunning(false);
+        setIsometricTargetTimestamp(null);
+        handleCompleteIsometricSet();
+        return;
       }
-      return copy;
-    });
-  };
+
+      if (remaining <= 3 && remaining > 0) {
+        soundManager.playCountdownBeep();
+      }
+    };
+
+    checkIsometricTime();
+    const timer = setInterval(checkIsometricTime, 500);
+    return () => clearInterval(timer);
+  }, [phase, isometricTimerRunning, isometricTargetTimestamp, isWorkoutPaused]);
 
   const handleSkipRest = () => {
     setRestTargetTimestamp(null);
@@ -323,17 +587,21 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
     // Aggregate unique muscles worked
     const musclesWorked = Array.from(
       new Set(
-        routine.exercises.flatMap(re => {
-          const ex = EXERCISES_DATABASE.find(e => e.id === re.exerciseId);
+        activeRoutine.exercises.flatMap(re => {
+          const ex = getExerciseById(re.exerciseId) || EXERCISES_DATABASE.find(e => e.id === re.exerciseId);
           return ex ? [...ex.primaryMuscles, ...ex.secondaryMuscles] : [];
         })
       )
     ) as MuscleGroup[];
 
+    const progressionSummary = unlockedProgressions.length > 0
+      ? `🏆 Progressões recomendadas com base nas metas atingidas hoje: ${unlockedProgressions.map(p => `${p.from} ➔ ${p.toName}`).join(' | ')}`
+      : undefined;
+
     const session: WorkoutSession = {
       id: `workout-${Date.now()}`,
-      routineId: routine.id,
-      routineTitle: routine.title,
+      routineId: activeRoutine.id,
+      routineTitle: activeRoutine.title,
       startTime: sessionStartTime,
       endTime: new Date().toISOString(),
       durationSeconds: totalElapsedSeconds,
@@ -342,6 +610,7 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
       totalRepsCompleted: totalRepsDone,
       totalIsometricSeconds: totalIsoSecDone,
       musclesWorked,
+      userNotes: progressionSummary,
     };
 
     clearActiveWorkoutBackup();
@@ -384,10 +653,7 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
         {/* Workout elapsed timer & Pause */}
         <div className="flex items-center gap-2.5">
           <button
-            onClick={() => {
-              soundManager.triggerHaptic([30]);
-              setIsWorkoutPaused(!isWorkoutPaused);
-            }}
+            onClick={toggleWorkoutPause}
             className={`p-2.5 rounded-2xl border transition active:scale-95 ${
               isWorkoutPaused
                 ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 glow-amber'
@@ -451,12 +717,12 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
         {phase === 'exercise' ? (
           /* ================= PHASE 1: EXECUTING SET ================= */
           <div className="w-full flex flex-col items-center space-y-5 animate-in fade-in zoom-in-95 duration-200">
-            {/* Exercise Header & Posture Trigger */}
+            {/* Exercise Header & Posture/Adaptation Triggers */}
             <div className="w-full glass-card border border-white/10 rounded-3xl p-5 shadow-2xl flex items-center justify-between gap-3">
               <div>
                 <div className="flex items-center gap-2 mb-1.5">
                   <span className="px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold uppercase tracking-widest bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
-                    Exercício {exerciseIndex + 1} de {routine.exercises.length}
+                    Exercício {exerciseIndex + 1} de {activeRoutine.exercises.length}
                   </span>
                   <span className="px-2 py-0.5 rounded-lg text-[11px] font-semibold bg-white/[0.06] text-slate-300 border border-white/[0.08]">
                     {currentExerciseData?.difficulty}
@@ -478,17 +744,44 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
                 )}
               </div>
 
-              {/* View Posture Guide Button */}
-              {currentExerciseData && (
-                <button
-                  onClick={() => setShowPostureDrawer(true)}
-                  className="px-3.5 py-2.5 rounded-2xl glass-card text-emerald-300 hover:text-white hover:bg-white/[0.08] border border-white/10 text-xs font-bold flex items-center gap-1.5 transition active:scale-95 shrink-0 glow-emerald"
-                >
-                  <HelpCircle className="w-4 h-4 text-emerald-400" />
-                  <span className="hidden sm:inline">Postura</span>
-                </button>
-              )}
+              {/* View Posture Guide & Quick Adapt Buttons */}
+              <div className="flex items-center gap-2 shrink-0">
+                {currentExerciseData && (
+                  <button
+                    onClick={() => setShowPostureDrawer(true)}
+                    className="px-3 py-2.5 rounded-2xl glass-card text-emerald-300 hover:text-white hover:bg-white/[0.08] border border-white/10 text-xs font-bold flex items-center gap-1.5 transition active:scale-95 glow-emerald min-h-[44px]"
+                    title="Guia de postura biomecânica"
+                  >
+                    <HelpCircle className="w-4 h-4 text-emerald-400" />
+                    <span className="hidden sm:inline">Postura</span>
+                  </button>
+                )}
+
+                {currentExerciseData && (
+                  <button
+                    onClick={() => setShowAdaptationModal(true)}
+                    className="px-3 py-2.5 rounded-2xl glass-card text-amber-300 hover:text-white hover:bg-white/[0.08] border border-amber-500/30 text-xs font-bold flex items-center gap-1.5 transition active:scale-95 min-h-[44px]"
+                    title="Sentiu dor ou está pesado? Trocar versão"
+                  >
+                    <ShieldCheck className="w-4 h-4 text-amber-400" />
+                    <span className="hidden sm:inline">Adaptar</span>
+                  </button>
+                )}
+              </div>
             </div>
+
+            {/* Quick Notice / Celebration Banner */}
+            {quickNotice && (
+              <div className="w-full bg-gradient-to-r from-emerald-500/20 via-teal-500/20 to-emerald-500/20 border border-emerald-500/40 text-emerald-200 text-xs font-bold p-3.5 rounded-2xl shadow-xl flex items-center justify-between gap-2 animate-in fade-in slide-in-from-top-2">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>{quickNotice}</span>
+                </div>
+                <button onClick={() => setQuickNotice(null)} className="text-slate-400 hover:text-white">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            )}
 
             {/* Set Progression Pills */}
             <div className="flex items-center gap-2 flex-wrap justify-center">
@@ -569,10 +862,7 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
                 {/* Isometric Controls */}
                 <div className="flex items-center gap-3">
                   <button
-                    onClick={() => {
-                      soundManager.triggerHaptic([30]);
-                      setIsometricTimerRunning(!isometricTimerRunning);
-                    }}
+                    onClick={toggleIsometricTimer}
                     className={`px-7 py-3.5 rounded-2xl font-black text-sm flex items-center gap-2 shadow-xl transition active:scale-95 ${
                       isometricTimerRunning
                         ? 'bg-amber-500 text-slate-950 shadow-amber-500/25 glow-amber'
@@ -584,11 +874,7 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
                   </button>
 
                   <button
-                    onClick={() => {
-                      soundManager.triggerHaptic([20]);
-                      setIsometricTimerRunning(false);
-                      setIsometricSecondsLeft(isometricInitialSeconds);
-                    }}
+                    onClick={resetIsometricTimer}
                     className="p-3.5 rounded-2xl glass-card text-slate-300 hover:text-white border border-white/10 transition active:scale-95"
                     title="Reiniciar tempo"
                   >
@@ -766,6 +1052,72 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
               </button>
             </div>
 
+            {/* Quick Intensity / Joint Comfort Feedback during Rest */}
+            <div className="w-full glass-card rounded-3xl p-4 border border-white/10 space-y-2.5">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-300">Como sentiu a última série?</span>
+                {lastSetFeedback && (
+                  <span className="text-[10px] text-emerald-400 font-semibold">Registrado</span>
+                )}
+              </div>
+              <div className="grid grid-cols-4 gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setLastSetFeedback('facil')}
+                  className={`py-2 rounded-xl text-xs font-semibold transition ${
+                    lastSetFeedback === 'facil' ? 'bg-cyan-500 text-slate-950 font-bold' : 'bg-white/[0.04] text-slate-400 hover:text-white'
+                  }`}
+                >
+                  Fácil
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLastSetFeedback('ideal')}
+                  className={`py-2 rounded-xl text-xs font-semibold transition ${
+                    lastSetFeedback === 'ideal' ? 'bg-emerald-500 text-slate-950 font-bold' : 'bg-white/[0.04] text-slate-400 hover:text-white'
+                  }`}
+                >
+                  Ideal
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLastSetFeedback('dificil')}
+                  className={`py-2 rounded-xl text-xs font-semibold transition ${
+                    lastSetFeedback === 'dificil' ? 'bg-amber-400 text-slate-950 font-bold' : 'bg-white/[0.04] text-slate-400 hover:text-white'
+                  }`}
+                >
+                  Pesado
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLastSetFeedback('dor');
+                    setShowAdaptationModal(true);
+                  }}
+                  className={`py-2 rounded-xl text-xs font-semibold transition ${
+                    lastSetFeedback === 'dor' ? 'bg-rose-500 text-white font-bold' : 'bg-white/[0.04] text-rose-300 hover:text-white'
+                  }`}
+                >
+                  Dor / Falha
+                </button>
+              </div>
+
+              {(lastSetFeedback === 'dificil' || lastSetFeedback === 'dor') && (
+                <div className="pt-2 border-t border-white/5 flex items-center justify-between">
+                  <span className="text-[11px] text-amber-300 flex items-center gap-1">
+                    <ShieldCheck className="w-3.5 h-3.5" /> Sentiu sobrecarga ou desconforto?
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setShowAdaptationModal(true)}
+                    className="text-[11px] font-bold text-cyan-400 hover:underline"
+                  >
+                    Trocar por regressão
+                  </button>
+                </div>
+              )}
+            </div>
+
             {/* Up Next Card Preview */}
             {nextExerciseData && (
               <div className="w-full glass-card rounded-3xl p-4 flex items-center justify-between gap-3 text-xs border border-white/10 shadow-lg">
@@ -901,6 +1253,101 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
                 className="px-6 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 text-slate-950 font-black text-xs shadow-lg shadow-emerald-500/25 glow-emerald"
               >
                 Continuar Treino
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Slide-over In-Workout Adaptation & Regression Drawer */}
+      {showAdaptationModal && currentExerciseData && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="w-full max-w-lg max-h-[85vh] glass-panel border border-white/10 rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden">
+            <div className="p-4 border-b border-white/10 flex items-center justify-between">
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400">
+                  Ajuste sem Interromper a Sessão
+                </span>
+                <h3 className="font-black text-sm text-slate-100">
+                  Trocar: {currentExerciseData.name}
+                </h3>
+              </div>
+              <button
+                onClick={() => setShowAdaptationModal(false)}
+                className="p-1.5 rounded-full text-slate-400 hover:text-white"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-4 overflow-y-auto space-y-4">
+              {/* Regressões Diretas */}
+              {currentExerciseData.regressoes && currentExerciseData.regressoes.length > 0 && (
+                <div className="space-y-2">
+                  <span className="text-xs font-bold text-slate-300 uppercase tracking-wider block">
+                    Regressão Direta (Carga Mais Leve):
+                  </span>
+                  {currentExerciseData.regressoes.map(regId => {
+                    const target = getExerciseById(regId);
+                    if (!target) return null;
+                    return (
+                      <div key={regId} className="glass-card p-3 rounded-2xl border border-white/10 flex items-center justify-between gap-3">
+                        <div>
+                          <div className="text-xs font-bold text-slate-100">{target.name}</div>
+                          <div className="text-[10px] text-slate-400">{target.difficulty} • {target.category}</div>
+                        </div>
+                        <button
+                          onClick={() => handleSwapCurrentExercise(target)}
+                          className="px-3.5 py-2 rounded-xl bg-cyan-500 text-slate-950 font-black text-xs shadow-md active:scale-95"
+                        >
+                          Trocar Agora
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Adaptações por Articulação */}
+              {currentExerciseData.adaptacoes && Object.keys(currentExerciseData.adaptacoes).length > 0 && (
+                <div className="space-y-2">
+                  <span className="text-xs font-bold text-slate-300 uppercase tracking-wider block">
+                    Adaptações por Desconforto Articular:
+                  </span>
+                  {Object.entries(currentExerciseData.adaptacoes).map(([joint, altIds]) => (
+                    <div key={joint} className="glass-card p-3 rounded-2xl border border-white/5 space-y-1.5">
+                      <span className="text-[11px] font-bold text-amber-300 capitalize">
+                        Para alívio no {joint}:
+                      </span>
+                      <div className="space-y-1 pl-2">
+                        {altIds?.map(altId => {
+                          const target = getExerciseById(altId);
+                          if (!target) return null;
+                          return (
+                            <div key={altId} className="flex items-center justify-between gap-2">
+                              <span className="text-xs text-slate-200">{target.name}</span>
+                              <button
+                                onClick={() => handleSwapCurrentExercise(target)}
+                                className="px-3 py-1 rounded-lg bg-emerald-500 text-slate-950 font-bold text-[11px] active:scale-95"
+                              >
+                                Usar esta versão
+                              </button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="p-3 border-t border-white/10 flex justify-end">
+              <button
+                onClick={() => setShowAdaptationModal(false)}
+                className="px-5 py-2 rounded-xl text-xs font-bold text-slate-400 hover:text-white"
+              >
+                Manter Exercício Atual
               </button>
             </div>
           </div>

@@ -132,6 +132,19 @@ export const WorkoutSummaryModal: React.FC<WorkoutSummaryModalProps> = ({
           </div>
         )}
 
+        {/* Unlocked Progression Celebratory Card */}
+        {session.userNotes && session.userNotes.includes('🏆') && (
+          <div className="glass-card p-4 rounded-2xl border border-purple-500/30 bg-purple-500/10 space-y-1.5 shadow-lg animate-in fade-in">
+            <div className="flex items-center gap-2 text-purple-300 font-bold text-xs uppercase tracking-wider">
+              <Trophy className="w-4 h-4 text-purple-400" />
+              <span>Conquista de Progressão Desbloqueada!</span>
+            </div>
+            <p className="text-xs text-slate-200 leading-relaxed font-medium">
+              {session.userNotes}
+            </p>
+          </div>
+        )}
+
         {/* Perceived Effort Rating (RPE 1-10) */}
         <div>
           <label className="block text-xs font-bold text-slate-300 mb-2 flex items-center justify-between">

@@ -14,27 +14,6 @@ import type {
 } from '../types';
 import { EXERCISES_DATABASE } from '../data/exercisesData';
 
-// Equipment requirement per exercise ID
-export const EXERCISE_EQUIPMENT_MAP: Record<string, EquipmentType[]> = {
-  pushup: ['nenhum'],
-  diamond_pushup: ['nenhum'],
-  dips: ['paralelas'],
-  pullup: ['barra'],
-  chinup: ['barra'],
-  australian_pullup: ['barra', 'argolas'],
-  pike_pushup: ['nenhum'],
-  handstand_hold: ['nenhum'],
-  squat: ['nenhum'],
-  lunges: ['nenhum'],
-  plank: ['nenhum'],
-  lsit: ['nenhum', 'paralelas'],
-  hollow_body: ['nenhum'],
-  muscleup: ['barra'],
-  front_lever: ['barra'],
-  planche_lean: ['nenhum'],
-  pistol_squat: ['nenhum'],
-};
-
 // Muscle mapping to focus categories
 export const FOCUS_LABELS: Record<BodyFocus, { label: string; emoji: string; color: string }> = {
   peito: { label: 'Peito', emoji: '🛡️', color: 'from-rose-500 to-red-600' },
@@ -65,15 +44,80 @@ export const WEEK_DAYS_NAMES = [
   { dayOfWeek: 0, shortName: 'DOM', dayName: 'Domingo' },
 ];
 
+/**
+ * Mapeamento exaustivo de contraindicações por articulação sensível
+ * Baseado em diretrizes biomecânicas auditadas por profissional CREF
+ */
 export const JOINT_RISK_MAP: Record<JointLimitation, string[]> = {
-  punho: ['planche_lean', 'handstand_hold', 'diamond_pushup'],
-  ombro: ['dips', 'handstand_hold', 'muscleup', 'pike_pushup'],
-  joelho: ['pistol_squat', 'lunges'],
-  lombar: ['front_lever'],
+  punho: [
+    'planche_lean',
+    'planche-lean',
+    'handstand_hold',
+    'handstand',
+    'handstand-parede',
+    'handstand-livre',
+    'diamond_pushup',
+    'diamondpushup',
+    'flexao-pseudo-planche',
+    'crow-pose',
+    'crane-pose',
+    'tuck-planche',
+    'straddle-planche',
+    'planche',
+    'flexao-palmas',
+    'hspu-completo-parede',
+    'hspu-livre'
+  ],
+  ombro: [
+    'dips',
+    'dip',
+    'dip-inclinado',
+    'dip-argolas',
+    'dip-com-carga',
+    'handstand_hold',
+    'handstand',
+    'muscleup',
+    'muscle-up-completo',
+    'pike_pushup',
+    'pikepushup',
+    'pike-pushup-elevado',
+    'hspu-negativa-parede',
+    'hspu-parcial-parede',
+    'hspu-completo-parede',
+    'hspu-livre',
+    'tuck-back-lever',
+    'back-lever',
+    'bandeira-humana-tuck',
+    'bandeira-humana'
+  ],
+  joelho: [
+    'pistol_squat',
+    'pistolsquat',
+    'pistol-squat-assistido',
+    'pistol-squat-caixa',
+    'shrimp-squat',
+    'lunges',
+    'afundo-bulgaro',
+    'agachamento-salto',
+    'cossack-squat',
+    'nordic-curl',
+    'nordic-curl-negativa'
+  ],
+  lombar: [
+    'front_lever',
+    'frontlever',
+    'tuck-front-lever',
+    'dragon-flag',
+    'dragon-flag-tuck',
+    'dragon-flag-negativa',
+    'ab-wheel-pe',
+    'ab-wheel-joelhos',
+    'hspu-completo-parede'
+  ],
 };
 
 /**
- * Filter exercises compatible with user's available equipment and level
+ * Filtra exercícios compatíveis com o equipamento do usuário, nível e limitações articulares
  */
 export function filterExercises(
   exercises: Exercise[],
@@ -89,7 +133,7 @@ export function filterExercises(
   };
   const userLevelNum = levelOrder[userLevel] || 2;
 
-  // Collect banned exercise IDs due to joint limitations
+  // Coleta IDs contraindicados para as limitações informadas
   const riskyIds = new Set<string>();
   if (limitations && limitations.length > 0) {
     limitations.forEach(lim => {
@@ -99,15 +143,15 @@ export function filterExercises(
   }
 
   return exercises.filter(ex => {
-    // Avoid risky exercises for injured joints
+    // 1. Elimina rigorosamente contraindicações articulares
     if (riskyIds.has(ex.id)) return false;
 
-    // Check level compatibility (allow exercises up to user's level or 1 above with caution)
+    // 2. Compatibilidade de nível (até o nível do usuário ou 1 acima para transição gradual)
     const exLevelNum = levelOrder[ex.difficulty] || 1;
     if (exLevelNum > userLevelNum + 1) return false;
 
-    // Check equipment compatibility
-    const requiredEquip = EXERCISE_EQUIPMENT_MAP[ex.id] || ['nenhum'];
+    // 3. Verificação dinâmica de equipamento necessário
+    const requiredEquip = ex.equipamento || ['nenhum'];
     const hasEquipment = requiredEquip.some(
       eq => eq === 'nenhum' || equipments.includes(eq)
     );
@@ -116,7 +160,7 @@ export function filterExercises(
 }
 
 /**
- * Generate a single day workout based on focuses, duration, equipment and goals
+ * Gera os blocos do treino do dia (Aquecimento, Principal, Core e Alongamento)
  */
 export function generateDayWorkout(params: {
   focuses: BodyFocus[];
@@ -125,7 +169,7 @@ export function generateDayWorkout(params: {
   userLevel: ExerciseDifficulty;
   equipments: EquipmentType[];
   limitations?: JointLimitation[];
-  existingBlocks?: WorkoutBlock[]; // For locked exercises preservation
+  existingBlocks?: WorkoutBlock[];
 }): WorkoutBlock[] {
   const {
     focuses,
@@ -137,13 +181,13 @@ export function generateDayWorkout(params: {
     existingBlocks = [],
   } = params;
 
-  // Extract locked exercises to preserve
+  // Extrair exercícios travados pelo usuário
   const lockedExercises = existingBlocks.flatMap(b =>
     b.exercises.filter(e => e.locked)
   );
   const lockedIds = new Set(lockedExercises.map(e => e.exerciseId));
 
-  // Determine volume / sets based on duration
+  // Volumes e metas
   const setsConfig = {
     20: { mainSets: 3, accSets: 2, mainExercisesCount: 2 },
     30: { mainSets: 3, accSets: 3, mainExercisesCount: 3 },
@@ -151,7 +195,6 @@ export function generateDayWorkout(params: {
     60: { mainSets: 4, accSets: 4, mainExercisesCount: 5 },
   }[targetDurationMinutes];
 
-  // Determine reps / rest based on goal
   const goalConfig = {
     forca: { reps: 6, holdSeconds: 20, rest: 90 },
     hipertrofia: { reps: 10, holdSeconds: 30, rest: 60 },
@@ -168,33 +211,36 @@ export function generateDayWorkout(params: {
     limitations
   );
 
-  // Helper: Match exercises to focuses
+  // Helper de correspondência de foco
   const isMatch = (ex: Exercise, focus: BodyFocus): boolean => {
     if (focus === 'full_body') return true;
-    if (focus === 'skills') return ex.category === 'Skill' || ex.difficulty === 'Avançado';
+    if (focus === 'skills') return ex.category === 'Skill' || ex.padrao === 'skills';
     if (focus === 'core' || focus === 'abdomen') {
       return (
         ex.category === 'Core' ||
-        ex.primaryMuscles.includes('abdomen') ||
-        ex.secondaryMuscles.includes('abdomen')
+        ex.padrao === 'core-anterior' ||
+        ex.padrao === 'core-lateral' ||
+        ex.primaryMuscles.includes('abdomen')
       );
     }
-    if (focus === 'mobilidade') return ex.type === 'isometric';
+    if (focus === 'mobilidade') return ex.tipoExercicio === 'aquecimento' || ex.tipoExercicio === 'alongamento';
     return (
       ex.primaryMuscles.includes(focus as MuscleGroup) ||
       ex.secondaryMuscles.includes(focus as MuscleGroup)
     );
   };
 
-  // Find candidate exercises sorted by relevance
-  const matchingCandidates = availableExercises.filter(ex =>
+  // Filtrar candidatos para bloco principal (excluindo aquecimentos e alongamentos puros)
+  const mainCandidatesPool = availableExercises.filter(
+    ex => ex.tipoExercicio !== 'aquecimento' && ex.tipoExercicio !== 'alongamento'
+  );
+
+  const matchingCandidates = mainCandidatesPool.filter(ex =>
     focuses.some(f => isMatch(ex, f))
   );
 
-  // Fallback pool if matching is scarce
-  const pool = matchingCandidates.length >= 2 ? matchingCandidates : availableExercises;
+  const pool = matchingCandidates.length >= 2 ? matchingCandidates : mainCandidatesPool;
 
-  // Separate into compound strength vs isometric/core
   const mainStrengthCandidates = pool.filter(
     e => e.type === 'reps' && !lockedIds.has(e.id)
   );
@@ -202,27 +248,30 @@ export function generateDayWorkout(params: {
     e => (e.type === 'isometric' || e.category === 'Core') && !lockedIds.has(e.id)
   );
 
-  // 1. WARM-UP BLOCK (Aquecimento e Ativação)
-  const warmupExercises: PlannedExercise[] = [
-    {
-      exerciseId: 'plank',
-      sets: 2,
-      targetHoldSeconds: 20,
-      restSeconds: 30,
-      notes: 'Aquecimento: ative o core e escápulas sem fadigar.',
-    },
-  ];
+  // 1. BLOCO DE AQUECIMENTO & MOBILIDADE DINÂMICA
+  const warmupPool = availableExercises.filter(
+    e => e.tipoExercicio === 'aquecimento' || e.padrao === 'aquecimento'
+  );
+  const selectedWarmupEx = warmupPool.length > 0
+    ? warmupPool.slice(0, 2)
+    : [availableExercises.find(e => e.id === 'plank') || availableExercises[0]];
 
-  // 2. MAIN STRENGTH BLOCK (Bloco Principal)
+  const warmupExercises: PlannedExercise[] = selectedWarmupEx.map(ex => ({
+    exerciseId: ex.id,
+    sets: 2,
+    targetHoldSeconds: ex.type === 'isometric' ? (ex.defaultHoldSeconds || 25) : undefined,
+    targetReps: ex.type === 'reps' ? (ex.defaultReps || 12) : undefined,
+    restSeconds: 30,
+    notes: 'Aquecimento articular: execute com fluidez e controle respiratório.',
+  }));
+
+  // 2. BLOCO PRINCIPAL DE FORÇA & HIPERTROFIA
   const selectedMain: PlannedExercise[] = [];
-
-  // Re-add locked exercises for main block
   existingBlocks
     .find(b => b.type === 'main')
     ?.exercises.filter(e => e.locked)
     .forEach(e => selectedMain.push(e));
 
-  // Fill remaining slots
   const neededMain = Math.max(0, setsConfig.mainExercisesCount - selectedMain.length);
   const shuffledMain = [...mainStrengthCandidates].sort(() => 0.5 - Math.random());
 
@@ -233,11 +282,11 @@ export function generateDayWorkout(params: {
       sets: setsConfig.mainSets,
       targetReps: ex.defaultReps || goalConfig.reps,
       restSeconds: ex.defaultRestSeconds || goalConfig.rest,
-      notes: ex.breathingTip ? `Foco: ${ex.breathingTip}` : undefined,
+      notes: ex.breathingTip ? `Respiração: ${ex.breathingTip}` : undefined,
     });
   }
 
-  // 3. ISOMETRIC & CORE BLOCK (Isometria e Core)
+  // 3. BLOCO DE ISOMETRIA, ESTABILIDADE & CORE
   const selectedCore: PlannedExercise[] = [];
   existingBlocks
     .find(b => b.type === 'isometric_core')
@@ -253,27 +302,32 @@ export function generateDayWorkout(params: {
       exerciseId: ex.id,
       sets: setsConfig.accSets,
       targetHoldSeconds: ex.defaultHoldSeconds || goalConfig.holdSeconds,
-      targetReps: ex.type === 'reps' ? 10 : undefined,
+      targetReps: ex.type === 'reps' ? (ex.defaultReps || 12) : undefined,
       restSeconds: 45,
-      notes: 'Mantenha a postura e a tensão contínua.',
+      notes: 'Estabilização: mantenha retroversão pélvica e tensão uniforme.',
     });
   }
 
-  // 4. COOLDOWN / ALONGAMENTO BLOCK
-  const cooldownExercises: PlannedExercise[] = [
-    {
-      exerciseId: 'hollow_body',
-      sets: 1,
-      targetHoldSeconds: 30,
-      restSeconds: 30,
-      notes: 'Descompressão e alongamento respiratório.',
-    },
-  ];
+  // 4. BLOCO DE ALONGAMENTO & VOLTA À CALMA
+  const cooldownPool = availableExercises.filter(
+    e => e.tipoExercicio === 'alongamento' || e.padrao === 'alongamento'
+  );
+  const selectedCooldownEx = cooldownPool.length > 0
+    ? cooldownPool.slice(0, 2)
+    : [availableExercises.find(e => e.id === 'hollowbody') || availableExercises[0]];
+
+  const cooldownExercises: PlannedExercise[] = selectedCooldownEx.map(ex => ({
+    exerciseId: ex.id,
+    sets: 1,
+    targetHoldSeconds: ex.defaultHoldSeconds || 35,
+    restSeconds: 20,
+    notes: 'Volta à calma: respire profundamente e relaxe a musculatura trabalhada.',
+  }));
 
   return [
     {
       id: `block-warmup-${Date.now()}`,
-      title: 'Aquecimento & Ativação',
+      title: 'Aquecimento & Mobilidade',
       type: 'warmup',
       exercises: warmupExercises,
     },
@@ -285,7 +339,7 @@ export function generateDayWorkout(params: {
     },
     {
       id: `block-core-${Date.now()}`,
-      title: 'Isometria & Estabilidade',
+      title: 'Isometria & Estabilidade do Core',
       type: 'isometric_core',
       exercises: selectedCore.length > 0 ? selectedCore : [warmupExercises[0]],
     },
@@ -299,7 +353,7 @@ export function generateDayWorkout(params: {
 }
 
 /**
- * Generate Preset Weekly Plans (PPL, Upper/Lower, Full Body 3x, ABC, Core Diário)
+ * Gera Presets de Planos Semanais
  */
 export function createPresetWeeklyPlan(
   templateType: 'ppl' | 'upper_lower' | 'fullbody' | 'abc' | 'core_daily',
@@ -342,37 +396,37 @@ export function createPresetWeeklyPlan(
   let title = 'Plano Semanal Personalizado';
 
   switch (templateType) {
-    case 'ppl': // Push / Pull / Legs (Seg, Ter, Qui, Sex)
+    case 'ppl':
       title = 'Divisão Push / Pull / Legs (PPL)';
       configureDay(1, 'Push (Peito, Ombros e Tríceps)', ['peito', 'ombros', 'triceps']);
-      configureDay(2, 'Pull (Costas, Bíceps e Trapézio)', ['costas', 'biceps', 'antebraco']);
-      configureDay(4, 'Legs (Pernas e Abdômen)', ['quadriceps', 'gluteos', 'abdomen']);
+      configureDay(2, 'Pull (Costas, Bíceps e Antebraço)', ['costas', 'biceps', 'antebraco']);
+      configureDay(4, 'Legs (Pernas e Glúteos)', ['quadriceps', 'gluteos', 'abdomen']);
       configureDay(5, 'Push & Core', ['peito', 'triceps', 'core']);
       break;
 
-    case 'upper_lower': // Upper / Lower (Seg, Ter, Qui, Sex)
+    case 'upper_lower':
       title = 'Divisão Upper / Lower (Membros Sup. e Inf.)';
-      configureDay(1, 'Upper (Peito, Costas e Braços)', ['peito', 'costas', 'ombros']);
+      configureDay(1, 'Upper (Peito, Costas e Ombros)', ['peito', 'costas', 'ombros']);
       configureDay(2, 'Lower (Pernas e Core)', ['quadriceps', 'posteriores', 'gluteos', 'abdomen']);
       configureDay(4, 'Upper Força', ['costas', 'peito', 'triceps'], 'forca');
       configureDay(5, 'Lower Isometria & Core', ['quadriceps', 'core'], 'skills');
       break;
 
-    case 'fullbody': // Full Body 3x (Seg, Qua, Sex)
+    case 'fullbody':
       title = 'Full Body 3x por Semana';
       configureDay(1, 'Full Body A (Foco Força)', ['full_body', 'peito', 'costas'], 'forca');
       configureDay(3, 'Full Body B (Foco Hipertrofia)', ['full_body', 'quadriceps', 'ombros'], 'hipertrofia');
       configureDay(5, 'Full Body C (Foco Isometria)', ['full_body', 'core', 'skills'], 'skills');
       break;
 
-    case 'abc': // ABC Clássico (Seg, Ter, Qua)
+    case 'abc':
       title = 'Divisão ABC Calistenia';
       configureDay(1, 'Treino A: Empurrar (Push)', ['peito', 'triceps', 'ombros']);
       configureDay(2, 'Treino B: Puxar (Pull)', ['costas', 'biceps']);
       configureDay(3, 'Treino C: Pernas & Abdômen', ['quadriceps', 'gluteos', 'abdomen']);
       break;
 
-    case 'core_daily': // Core e Calistenia Diária (5 dias)
+    case 'core_daily':
       title = 'Core & Habilidades Diárias';
       configureDay(1, 'Core & Push', ['abdomen', 'peito']);
       configureDay(2, 'Core & Pull', ['abdomen', 'costas']);
@@ -395,7 +449,7 @@ export function createPresetWeeklyPlan(
 }
 
 /**
- * Builds a customized weekly plan from the 8-step onboarding questionnaire
+ * Cria o plano customizado com base no perfil respondido no Onboarding
  */
 export function createCustomWeeklyPlanFromProfile(
   profile: UserOnboardingProfile
@@ -507,5 +561,3 @@ export function createCustomWeeklyPlanFromProfile(
     updatedAt: new Date().toISOString(),
   };
 }
-
-
