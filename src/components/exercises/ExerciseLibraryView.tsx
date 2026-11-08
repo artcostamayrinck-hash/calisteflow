@@ -4,6 +4,7 @@ import { EXERCISES_DATABASE, MUSCLE_LABELS, getExerciseById, CREF_REVIEWER_SPECI
 import { MuscleMap } from '../visuals/MuscleMap';
 import { ExerciseVideoPlayer } from '../workout/ExerciseVideoPlayer';
 import { soundManager } from '../../utils/audio';
+import { useBodyScrollLock } from '../../utils/useBodyScrollLock';
 import {
   Search,
   Filter,
@@ -61,6 +62,8 @@ export const ExerciseLibraryView = ({
     }
     return null;
   });
+
+  useBodyScrollLock(Boolean(selectedExercise), () => setSelectedExercise(null));
 
   const [activeTab, setActiveTab] = useState<ModalTab>('como_fazer');
   const [showInteractiveMap, setShowInteractiveMap] = useState<boolean>(false);
@@ -469,8 +472,14 @@ export const ExerciseLibraryView = ({
 
       {/* MODAL MULTI-ABAS DE DETALHES COMPLETOS DO EXERCÍCIO */}
       {selectedExercise && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="w-full max-w-2xl max-h-[92vh] sm:max-h-[88vh] glass-panel border border-white/10 rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden">
+        <div
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200"
+          onClick={() => setSelectedExercise(null)}
+        >
+          <div
+            className="w-full max-w-2xl max-h-[min(92dvh,calc(100dvh-2rem))] sm:max-h-[88dvh] glass-panel border border-white/10 rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden"
+            onClick={e => e.stopPropagation()}
+          >
             {/* Cabeçalho do Modal */}
             <div className="p-4 sm:p-5 border-b border-white/10 flex items-center justify-between shrink-0 glass-panel">
               <div className="pr-4">
@@ -551,7 +560,7 @@ export const ExerciseLibraryView = ({
             </div>
 
             {/* Conteúdo da Aba */}
-            <div className="overflow-y-auto p-4 sm:p-6 space-y-5 flex-1">
+            <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 space-y-5">
               {/* Visualização de Vídeo ou SVG Biomecânico */}
               <ExerciseVideoPlayer exercise={selectedExercise} autoLoop={true} />
 
@@ -861,8 +870,8 @@ export const ExerciseLibraryView = ({
               )}
             </div>
 
-            {/* Rodapé do Modal */}
-            <div className="p-4 border-t border-white/10 glass-panel flex items-center justify-between shrink-0">
+            {/* Rodapé do Modal com Safe Area */}
+            <div className="p-4 pb-[max(1rem,calc(env(safe-area-inset-bottom,0px)+0.75rem))] border-t border-white/10 glass-panel flex items-center justify-between shrink-0">
               <span className="text-[11px] text-slate-400 font-mono hidden sm:inline">
                 ID: {selectedExercise.id}
               </span>

@@ -11,6 +11,7 @@ import { EXERCISES_DATABASE } from '../../data/exercisesData';
 import { FOCUS_LABELS, generateDayWorkout } from '../../utils/workoutGenerator';
 import { MuscleMap } from '../visuals/MuscleMap';
 import { soundManager } from '../../utils/audio';
+import { useBodyScrollLock } from '../../utils/useBodyScrollLock';
 import {
   X,
   Lock,
@@ -162,9 +163,17 @@ export const DayEditorModal = ({ day, onSaveDay, onClose }: DayEditorModalProps)
 
   const allFocusKeys = Object.keys(FOCUS_LABELS) as BodyFocus[];
 
+  useBodyScrollLock(true, onClose);
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="w-full max-w-2xl max-h-[92vh] glass-panel border border-white/10 rounded-3xl shadow-2xl flex flex-col overflow-hidden">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/85 backdrop-blur-md animate-in fade-in duration-200"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-2xl max-h-[min(92dvh,calc(100dvh-2rem))] glass-panel border border-white/10 rounded-3xl shadow-2xl flex flex-col overflow-hidden"
+        onClick={e => e.stopPropagation()}
+      >
         {/* Header */}
         <div className="p-4 sm:p-5 border-b border-white/10 flex items-center justify-between shrink-0 glass-panel">
           <div className="flex items-center gap-3">
@@ -189,7 +198,7 @@ export const DayEditorModal = ({ day, onSaveDay, onClose }: DayEditorModalProps)
         </div>
 
         {/* Scrollable Body */}
-        <div className="overflow-y-auto p-4 sm:p-6 space-y-6">
+        <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 space-y-6">
           {/* Day Active Status Toggle */}
           <div className="p-4 glass-card rounded-2xl border border-white/10 flex items-center justify-between">
             <div>
@@ -461,8 +470,8 @@ export const DayEditorModal = ({ day, onSaveDay, onClose }: DayEditorModalProps)
           )}
         </div>
 
-        {/* Footer */}
-        <div className="p-4 sm:p-5 border-t border-white/10 flex items-center justify-between glass-panel shrink-0">
+        {/* Footer com Safe Area */}
+        <div className="p-4 sm:p-5 pb-[max(1rem,calc(env(safe-area-inset-bottom,0px)+0.75rem))] border-t border-white/10 flex items-center justify-between glass-panel shrink-0">
           <button
             type="button"
             onClick={onClose}
@@ -482,9 +491,15 @@ export const DayEditorModal = ({ day, onSaveDay, onClose }: DayEditorModalProps)
 
       {/* Add Exercise Modal Picker */}
       {showAddExerciseModal && (
-        <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-          <div className="w-full max-w-md glass-panel border border-white/10 rounded-3xl p-5 shadow-2xl max-h-[80vh] flex flex-col">
-            <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-3">
+        <div
+          className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
+          onClick={() => setShowAddExerciseModal(null)}
+        >
+          <div
+            className="w-full max-w-md glass-panel border border-white/10 rounded-3xl p-5 shadow-2xl max-h-[min(80dvh,calc(100dvh-3rem))] flex flex-col overflow-hidden"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-3 shrink-0">
               <h4 className="text-sm font-black text-slate-100">
                 Adicionar Exercício ao Bloco
               </h4>
@@ -497,7 +512,7 @@ export const DayEditorModal = ({ day, onSaveDay, onClose }: DayEditorModalProps)
               </button>
             </div>
 
-            <div className="overflow-y-auto space-y-2 flex-1">
+            <div className="flex-1 min-h-0 overflow-y-auto space-y-2 pr-1">
               {EXERCISES_DATABASE.map(ex => (
                 <button
                   key={ex.id}

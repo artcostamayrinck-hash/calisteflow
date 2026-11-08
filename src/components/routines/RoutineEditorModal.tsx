@@ -3,6 +3,7 @@ import type { Routine, RoutineExercise, ExerciseCategory, ExerciseDifficulty } f
 import { EXERCISES_DATABASE } from '../../data/exercisesData';
 import { soundManager } from '../../utils/audio';
 import { X, Plus, Trash2, ArrowUp, ArrowDown, Save, Dumbbell } from 'lucide-react';
+import { useBodyScrollLock } from '../../utils/useBodyScrollLock';
 
 interface RoutineEditorModalProps {
   routineToEdit: Routine | null;
@@ -17,6 +18,8 @@ export const RoutineEditorModal = ({
   onClose,
   onSave,
 }: RoutineEditorModalProps) => {
+  useBodyScrollLock(isOpen, onClose);
+
   if (!isOpen) return null;
 
   const [title, setTitle] = useState(routineToEdit?.title || '');
@@ -98,8 +101,14 @@ export const RoutineEditorModal = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="w-full max-w-2xl max-h-[94vh] sm:max-h-[90vh] glass-panel border border-white/10 rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden">
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-2xl max-h-[min(94dvh,calc(100dvh-1.5rem))] sm:max-h-[90dvh] glass-panel border border-white/10 rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden"
+        onClick={e => e.stopPropagation()}
+      >
         {/* Header */}
         <div className="p-4 sm:p-5 border-b border-white/10 flex items-center justify-between shrink-0 glass-panel">
           <h2 className="text-lg font-black text-slate-100 flex items-center gap-2.5 tracking-tight">
@@ -115,7 +124,7 @@ export const RoutineEditorModal = ({
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSave} className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5">
+        <form onSubmit={handleSave} className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 space-y-5">
           {/* Title & Description */}
           <div className="space-y-3.5">
             <div>
@@ -340,9 +349,15 @@ export const RoutineEditorModal = ({
 
           {/* Exercise Picker Modal / Drawer */}
           {showAddDrawer && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-              <div className="w-full max-w-lg max-h-[80vh] glass-panel border border-white/10 rounded-3xl p-5 sm:p-6 shadow-2xl flex flex-col">
-                <div className="flex items-center justify-between pb-3.5 border-b border-white/10">
+            <div
+              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md"
+              onClick={() => setShowAddDrawer(false)}
+            >
+              <div
+                className="w-full max-w-lg max-h-[min(80dvh,calc(100dvh-3rem))] glass-panel border border-white/10 rounded-3xl p-5 sm:p-6 shadow-2xl flex flex-col overflow-hidden"
+                onClick={e => e.stopPropagation()}
+              >
+                <div className="flex items-center justify-between pb-3.5 border-b border-white/10 shrink-0">
                   <h3 className="font-black text-slate-100 text-sm">Biblioteca de Calistenia</h3>
                   <button
                     type="button"
@@ -352,7 +367,7 @@ export const RoutineEditorModal = ({
                     <X className="w-5 h-5" />
                   </button>
                 </div>
-                <div className="overflow-y-auto space-y-2 py-3 flex-1">
+                <div className="flex-1 min-h-0 overflow-y-auto space-y-2 py-3 pr-1">
                   {EXERCISES_DATABASE.map(ex => (
                     <button
                       key={ex.id}
@@ -374,8 +389,8 @@ export const RoutineEditorModal = ({
             </div>
           )}
 
-          {/* Footer Save Actions */}
-          <div className="pt-4 border-t border-white/10 flex items-center justify-end gap-3">
+          {/* Footer Save Actions com Safe Area */}
+          <div className="pt-4 pb-[max(0.75rem,calc(env(safe-area-inset-bottom,0px)+0.5rem))] border-t border-white/10 flex items-center justify-end gap-3 shrink-0">
             <button
               type="button"
               onClick={onClose}

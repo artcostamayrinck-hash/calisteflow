@@ -8,6 +8,7 @@ import {
   Activity,
   Flame,
 } from 'lucide-react';
+import { useBodyScrollLock } from '../../utils/useBodyScrollLock';
 
 interface HealthDisclaimerModalProps {
   isOpen: boolean;
@@ -19,6 +20,7 @@ export const HealthDisclaimerModal: React.FC<HealthDisclaimerModalProps> = ({
   onAccept,
 }) => {
   const [hasAcknowledged, setHasAcknowledged] = useState(false);
+  useBodyScrollLock(isOpen);
 
   if (!isOpen) return null;
 
@@ -29,9 +31,9 @@ export const HealthDisclaimerModal: React.FC<HealthDisclaimerModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/90 backdrop-blur-xl animate-in fade-in duration-300">
-      <div className="w-full max-w-lg glass-panel border border-amber-500/30 rounded-3xl shadow-2xl p-5 sm:p-7 flex flex-col space-y-4 max-h-[92vh] overflow-y-auto">
+      <div className="w-full max-w-lg glass-panel border border-amber-500/30 rounded-3xl shadow-2xl p-5 sm:p-7 flex flex-col space-y-4 max-h-[min(92dvh,calc(100dvh-2rem))] overflow-hidden">
         {/* Header with Safety Shield */}
-        <div className="flex items-center gap-3 pb-3 border-b border-white/10">
+        <div className="flex items-center gap-3 pb-3 border-b border-white/10 shrink-0">
           <div className="w-11 h-11 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0 glow-amber">
             <ShieldAlert className="w-6 h-6 stroke-[2.5]" />
           </div>
@@ -45,8 +47,10 @@ export const HealthDisclaimerModal: React.FC<HealthDisclaimerModalProps> = ({
           </div>
         </div>
 
-        {/* Core Disclaimer Message without Medical Promises */}
-        <div className="space-y-3 text-xs sm:text-sm text-slate-300 leading-relaxed">
+        {/* Scrollable Body */}
+        <div className="flex-1 min-h-0 overflow-y-auto space-y-4 pr-1">
+          {/* Core Disclaimer Message without Medical Promises */}
+          <div className="space-y-3 text-xs sm:text-sm text-slate-300 leading-relaxed">
           <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-200/90 text-xs flex items-start gap-2.5">
             <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
             <span>
@@ -108,9 +112,10 @@ export const HealthDisclaimerModal: React.FC<HealthDisclaimerModalProps> = ({
             Li e compreendi que devo parar imediatamente em caso de dor articular aguda e que sou responsável por respeitar meus limites fisiológicos.
           </span>
         </button>
+        </div>
 
         {/* Action Button */}
-        <div className="pt-2">
+        <div className="pt-2 shrink-0">
           <button
             type="button"
             disabled={!hasAcknowledged}

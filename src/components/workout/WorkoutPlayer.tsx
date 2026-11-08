@@ -7,6 +7,7 @@ import { ExercisePostureVisual } from '../visuals/ExercisePostureVisual';
 import { MuscleMap } from '../visuals/MuscleMap';
 import { CadenceMetronome } from './CadenceMetronome';
 import { ExerciseVideoPlayer } from './ExerciseVideoPlayer';
+import { useBodyScrollLock } from '../../utils/useBodyScrollLock';
 import {
   Play,
   Pause,
@@ -41,6 +42,8 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
   onExitWorkout,
   initialBackup,
 }) => {
+  useBodyScrollLock(true);
+
   // Navigation & Step State (supports restoring from active backup)
   const [exerciseIndex, setExerciseIndex] = useState<number>(initialBackup?.exerciseIndex || 0);
   const [setIndex, setSetIndex] = useState<number>(initialBackup?.setIndex || 0);
@@ -749,7 +752,7 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
       </div>
 
       {/* Main Active Training Stage */}
-      <main className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-4 flex flex-col items-center justify-start max-w-md sm:max-w-xl mx-auto w-full box-border pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))]">
+      <main className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-3 sm:p-4 flex flex-col items-center justify-start max-w-md sm:max-w-xl mx-auto w-full box-border pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))]">
         {phase === 'exercise' ? (
           /* ================= PHASE 1: EXECUTING SET ================= */
           <div className="w-full flex flex-col items-center space-y-4 animate-in fade-in zoom-in-95 duration-200">
@@ -1251,8 +1254,14 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
 
       {/* Slide-over Posture Drawer during Workout */}
       {showPostureDrawer && currentExerciseData && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="w-full max-w-xl max-h-[88vh] glass-panel border border-white/10 rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden">
+        <div
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
+          onClick={() => setShowPostureDrawer(false)}
+        >
+          <div
+            className="w-full max-w-xl max-h-[min(88dvh,calc(100dvh-2rem))] glass-panel border border-white/10 rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden"
+            onClick={e => e.stopPropagation()}
+          >
             <div className="p-4 border-b border-white/10 flex items-center justify-between shrink-0">
               <h3 className="font-black text-sm text-slate-100 flex items-center gap-2 tracking-tight">
                 <HelpCircle className="w-4 h-4 text-emerald-400" />
@@ -1265,7 +1274,7 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="p-4 sm:p-6 overflow-y-auto space-y-4">
+            <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 space-y-4">
               <ExercisePostureVisual exercise={currentExerciseData} />
               <MuscleMap
                 primaryMuscles={currentExerciseData.primaryMuscles}
@@ -1298,7 +1307,7 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
                 </div>
               )}
             </div>
-            <div className="p-4 border-t border-white/10 flex justify-end">
+            <div className="p-4 pb-[max(1rem,calc(env(safe-area-inset-bottom,0px)+0.75rem))] border-t border-white/10 flex justify-end shrink-0">
               <button
                 onClick={() => setShowPostureDrawer(false)}
                 className="px-6 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 text-slate-950 font-black text-xs shadow-lg shadow-emerald-500/25 glow-emerald"
@@ -1312,9 +1321,15 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
 
       {/* Slide-over In-Workout Adaptation & Regression Drawer */}
       {showAdaptationModal && currentExerciseData && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="w-full max-w-lg max-h-[85vh] glass-panel border border-white/10 rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden">
-            <div className="p-4 border-b border-white/10 flex items-center justify-between">
+        <div
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200"
+          onClick={() => setShowAdaptationModal(false)}
+        >
+          <div
+            className="w-full max-w-lg max-h-[min(85dvh,calc(100dvh-2rem))] glass-panel border border-white/10 rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="p-4 border-b border-white/10 flex items-center justify-between shrink-0">
               <div>
                 <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400">
                   Ajuste sem Interromper a Sessão
@@ -1331,7 +1346,7 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
               </button>
             </div>
 
-            <div className="p-4 overflow-y-auto space-y-4">
+            <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4">
               {/* Regressões Diretas */}
               {currentExerciseData.regressoes && currentExerciseData.regressoes.length > 0 && (
                 <div className="space-y-2">
@@ -1393,7 +1408,7 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
               )}
             </div>
 
-            <div className="p-3 border-t border-white/10 flex justify-end">
+            <div className="p-3 pb-[max(0.75rem,calc(env(safe-area-inset-bottom,0px)+0.5rem))] border-t border-white/10 flex justify-end shrink-0">
               <button
                 onClick={() => setShowAdaptationModal(false)}
                 className="px-5 py-2 rounded-xl text-xs font-bold text-slate-400 hover:text-white"
@@ -1407,8 +1422,14 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
 
       {/* Exit Confirmation Dialog */}
       {showExitConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-          <div className="w-full max-w-sm glass-panel border border-white/10 rounded-3xl p-6 shadow-2xl space-y-4">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md"
+          onClick={() => setShowExitConfirm(false)}
+        >
+          <div
+            className="w-full max-w-sm glass-panel border border-white/10 rounded-3xl p-6 shadow-2xl space-y-4"
+            onClick={e => e.stopPropagation()}
+          >
             <h3 className="text-lg font-black text-slate-100 tracking-tight">Sair do Treino em Andamento?</h3>
             <p className="text-xs text-slate-300 leading-relaxed font-medium">
               Você pode finalizar e salvar todo o progresso realizado até agora ou descartar esta sessão.

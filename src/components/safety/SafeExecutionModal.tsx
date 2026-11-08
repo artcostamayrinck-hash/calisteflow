@@ -11,6 +11,7 @@ import {
   CheckCircle2,
   Sparkles,
 } from 'lucide-react';
+import { useBodyScrollLock } from '../../utils/useBodyScrollLock';
 
 interface SafeExecutionModalProps {
   isOpen: boolean;
@@ -26,12 +27,19 @@ export const SafeExecutionModal: React.FC<SafeExecutionModalProps> = ({
   onSelectAudienceProgram,
 }) => {
   const [activeTab, setActiveTab] = useState<SafetyTab>('golden_rules');
+  useBodyScrollLock(isOpen, onClose);
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/90 backdrop-blur-xl animate-in fade-in duration-300">
-      <div className="w-full max-w-2xl glass-panel border border-white/10 rounded-3xl shadow-2xl p-5 sm:p-7 flex flex-col space-y-4 max-h-[92vh] overflow-hidden">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/90 backdrop-blur-xl animate-in fade-in duration-300"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-2xl glass-panel border border-white/10 rounded-3xl shadow-2xl p-5 sm:p-7 flex flex-col space-y-4 max-h-[min(92dvh,calc(100dvh-2rem))] overflow-hidden"
+        onClick={e => e.stopPropagation()}
+      >
         {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b border-white/10 shrink-0">
           <div className="flex items-center gap-3">
@@ -92,7 +100,7 @@ export const SafeExecutionModal: React.FC<SafeExecutionModalProps> = ({
         </div>
 
         {/* Main Tab Content */}
-        <div className="flex-1 overflow-y-auto space-y-4 pr-1 text-xs sm:text-sm text-slate-300">
+        <div className="flex-1 min-h-0 overflow-y-auto space-y-4 pr-1 text-xs sm:text-sm text-slate-300">
           {/* TAB 1: REGRAS DE OURO */}
           {activeTab === 'golden_rules' && (
             <div className="space-y-4 animate-in fade-in duration-200">

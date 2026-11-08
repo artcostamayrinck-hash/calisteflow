@@ -22,6 +22,7 @@ import {
 } from '../../utils/storage';
 import { soundManager } from '../../utils/audio';
 import { isIOS, isStandalone } from '../../utils/platform';
+import { useBodyScrollLock } from '../../utils/useBodyScrollLock';
 import {
   Sparkles,
   Calendar,
@@ -278,9 +279,11 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ onComplete, on
     'mobilidade',
   ];
 
+  useBodyScrollLock(true, handleSkip);
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/90 backdrop-blur-xl animate-in fade-in duration-300 overflow-y-auto">
-      <div className="w-full max-w-xl glass-panel border border-white/10 rounded-3xl shadow-2xl p-5 sm:p-7 flex flex-col space-y-5 my-auto max-h-[95vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/90 backdrop-blur-xl animate-in fade-in duration-300">
+      <div className="w-full max-w-xl glass-panel border border-white/10 rounded-3xl shadow-2xl p-5 sm:p-7 flex flex-col space-y-5 max-h-[min(95dvh,calc(100dvh-1.5rem))] overflow-hidden">
         {/* Step Indicator & Header */}
         <div className="flex items-center justify-between pb-3 border-b border-white/10 shrink-0">
           <div className="flex items-center gap-2">
@@ -312,6 +315,9 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ onComplete, on
             ))}
           </div>
         </div>
+
+        {/* Scrollable Step Body */}
+        <div className="flex-1 min-h-0 overflow-y-auto space-y-5 pr-1">
 
         {/* STEP 1: OBJETIVO PRINCIPAL */}
         {step === 1 && (
@@ -1005,9 +1011,10 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ onComplete, on
             </div>
           </div>
         )}
+        </div>
 
-        {/* Bottom Actions Bar */}
-        <div className="flex items-center justify-between pt-3 border-t border-white/10 shrink-0">
+        {/* Bottom Actions Bar com Safe Area */}
+        <div className="flex items-center justify-between pt-3 pb-[max(0.75rem,calc(env(safe-area-inset-bottom,0px)+0.5rem))] border-t border-white/10 shrink-0">
           {step === 1 ? (
             <button
               type="button"

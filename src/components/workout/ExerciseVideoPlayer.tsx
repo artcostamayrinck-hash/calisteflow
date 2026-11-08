@@ -14,6 +14,7 @@ import {
   X,
 } from 'lucide-react';
 import { soundManager } from '../../utils/audio';
+import { useBodyScrollLock } from '../../utils/useBodyScrollLock';
 
 interface ExerciseVideoPlayerProps {
   exercise: Exercise;
@@ -44,6 +45,8 @@ export const ExerciseVideoPlayer: React.FC<ExerciseVideoPlayerProps> = ({
   const [hasError, setHasError] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const isMuted = true;
+
+  useBodyScrollLock(isFullscreen, () => setIsFullscreen(false));
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
@@ -326,8 +329,14 @@ export const ExerciseVideoPlayer: React.FC<ExerciseVideoPlayerProps> = ({
 
       {/* Expanded Fullscreen Inspection Modal */}
       {isFullscreen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/90 backdrop-blur-xl animate-in fade-in duration-200">
-          <div className="w-full max-w-xl glass-panel border border-white/15 rounded-3xl shadow-2xl flex flex-col overflow-hidden max-h-[92vh]">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/90 backdrop-blur-xl animate-in fade-in duration-200"
+          onClick={() => setIsFullscreen(false)}
+        >
+          <div
+            className="w-full max-w-xl glass-panel border border-white/15 rounded-3xl shadow-2xl flex flex-col overflow-hidden max-h-[min(92dvh,calc(100dvh-2rem))]"
+            onClick={e => e.stopPropagation()}
+          >
             {/* Header */}
             <div className="p-4 border-b border-white/10 flex items-center justify-between shrink-0 glass-panel">
               <div>
@@ -347,7 +356,7 @@ export const ExerciseVideoPlayer: React.FC<ExerciseVideoPlayerProps> = ({
             </div>
 
             {/* Modal Body */}
-            <div className="overflow-y-auto p-4 sm:p-6 space-y-4 flex flex-col items-center">
+            <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 space-y-4 flex flex-col items-center">
               <div className="w-full rounded-2xl overflow-hidden bg-black/60 border border-white/10 flex items-center justify-center min-h-[220px]">
                 {exercise.videoUrl && !hasError ? (
                   isVideoFormat ? (
@@ -382,8 +391,8 @@ export const ExerciseVideoPlayer: React.FC<ExerciseVideoPlayerProps> = ({
               </div>
             </div>
 
-            {/* Footer */}
-            <div className="p-4 border-t border-white/10 flex justify-end glass-panel shrink-0">
+            {/* Footer com Safe Area */}
+            <div className="p-4 pb-[max(1rem,calc(env(safe-area-inset-bottom,0px)+0.75rem))] border-t border-white/10 flex justify-end glass-panel shrink-0">
               <button
                 type="button"
                 onClick={() => setIsFullscreen(false)}

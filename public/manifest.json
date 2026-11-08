@@ -10,7 +10,12 @@
   "theme_color": "#020617",
   "orientation": "portrait",
   "lang": "pt-BR",
-  "categories": ["fitness", "health", "sports", "lifestyle"],
+  "categories": [
+    "fitness",
+    "health",
+    "sports",
+    "lifestyle"
+  ],
   "icons": [
     {
       "src": "/calisteflow/assets/img/icon-192.png?v=4",
@@ -55,21 +60,36 @@
       "short_name": "Treinar",
       "description": "Iniciar a rotina agendada para hoje",
       "url": "/calisteflow/?shortcut=today",
-      "icons": [{ "src": "/calisteflow/assets/img/icon-192.png?v=4", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "/calisteflow/assets/img/icon-192.png?v=4",
+          "sizes": "192x192"
+        }
+      ]
     },
     {
       "name": "Cronômetro de Descanso",
       "short_name": "Cronômetro",
       "description": "Abrir temporizador inteligente com feedback tátil",
       "url": "/calisteflow/?shortcut=timer",
-      "icons": [{ "src": "/calisteflow/assets/img/icon-192.png?v=4", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "/calisteflow/assets/img/icon-192.png?v=4",
+          "sizes": "192x192"
+        }
+      ]
     },
     {
       "name": "Biblioteca de Exercícios",
       "short_name": "Exercícios",
       "description": "Explorar biomecânica, variações e mapa muscular",
       "url": "/calisteflow/?shortcut=exercises",
-      "icons": [{ "src": "/calisteflow/assets/img/icon-192.png?v=4", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "/calisteflow/assets/img/icon-192.png?v=4",
+          "sizes": "192x192"
+        }
+      ]
     }
   ]
 }

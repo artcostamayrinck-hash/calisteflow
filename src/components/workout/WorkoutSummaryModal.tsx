@@ -3,6 +3,7 @@ import confetti from 'canvas-confetti';
 import type { WorkoutSession, MuscleGroup } from '../../types';
 import { MUSCLE_LABELS } from '../../data/exercisesData';
 import { Trophy, Clock, CheckCircle2, Flame, ArrowRight } from 'lucide-react';
+import { useBodyScrollLock } from '../../utils/useBodyScrollLock';
 
 interface WorkoutSummaryModalProps {
   session: WorkoutSession;
@@ -15,6 +16,8 @@ export const WorkoutSummaryModal: React.FC<WorkoutSummaryModalProps> = ({
 }) => {
   const [perceivedEffort, setPerceivedEffort] = useState<number>(session.perceivedEffort || 7);
   const [notes, setNotes] = useState<string>(session.userNotes || '');
+
+  useBodyScrollLock(true);
 
   useEffect(() => {
     // Launch celebratory confetti burst
@@ -63,20 +66,22 @@ export const WorkoutSummaryModal: React.FC<WorkoutSummaryModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-300">
-      <div className="w-full max-w-lg glass-panel border border-white/10 rounded-3xl shadow-2xl p-6 sm:p-8 flex flex-col space-y-5 max-h-[92vh] overflow-y-auto">
-        {/* Celebration Header */}
-        <div className="text-center space-y-2">
-          <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-emerald-500/25 to-teal-400/25 border border-emerald-500/40 text-emerald-400 flex items-center justify-center mx-auto shadow-xl glow-emerald animate-bounce">
-            <Trophy className="w-8 h-8" />
+      <div className="w-full max-w-lg glass-panel border border-white/10 rounded-3xl shadow-2xl p-6 sm:p-8 flex flex-col space-y-5 max-h-[min(92dvh,calc(100dvh-2rem))] overflow-hidden">
+        {/* Scrollable Body */}
+        <div className="flex-1 min-h-0 overflow-y-auto space-y-5 pr-1">
+          {/* Celebration Header */}
+          <div className="text-center space-y-2">
+            <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-emerald-500/25 to-teal-400/25 border border-emerald-500/40 text-emerald-400 flex items-center justify-center mx-auto shadow-xl glow-emerald animate-bounce">
+              <Trophy className="w-8 h-8" />
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-black text-slate-100 tracking-tight">Treino Concluído!</h2>
+            <p className="text-xs text-slate-400 font-medium">
+              Excelente trabalho! Você completou sua rotina com sucesso.
+            </p>
+            <div className="inline-block px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 glow-emerald">
+              {session.routineTitle}
+            </div>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-black text-slate-100 tracking-tight">Treino Concluído!</h2>
-          <p className="text-xs text-slate-400 font-medium">
-            Excelente trabalho! Você completou sua rotina com sucesso.
-          </p>
-          <div className="inline-block px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 glow-emerald">
-            {session.routineTitle}
-          </div>
-        </div>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
@@ -187,14 +192,17 @@ export const WorkoutSummaryModal: React.FC<WorkoutSummaryModalProps> = ({
             className="w-full px-3.5 py-2 rounded-2xl glass-card border border-white/10 text-slate-200 text-xs focus:outline-none focus:border-emerald-500"
           />
         </div>
+        </div>
 
-        {/* Save & Finish CTA */}
-        <button
-          onClick={handleFinish}
-          className="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 text-slate-950 font-black text-sm tracking-wide flex items-center justify-center gap-2 shadow-xl shadow-emerald-500/30 hover:brightness-110 active:scale-98 transition glow-emerald"
-        >
-          Salvar no Histórico & Continuar <ArrowRight className="w-4 h-4 stroke-[3]" />
-        </button>
+        {/* Save & Finish CTA com Safe Area */}
+        <div className="pt-2 pb-[max(0.75rem,calc(env(safe-area-inset-bottom,0px)+0.5rem))] shrink-0">
+          <button
+            onClick={handleFinish}
+            className="w-full min-h-[48px] py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 text-slate-950 font-black text-sm tracking-wide flex items-center justify-center gap-2 shadow-xl shadow-emerald-500/30 hover:brightness-110 active:scale-98 transition glow-emerald"
+          >
+            Salvar no Histórico & Continuar <ArrowRight className="w-4 h-4 stroke-[3]" />
+          </button>
+        </div>
       </div>
     </div>
   );

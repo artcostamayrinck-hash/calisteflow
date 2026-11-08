@@ -6,9 +6,16 @@
     --font-mono: 'JetBrains Mono', monospace;
   }
 
-  html,
+  html {
+    overflow-x: clip;
+    scroll-behavior: smooth;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
   body {
-    overflow-x: hidden;
+    overflow-x: clip;
+    min-height: 100dvh;
     max-width: 100%;
     box-sizing: border-box;
   }
@@ -24,7 +31,6 @@
     font-family: var(--font-sans);
     -webkit-tap-highlight-color: transparent;
     user-select: none;
-    overscroll-behavior-y: contain;
     background-color: #060913;
     background-image: 
       radial-gradient(at 15% 15%, rgba(16, 185, 129, 0.08) 0px, transparent 50%),
@@ -38,6 +44,21 @@
     font-family: var(--font-mono);
     font-feature-settings: "tnum";
     font-variant-numeric: tabular-nums;
+  }
+
+  /* Suporte de rolagem nativa suave para iOS WebKit, PWA e Android */
+  .overflow-y-auto {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+    overscroll-behavior-y: contain;
+  }
+
+  .overflow-x-auto {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x;
+    overscroll-behavior-x: contain;
   }
 }
 

@@ -2,6 +2,7 @@ import type { Routine, MuscleGroup } from '../../types';
 import { EXERCISES_DATABASE } from '../../data/exercisesData';
 import { MuscleMap } from '../visuals/MuscleMap';
 import { X, Play, Clock, Dumbbell, Shield, Info } from 'lucide-react';
+import { useBodyScrollLock } from '../../utils/useBodyScrollLock';
 
 interface RoutineDetailModalProps {
   routine: Routine | null;
@@ -16,6 +17,8 @@ export const RoutineDetailModal = ({
   onStart,
   onSelectExerciseToInspect,
 }: RoutineDetailModalProps) => {
+  useBodyScrollLock(Boolean(routine), onClose);
+
   if (!routine) return null;
 
   // Aggregate all muscles worked across this routine
@@ -40,8 +43,14 @@ export const RoutineDetailModal = ({
   const totalSets = routine.exercises.reduce((acc, curr) => acc + curr.sets, 0);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="w-full max-w-2xl max-h-[92vh] sm:max-h-[88vh] glass-panel border border-white/10 rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden">
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-2xl max-h-[min(92dvh,calc(100dvh-2rem))] sm:max-h-[88dvh] glass-panel border border-white/10 rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden"
+        onClick={e => e.stopPropagation()}
+      >
         {/* Modal Header */}
         <div className="p-4 sm:p-5 border-b border-white/10 flex items-center justify-between shrink-0 glass-panel">
           <div className="flex items-center gap-2">
@@ -61,7 +70,7 @@ export const RoutineDetailModal = ({
         </div>
 
         {/* Modal Scrollable Body */}
-        <div className="overflow-y-auto p-4 sm:p-6 space-y-6">
+        <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 space-y-6">
           {/* Title & Stats */}
           <div>
             <h2 className="text-xl sm:text-2xl font-black text-slate-100 tracking-tight">{routine.title}</h2>
@@ -164,8 +173,8 @@ export const RoutineDetailModal = ({
           </div>
         </div>
 
-        {/* Modal Bottom CTA */}
-        <div className="p-4 sm:p-5 border-t border-white/10 glass-panel flex items-center justify-end gap-3 shrink-0">
+        {/* Modal Bottom CTA com Safe Area */}
+        <div className="p-4 sm:p-5 pb-[max(1rem,calc(env(safe-area-inset-bottom,0px)+0.75rem))] border-t border-white/10 glass-panel flex items-center justify-end gap-3 shrink-0">
           <button
             onClick={onClose}
             className="px-5 py-2.5 rounded-2xl glass-card text-slate-300 text-xs font-bold hover:bg-white/[0.08] transition"
