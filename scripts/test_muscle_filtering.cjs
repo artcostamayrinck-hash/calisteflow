@@ -210,7 +210,7 @@ assert(multiPrim.length > 0 && multiSec.length > 0, `Multi-seleção [peito, tri
 // -------------------------------------------------------------
 console.log('\n--- TESTE 4: Interação com Filtro de Padrão e Exercícios Ocultos ---');
 const { primary: patPrim, secondary: patSec, hiddenByPattern } = partitionExercises(EXERCISES_DATABASE, ['abdomen'], 'empurrar-horizontal');
-assert(hiddenByPattern === 97, `Contagem exata de exercícios ocultos: ${hiddenByPattern} exercícios de abdômen estão fora de empurrar-horizontal`);
+assert(hiddenByPattern === 101, `Contagem exata de exercícios ocultos: ${hiddenByPattern} exercícios de abdômen estão fora de empurrar-horizontal`);
 assert(patPrim.length === 2, `2 exercícios com abdômen primário em empurrar-horizontal (flexao-escapular, flexao-unilateral)`);
 assert(patSec.length === 11, `11 flexões com abdômen secundário exibidas corretamente no Grupo 2`);
 assert(patPrim.length + patSec.length === 13, `Total de 13 exercícios em empurrar-horizontal que recrutam abdômen`);

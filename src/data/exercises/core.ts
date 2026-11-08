@@ -143,7 +143,7 @@ export const CORE_EXERCISES: Exercise[] = [
     tipoExercicio: 'aquecimento',
     estatico: false,
     cadencia: '2-1-2',
-    regressoes: ['elevacao-joelhos-chao'],
+    regressoes: [],
     progressoes: ['dead-bug-perna-estendida', 'hollow-hold-tuck', 'plank'],
     variacoes: ['hollow-hold-tuck'],
     adaptacoes: {
@@ -241,7 +241,52 @@ export const CORE_EXERCISES: Exercise[] = [
       { mistake: 'Arquear a lombar criando espaço sob a coluna', correction: 'Suba um pouco as pernas ou dobre levemente os joelhos até a lombar colar de novo.' }
     ]
   },
-  {
+    {
+    id: 'elevacao-joelhos-deitado',
+    name: 'Elevação de Joelhos Deitado no Solo',
+    category: 'Core',
+    difficulty: 'Iniciante',
+    type: 'reps',
+    primaryMuscles: ['abdomen'],
+    secondaryMuscles: ['quadriceps', 'lombar'],
+    defaultSets: 3,
+    defaultReps: 12,
+    defaultRestSeconds: 45,
+    description: 'Exercício de base e regressão direta do reverse crunch, focado em flexão do quadril com joelhos flexionados a 90° mantendo a coluna lombar estável no solo.',
+    breathingTip: 'Expire ao puxar os joelhos até a linha do quadril; inspire ao retornar os pés em direção ao solo.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Pare se houver dor aguda.',
+      'Mantenha a região lombar sempre em contato com o solo.'
+    ],
+    padrao: 'core-anterior',
+    equipamento: ['nenhum'],
+    tipoExercicio: 'principal',
+    estatico: false,
+    cadencia: '2-1-2',
+    regressoes: [],
+    progressoes: ['elevacao-joelhos-chao', 'elevacao-pernas-chao'],
+    variacoes: ['dead-bug'],
+    adaptacoes: {
+      lombar: ['dead-bug'],
+      pescoco: ['dead-bug'],
+      semEquipamento: ['elevacao-joelhos-deitado']
+    },
+    criterioAvanco: 'Completar 3 séries de 15 repetições controladas com lombar 100% apoiada',
+    sinonimos: ['lying knee raise', 'elevação de joelhos no chão', 'knee tuck solo', 'elevação de joelhos deitado'],
+    animationType: 'plank',
+    executionSteps: [
+      { step: 1, title: 'Posição Inicial Deitado', description: 'Deite-se de costas com a coluna lombar colada ao solo e braços estendidos ao longo do corpo.' },
+      { step: 2, title: 'Flexão dos Joelhos a 90°', description: 'Eleve os joelhos flexionados a 90° até que as coxas fiquem perpendiculares ao solo.' },
+      { step: 3, title: 'Retorno com Controle', description: 'Abaixe as pernas de volta até as pontas dos pés quase tocarem o chão, sem perder a pressão lombar no piso.' }
+    ],
+    commonMistakes: [
+      { mistake: 'Arquear a lombar criando espaço entre as costas e o solo', correction: 'Pressione o umbigo ativamente contra o solo durante toda a amplitude.' },
+      { mistake: 'Tirar o quadril do chão com impulso descontrolado', correction: 'Mantenha a bacia apoiada e mova apenas as pernas pela articulação do quadril.' }
+    ]
+  },
+{
     id: 'elevacao-joelhos-chao',
     name: 'Elevação de Joelhos Deitado (Reverse Crunch)',
     category: 'Core',
@@ -261,7 +306,7 @@ export const CORE_EXERCISES: Exercise[] = [
     tipoExercicio: 'principal',
     estatico: false,
     cadencia: '2-1-2',
-    regressoes: ['dead-bug'],
+    regressoes: ['elevacao-joelhos-deitado', 'dead-bug'],
     progressoes: ['elevacao-pernas-chao', 'elevacao-joelhos-barra'],
     variacoes: ['dead-bug'],
     adaptacoes: {
@@ -932,7 +977,7 @@ export const CORE_EXERCISES: Exercise[] = [
     tipoExercicio: 'aquecimento',
     estatico: false,
     cadencia: '2-1-2',
-    regressoes: ['ponte-gluteo'],
+    regressoes: [],
     progressoes: ['bird-dog-pausa', 'superman', 'superman-alternado'],
     variacoes: ['superman-alternado'],
     adaptacoes: {
@@ -1291,7 +1336,7 @@ export const CORE_EXERCISES: Exercise[] = [
     estatico: true,
     cadencia: 'isometria',
     regressoes: ['prancha-toque-ombro', 'plank'],
-    progressoes: ['prancha-apoio-instavel'],
+    progressoes: ['prancha-serrote', 'prancha-apoio-instavel'],
     variacoes: ['prancha-toque-ombro', 'prancha-joelhos'],
     adaptacoes: {
       lombar: ['prancha-joelhos', 'dead-bug'],
@@ -1310,6 +1355,51 @@ export const CORE_EXERCISES: Exercise[] = [
     commonMistakes: [
       { mistake: 'Elevar a perna excessivamente arqueando a lombar', correction: 'Suba o calcanhar apenas até a linha do tronco, mantendo o abdômen contraído.' },
       { mistake: 'Girar a bacia para o lado da perna elevada', correction: 'Mantenha as duas cristas ilíacas apontadas diretamente para o chão.' }
+    ]
+  },
+  {
+    id: 'prancha-serrote',
+    name: 'Prancha Serrote no Solo (Body Saw)',
+    category: 'Core',
+    difficulty: 'Avançado',
+    type: 'reps',
+    primaryMuscles: ['abdomen'],
+    secondaryMuscles: ['ombros', 'lombar', 'gluteos'],
+    defaultSets: 3,
+    defaultReps: 10,
+    defaultRestSeconds: 60,
+    description: 'Variação avançada de anti-extensão onde o corpo se desloca para frente e para trás sobre os antebraços com pés sobre superfície deslizante, aumentando a alavanca sobre o core.',
+    breathingTip: 'Inspire ao deslizar para trás aumentando a tensão do core; expire ao puxar os cotovelos de volta à posição inicial.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Pare se houver dor aguda.',
+      'Mantenha amplitude curta caso sinta pressão na lombar.'
+    ],
+    padrao: 'core-anterior',
+    equipamento: ['toalha'],
+    tipoExercicio: 'principal',
+    estatico: false,
+    cadencia: '2-1-2',
+    regressoes: ['prancha-elevacao-perna', 'plank'],
+    progressoes: ['ab-wheel-negativa', 'prancha-apoio-instavel'],
+    variacoes: ['ab-wheel-joelhos'],
+    adaptacoes: {
+      lombar: ['plank', 'dead-bug'],
+      ombro: ['prancha-joelhos'],
+      'sem-equipamento': ['prancha-elevacao-perna']
+    },
+    criterioAvanco: 'Executar 3 séries de 12 repetições completas mantendo a pelve em retroversão sem arqueamento lombar',
+    sinonimos: ['body saw', 'prancha serrote', 'body saw plank', 'prancha deslizante'],
+    animationType: 'plank',
+    executionSteps: [
+      { step: 1, title: 'Posição de Prancha com Pés Deslizantes', description: 'Inicie na posição de prancha sobre os antebraços, com os pés apoiados sobre uma toalha ou sliders em superfície lisa.' },
+      { step: 2, title: 'Deslizamento Posterior', description: 'Empurre o corpo para trás usando os ombros, estendendo a alavanca corporal sem deixar a pelve desabar.' },
+      { step: 3, title: 'Retorno com Tração dos Cotovelos', description: 'Puxe o corpo de volta para a posição inicial flexionando os cotovelos sob os ombros e travando o abdômen.' }
+    ],
+    commonMistakes: [
+      { mistake: 'Deixar o quadril ceder em hiperextensão lombar no ponto mais distante', correction: 'Aperte os glúteos intensamente e limite o deslize até o ponto em que o core se mantém 100% rígido.' },
+      { mistake: 'Subir os quadris em formato de pirâmide ao puxar de volta', correction: 'Mantenha o alinhamento reto e horizontal do corpo durante toda a transição.' }
     ]
   },
   {
@@ -1648,7 +1738,7 @@ export const CORE_EXERCISES: Exercise[] = [
     estatico: false,
     cadencia: '2-1-2',
     regressoes: ['dead-bug'],
-    progressoes: ['abdominal-bicicleta', 'russian-twist'],
+    progressoes: ['abdominal-completo', 'abdominal-bicicleta', 'russian-twist'],
     variacoes: ['dead-bug', 'heel-touch'],
     adaptacoes: {
       lombar: ['dead-bug', 'crunch-solo'],
@@ -1665,6 +1755,96 @@ export const CORE_EXERCISES: Exercise[] = [
     ],
     commonMistakes: [
       { mistake: 'Puxar o pescoço com as mãos forçando a cervical', correction: 'Fixe o olhar em diagonal para cima e mantenha espaço de uma maçã entre queixo e peito.' }
+    ]
+  },
+  {
+    id: 'abdominal-completo',
+    name: 'Abdominal Completo no Solo (Sit-Up)',
+    category: 'Core',
+    difficulty: 'Intermediário',
+    type: 'reps',
+    primaryMuscles: ['abdomen'],
+    secondaryMuscles: ['quadriceps', 'lombar'],
+    defaultSets: 3,
+    defaultReps: 12,
+    defaultRestSeconds: 45,
+    description: 'Exercício clássico de flexão completa do tronco a partir do solo até a posição sentada, combinando o trabalho do reto abdominal e flexores de quadril.',
+    breathingTip: 'Expire intensamente durante a subida do tronco; inspire de forma controlada na descida.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Pare se houver dor aguda.',
+      'Evite puxar a cabeça com as mãos. Em caso de desconforto lombar prévio, prefira o crunch curto.'
+    ],
+    padrao: 'core-anterior',
+    equipamento: ['nenhum'],
+    tipoExercicio: 'principal',
+    estatico: false,
+    cadencia: '2-1-2',
+    regressoes: ['crunch-solo'],
+    progressoes: ['abdominal-canivete', 'elevacao-pernas-chao'],
+    variacoes: ['crunch-solo', 'abdominal-bicicleta'],
+    adaptacoes: {
+      lombar: ['crunch-solo', 'dead-bug'],
+      pescoco: ['crunch-solo'],
+      semEquipamento: ['abdominal-completo']
+    },
+    criterioAvanco: 'Completar 3 séries de 15 repetições com subida e descida fluidas sem soltar o corpo no chão',
+    sinonimos: ['sit-up', 'situp', 'abdominal militar', 'subida completa de tronco', 'abdominal completo'],
+    animationType: 'plank',
+    executionSteps: [
+      { step: 1, title: 'Decúbito Dorsal', description: 'Deite-se de costas no solo com os joelhos dobrados a 90° e pés firmes no chão, braços cruzados sobre o peito.' },
+      { step: 2, title: 'Flexão do Tronco', description: 'Eleve o tronco enrolando vértebra por vértebra até alcançar a posição sentada completa.' },
+      { step: 3, title: 'Descida Articulada', description: 'Desça de maneira controlada, encostando a coluna gradualmente no solo sem impacto.' }
+    ],
+    commonMistakes: [
+      { mistake: 'Puxar o pescoço com força gerando compressão cervical', correction: 'Mantenha os braços cruzados no peito ou ao lado das orelhas sem entrelaçar os dedos atrás da nuca.' },
+      { mistake: 'Usar impulso dos braços e descolar a lombar em bloco rígido', correction: 'Articule a coluna suavemente focando na contração contínua da parede abdominal.' }
+    ]
+  },
+  {
+    id: 'abdominal-canivete',
+    name: 'Abdominal Canivete no Solo (V-Up)',
+    category: 'Core',
+    difficulty: 'Avançado',
+    type: 'reps',
+    primaryMuscles: ['abdomen'],
+    secondaryMuscles: ['quadriceps', 'ombros', 'lombar'],
+    defaultSets: 3,
+    defaultReps: 10,
+    defaultRestSeconds: 60,
+    description: 'Exercício dinâmico e exigente de compressão corporal que fecha tronco e pernas simultaneamente em formato de "V", recrutando toda a parede abdominal.',
+    breathingTip: 'Expire forte ao fechar no topo tocando os pés; inspire ao abrir o corpo com controle.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Pare se houver dor aguda.',
+      'Se não conseguir manter as pernas estendidas sem curvar a lombar, inicie com joelhos dobrados (tuck-up).'
+    ],
+    padrao: 'core-anterior',
+    equipamento: ['nenhum'],
+    tipoExercicio: 'principal',
+    estatico: false,
+    cadencia: '2-1-2',
+    regressoes: ['abdominal-completo', 'elevacao-pernas-chao'],
+    progressoes: ['toes-to-bar', 'hollow-rock'],
+    variacoes: ['hollow-rock', 'elevacao-pernas-chao'],
+    adaptacoes: {
+      lombar: ['crunch-solo', 'elevacao-joelhos-chao'],
+      sobrepeso: ['abdominal-completo'],
+      semEquipamento: ['abdominal-canivete']
+    },
+    criterioAvanco: 'Executar 3 séries de 12 repetições tocando a ponta dos pés com pernas estendidas e descida amortecida',
+    sinonimos: ['v-up', 'abdominal em V', 'jackknife sit-up', 'canivete abdominal', 'abdominal canivete'],
+    animationType: 'plank',
+    executionSteps: [
+      { step: 1, title: 'Extensão Total no Solo', description: 'Deite-se no chão com braços estendidos acima da cabeça e pernas unidas e alinhadas.' },
+      { step: 2, title: 'Fechamento em V', description: 'Em movimento sincrônico, eleve o tronco e as pernas estendidas até que as mãos toquem as canelas ou pés.' },
+      { step: 3, title: 'Abertura Controlada', description: 'Retorne abrindo o corpo sem relaxar a musculatura do core nem bater os calcanhares no solo.' }
+    ],
+    commonMistakes: [
+      { mistake: 'Flexionar excessivamente os joelhos e bater as costas no solo na descida', correction: 'Mantenha os membros tão retos quanto possível e freie a descida antes de tocar totalmente o chão.' },
+      { mistake: 'Mover apenas os braços e pernas mantendo o tronco colado ao chão', correction: 'Tire a parte superior das costas do solo ativando a flexão torácica no topo.' }
     ]
   },
   {
