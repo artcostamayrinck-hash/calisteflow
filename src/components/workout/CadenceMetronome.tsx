@@ -109,17 +109,17 @@ export const CadenceMetronome = ({ onTempoTick }: CadenceMetronomeProps) => {
   };
 
   return (
-    <div className="w-full bg-slate-950/70 border border-slate-800 rounded-2xl p-3 text-xs">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Activity className={`w-4 h-4 ${isActive ? 'text-emerald-400 animate-pulse' : 'text-slate-500'}`} />
-          <span className="font-semibold text-slate-200">Metrônomo de Cadência (TUT)</span>
-          <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 font-mono">
+    <div className="w-full bg-slate-950/70 border border-slate-800 rounded-2xl p-3 text-xs box-border">
+      <div className="flex items-center justify-between gap-2 min-w-0">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          <Activity className={`w-4 h-4 shrink-0 ${isActive ? 'text-emerald-400 animate-pulse' : 'text-slate-500'}`} />
+          <span className="font-semibold text-slate-200 truncate">Cadência (TUT)</span>
+          <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 font-mono shrink-0 tabular-nums">
             {tempo.down}-{tempo.holdBottom}-{tempo.up}-{tempo.holdTop}
           </span>
         </div>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 shrink-0">
           <button
             type="button"
             onClick={() => setShowConfig(!showConfig)}

@@ -128,30 +128,22 @@ export const ExerciseVideoPlayer: React.FC<ExerciseVideoPlayerProps> = ({
   return (
     <>
       <div
-        className={`w-full glass-card border border-white/10 rounded-3xl overflow-hidden shadow-2xl transition-all duration-300 relative select-none ${
-          isCollapsed ? 'py-3 px-4' : 'p-3 sm:p-4'
+        className={`w-full glass-card border border-white/10 rounded-2xl overflow-hidden shadow-xl transition-all duration-300 relative select-none ${
+          isCollapsed ? 'py-3 px-3.5' : 'p-3 sm:p-4'
         } ${className}`}
       >
         {/* Top Mini Control Toolbar */}
-        <div className="flex items-center justify-between gap-2 pb-2.5 mb-1 border-b border-white/[0.08]">
-          <div className="flex items-center gap-2">
-            <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[10px] font-black uppercase tracking-wider bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
-              <span className="relative flex h-2 w-2">
-                <span className={`animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 ${isPlaying ? '' : 'hidden'}`} />
-                <span className={`relative inline-flex rounded-full h-2 w-2 ${isPlaying ? 'bg-emerald-400' : 'bg-amber-400'}`} />
-              </span>
-              {isPlaying ? 'Loop Ativo' : 'Pausado'}
-            </span>
-
-            {allowToggleMode && (
-              <div className="flex items-center bg-white/[0.06] rounded-xl p-0.5 border border-white/5">
+        <div className="flex items-center justify-between gap-1.5 pb-2 mb-1 border-b border-white/[0.08] min-w-0 max-w-full overflow-hidden">
+          <div className="flex items-center gap-1.5 min-w-0">
+            {allowToggleMode ? (
+              <div className="flex items-center bg-white/[0.06] rounded-xl p-0.5 border border-white/5 shrink-0">
                 <button
                   type="button"
                   onClick={() => {
                     soundManager.triggerHaptic([15]);
                     setViewMode('video');
                   }}
-                  className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition flex items-center gap-1 ${
+                  className={`px-2 py-0.5 rounded-lg text-[10px] font-bold transition flex items-center gap-1 ${
                     viewMode === 'video'
                       ? 'bg-emerald-500 text-slate-950 font-black shadow-md'
                       : 'text-slate-400 hover:text-slate-200'
@@ -166,7 +158,7 @@ export const ExerciseVideoPlayer: React.FC<ExerciseVideoPlayerProps> = ({
                     soundManager.triggerHaptic([15]);
                     setViewMode('posture');
                   }}
-                  className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition flex items-center gap-1 ${
+                  className={`px-2 py-0.5 rounded-lg text-[10px] font-bold transition flex items-center gap-1 ${
                     viewMode === 'posture'
                       ? 'bg-emerald-500 text-slate-950 font-black shadow-md'
                       : 'text-slate-400 hover:text-slate-200'
@@ -176,23 +168,28 @@ export const ExerciseVideoPlayer: React.FC<ExerciseVideoPlayerProps> = ({
                   <Layers className="w-3 h-3" /> Biomecânica
                 </button>
               </div>
+            ) : (
+              <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-xl text-[10px] font-black uppercase tracking-wider bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shrink-0">
+                <span className={`w-2 h-2 rounded-full ${isPlaying ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
+                {isPlaying ? 'Loop' : 'Pausado'}
+              </span>
             )}
           </div>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 shrink-0">
             {/* Speed Toggle (1x / 0.5x Slow-Motion) */}
             {showVideo && !isCollapsed && (
               <button
                 type="button"
                 onClick={toggleSlowMo}
                 title="Alternar câmera lenta (0.5x)"
-                className={`px-2 py-1 rounded-xl text-[10px] font-mono font-bold transition border ${
+                className={`px-1.5 py-1 rounded-xl text-[10px] font-mono font-bold transition border ${
                   playbackRate === 0.5
                     ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 glow-amber'
                     : 'glass-card text-slate-300 hover:text-white border-white/10'
                 }`}
               >
-                {playbackRate === 0.5 ? '0.5x Slow' : '1.0x'}
+                {playbackRate === 0.5 ? '0.5x' : '1.0x'}
               </button>
             )}
 
@@ -205,7 +202,7 @@ export const ExerciseVideoPlayer: React.FC<ExerciseVideoPlayerProps> = ({
                   setIsFullscreen(true);
                 }}
                 title="Expandir visualização"
-                className="p-1.5 rounded-xl glass-card text-slate-400 hover:text-white border border-white/10 transition active:scale-95"
+                className="p-1 rounded-xl glass-card text-slate-400 hover:text-white border border-white/10 transition active:scale-95"
                 aria-label="Expandir ilustração"
               >
                 <Maximize2 className="w-3.5 h-3.5" />
@@ -220,7 +217,7 @@ export const ExerciseVideoPlayer: React.FC<ExerciseVideoPlayerProps> = ({
                 setIsCollapsed(!isCollapsed);
               }}
               title={isCollapsed ? 'Expandir demonstração' : 'Recolher demonstração'}
-              className="p-1.5 rounded-xl glass-card text-slate-400 hover:text-white border border-white/10 transition active:scale-95"
+              className="p-1 rounded-xl glass-card text-slate-400 hover:text-white border border-white/10 transition active:scale-95"
               aria-label={isCollapsed ? 'Expandir ilustração' : 'Recolher ilustração'}
             >
               {isCollapsed ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronUp className="w-3.5 h-3.5" />}
@@ -248,7 +245,7 @@ export const ExerciseVideoPlayer: React.FC<ExerciseVideoPlayerProps> = ({
         {!isCollapsed && (
           <div className="relative w-full rounded-2xl overflow-hidden bg-slate-950/80 border border-white/5 flex items-center justify-center">
             {showVideo ? (
-              <div className="relative w-full flex items-center justify-center bg-black/40 min-h-[170px] sm:min-h-[200px] max-h-[260px] overflow-hidden">
+              <div className="relative w-full aspect-[16/9] flex items-center justify-center bg-black/40 overflow-hidden">
                 {/* Loader Placeholder */}
                 {isLoading && (
                   <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/60 z-10">
@@ -272,7 +269,7 @@ export const ExerciseVideoPlayer: React.FC<ExerciseVideoPlayerProps> = ({
                       setHasError(true);
                       setIsLoading(false);
                     }}
-                    className={`w-full h-full max-h-[260px] object-contain transition-opacity duration-300 ${
+                    className={`w-full h-full object-contain transition-opacity duration-300 ${
                       isLoading ? 'opacity-0' : 'opacity-100'
                     }`}
                   />
@@ -286,7 +283,7 @@ export const ExerciseVideoPlayer: React.FC<ExerciseVideoPlayerProps> = ({
                       setHasError(true);
                       setIsLoading(false);
                     }}
-                    className={`w-full h-full max-h-[260px] object-contain select-none transition-opacity duration-300 ${
+                    className={`w-full h-full object-contain select-none transition-opacity duration-300 ${
                       isLoading ? 'opacity-0' : 'opacity-100'
                     }`}
                   />
@@ -318,9 +315,9 @@ export const ExerciseVideoPlayer: React.FC<ExerciseVideoPlayerProps> = ({
                 </div>
               </div>
             ) : (
-              /* Fallback to Biomechanical Vector Steps Loop */
-              <div className="w-full p-2 bg-gradient-to-b from-slate-900/50 to-slate-950/80">
-                <ExercisePostureVisual exercise={exercise} />
+              /* Biomechanical Vector Steps Loop (no extra nested border) */
+              <div className="w-full">
+                <ExercisePostureVisual exercise={exercise} embedded={true} />
               </div>
             )}
           </div>

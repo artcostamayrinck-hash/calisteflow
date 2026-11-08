@@ -34,9 +34,8 @@ export const BottomNav = ({
             className="w-full py-2.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 text-slate-950 font-extrabold text-xs flex items-center justify-between shadow-xl shadow-emerald-500/25 active:scale-98 transition glow-emerald"
           >
             <div className="flex items-center gap-2.5">
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-slate-950 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-slate-950" />
+              <span className="relative flex h-2.5 w-2.5 items-center justify-center">
+                <span className="animate-pulse inline-flex rounded-full h-2.5 w-2.5 bg-slate-950" />
               </span>
               <span className="truncate max-w-[200px]">Treino Ativo: {activeWorkoutRoutineTitle}</span>
             </div>

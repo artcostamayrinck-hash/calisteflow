@@ -1,18 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import type { Exercise } from '../../types';
-import { Play, Pause, AlertTriangle } from 'lucide-react';
+import { Play, Pause, AlertTriangle, Wind, ChevronDown } from 'lucide-react';
 
 interface ExercisePostureVisualProps {
   exercise: Exercise;
   className?: string;
+  embedded?: boolean;
 }
 
 export const ExercisePostureVisual: React.FC<ExercisePostureVisualProps> = ({
   exercise,
   className = '',
+  embedded = false,
 }) => {
   const [currentStepIndex, setCurrentStepIndex] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState<boolean>(true);
+  const [isMistakesOpen, setIsMistakesOpen] = useState<boolean>(false);
 
   // Auto-play steps loop
   useEffect(() => {
@@ -86,7 +89,7 @@ export const ExercisePostureVisual: React.FC<ExercisePostureVisualProps> = ({
 
                 {/* Core Alignment Line */}
                 <line x1="45" y1="148" x2="235" y2="78" stroke="#10b981" strokeWidth="1.5" strokeDasharray="4 4" opacity="0.6" />
-                <text x="110" y="98" fill="#10b981" fontSize="11" fontWeight="bold">Tronco Neutro 180°</text>
+                <text x="16" y="24" fill="#10b981" fontSize="11" fontWeight="bold">Tronco Neutro 180°</text>
               </g>
             )}
           </svg>
@@ -266,7 +269,7 @@ export const ExercisePostureVisual: React.FC<ExercisePostureVisualProps> = ({
               {/* Core Activation Badge */}
               <g>
                 <circle cx="140" cy="127" r="14" fill="#10b981" opacity="0.2" className="animate-ping" />
-                <text x="110" y="90" fill="#10b981" fontSize="11" fontWeight="bold">Transverso Travado 🔒</text>
+                <text x="16" y="24" fill="#10b981" fontSize="11" fontWeight="bold">Transverso Travado 🔒</text>
               </g>
             </g>
           </svg>
@@ -396,79 +399,108 @@ export const ExercisePostureVisual: React.FC<ExercisePostureVisualProps> = ({
     }
   };
 
-  return (
-    <div className={`w-full bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-lg ${className}`}>
-      {/* Visual Canvas Stage */}
-      <div className="relative w-full aspect-video sm:h-56 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-3 border-b border-slate-800">
-        {renderGraphicIllustration()}
+  const containerClasses = embedded
+    ? `w-full overflow-hidden ${className}`
+    : `w-full bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-lg ${className}`;
 
-        {/* Step Badge Overlay */}
-        <div className="absolute top-3 left-3 bg-slate-950/80 backdrop-blur-md px-3 py-1 rounded-full border border-slate-700/80 text-xs font-semibold text-emerald-400 flex items-center gap-1.5 shadow">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          Passo {activeStep.step} de {exercise.executionSteps.length}: {activeStep.title}
-        </div>
+  return (
+    <div className={containerClasses}>
+      {/* Visual Canvas Stage (Fixed 16:9 aspect-ratio, contain) */}
+      <div className="relative w-full aspect-[16/9] bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-2 overflow-hidden">
+        {renderGraphicIllustration()}
 
         {/* Play/Pause Animation Button */}
         <button
           onClick={() => setIsPlaying(!isPlaying)}
-          className="absolute top-3 right-3 p-2 rounded-full bg-slate-950/80 backdrop-blur-md border border-slate-700/80 text-slate-300 hover:text-white hover:bg-slate-800 transition active:scale-95"
+          className="absolute top-2.5 right-2.5 p-1.5 rounded-lg bg-slate-950/80 backdrop-blur-md border border-slate-700/80 text-slate-300 hover:text-white hover:bg-slate-800 transition active:scale-95"
           title={isPlaying ? 'Pausar animação' : 'Reproduzir animação'}
+          aria-label={isPlaying ? 'Pausar animação' : 'Reproduzir animação'}
         >
-          {isPlaying ? <Pause className="w-4 h-4 text-emerald-400" /> : <Play className="w-4 h-4" />}
+          {isPlaying ? <Pause className="w-3.5 h-3.5 text-emerald-400" /> : <Play className="w-3.5 h-3.5" />}
         </button>
+      </div>
 
-        {/* Bottom Cue Pills */}
-        <div className="absolute bottom-2.5 right-3 bg-slate-950/80 backdrop-blur-md px-2.5 py-1 rounded-lg border border-slate-800 text-[11px] text-slate-300">
-          💡 {exercise.breathingTip}
+      {/* Dedicated Breathing Cue Row right below animation */}
+      {exercise.breathingTip && (
+        <div className="flex items-center gap-2 px-3 py-2 bg-slate-950/70 border-t border-slate-800/80 text-[11px] text-slate-300">
+          <Wind className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+          <span className="leading-snug">{exercise.breathingTip}</span>
         </div>
-      </div>
+      )}
 
-      {/* Step selector tabs */}
-      <div className="flex border-b border-slate-800 bg-slate-950/50 overflow-x-auto scrollbar-none">
-        {exercise.executionSteps.map((step, idx) => (
-          <button
-            key={step.step}
-            onClick={() => {
-              setCurrentStepIndex(idx);
-              setIsPlaying(false);
-            }}
-            className={`flex-1 min-w-[120px] py-2.5 px-3 text-xs font-medium border-b-2 transition text-center whitespace-nowrap ${
-              currentStepIndex === idx
-                ? 'border-emerald-500 text-emerald-300 bg-emerald-500/10 font-semibold'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            {step.step}. {step.title}
-          </button>
-        ))}
-      </div>
+      {/* Compact Steps Indicator (Passo X de Y + segmented bars) */}
+      {exercise.executionSteps && exercise.executionSteps.length > 0 && (
+        <div className="px-3.5 py-2.5 bg-slate-950/50 border-t border-slate-800/70 space-y-1.5">
+          <div className="flex items-center justify-between text-xs">
+            <span className="font-bold text-slate-300">
+              Passo {currentStepIndex + 1} de {exercise.executionSteps.length}
+            </span>
+            <span className="text-[11px] font-semibold text-emerald-400 truncate max-w-[190px]">
+              {activeStep.title}
+            </span>
+          </div>
+
+          {/* Segmented clickable progress bars */}
+          <div className="flex items-center gap-1.5 w-full">
+            {exercise.executionSteps.map((step, idx) => (
+              <button
+                key={step.step}
+                type="button"
+                onClick={() => {
+                  setCurrentStepIndex(idx);
+                  setIsPlaying(false);
+                }}
+                aria-label={`Passo ${step.step}: ${step.title}`}
+                className={`h-2 flex-1 rounded-full transition-all cursor-pointer ${
+                  currentStepIndex === idx
+                    ? 'bg-emerald-400 shadow-sm shadow-emerald-400/50'
+                    : idx < currentStepIndex
+                    ? 'bg-emerald-600/70 hover:bg-emerald-500'
+                    : 'bg-white/10 hover:bg-white/20'
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Current Step Description Card */}
-      <div className="p-4 space-y-3">
+      <div className="p-3 sm:p-4 space-y-2.5 border-t border-slate-800/60">
         <div className="flex items-start gap-2.5">
-          <div className="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+          <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center font-bold text-[11px] shrink-0 mt-0.5">
             {activeStep.step}
           </div>
-          <div>
-            <h4 className="text-sm font-semibold text-slate-100">{activeStep.title}</h4>
+          <div className="flex-1 min-w-0">
+            <h4 className="text-xs font-bold text-slate-100">{activeStep.title}</h4>
             <p className="text-xs text-slate-300 mt-1 leading-relaxed">{activeStep.description}</p>
           </div>
         </div>
 
-        {/* Common Mistakes to Avoid Alert Box */}
+        {/* Common Mistakes to Avoid Accordion (collapsed by default) */}
         {exercise.commonMistakes && exercise.commonMistakes.length > 0 && (
-          <div className="mt-3 pt-3 border-t border-slate-800/80">
-            <span className="text-xs font-semibold text-rose-400 flex items-center gap-1.5 mb-2">
-              <AlertTriangle className="w-3.5 h-3.5" /> Erros Críticos a Evitar:
-            </span>
-            <div className="space-y-1.5">
-              {exercise.commonMistakes.map((m, i) => (
-                <div key={i} className="text-xs bg-rose-500/10 border border-rose-500/20 rounded-lg p-2 text-slate-300">
-                  <div className="text-rose-300 font-medium">❌ {m.mistake}</div>
-                  <div className="text-emerald-400 mt-0.5">✓ Correção: {m.correction}</div>
-                </div>
-              ))}
-            </div>
+          <div className="pt-2 border-t border-slate-800/80">
+            <button
+              type="button"
+              onClick={() => setIsMistakesOpen(!isMistakesOpen)}
+              className="w-full flex items-center justify-between py-1 text-xs font-bold text-rose-400 hover:text-rose-300 transition"
+              aria-expanded={isMistakesOpen}
+            >
+              <span className="flex items-center gap-1.5">
+                <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+                Erros Críticos a Evitar ({exercise.commonMistakes.length})
+              </span>
+              <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isMistakesOpen ? 'rotate-180' : ''}`} />
+            </button>
+            {isMistakesOpen && (
+              <div className="mt-2 space-y-1.5 animate-in fade-in duration-150">
+                {exercise.commonMistakes.map((m, i) => (
+                  <div key={i} className="text-xs bg-rose-500/10 border border-rose-500/20 rounded-xl p-2.5 text-slate-300">
+                    <div className="text-rose-300 font-semibold">❌ {m.mistake}</div>
+                    <div className="text-emerald-400 mt-1">✓ Correção: {m.correction}</div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>

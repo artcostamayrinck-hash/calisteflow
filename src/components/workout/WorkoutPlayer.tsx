@@ -646,63 +646,99 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
     ? currentExerciseData
     : EXERCISES_DATABASE.find(e => e.id === routine.exercises[exerciseIndex + 1]?.exerciseId);
 
+  const isFirstSetOfFirstExercise = exerciseIndex === 0 && setIndex === 0;
+  const isLastSetOfLastExercise =
+    exerciseIndex >= routine.exercises.length - 1 &&
+    setIndex >= currentRoutineExercise.sets - 1;
+
+  const handlePreviousStep = () => {
+    soundManager.triggerHaptic([20]);
+    if (setIndex > 0) {
+      setSetIndex(setIndex - 1);
+      setPhase('exercise');
+    } else if (exerciseIndex > 0) {
+      const prevEx = routine.exercises[exerciseIndex - 1];
+      setExerciseIndex(exerciseIndex - 1);
+      setSetIndex(Math.max(0, (prevEx?.sets || 1) - 1));
+      setPhase('exercise');
+    }
+  };
+
+  const handleNextStep = () => {
+    soundManager.triggerHaptic([20]);
+    if (setIndex < currentRoutineExercise.sets - 1) {
+      setSetIndex(setIndex + 1);
+      setPhase('exercise');
+    } else if (exerciseIndex < routine.exercises.length - 1) {
+      setExerciseIndex(exerciseIndex + 1);
+      setSetIndex(0);
+      setPhase('exercise');
+    }
+  };
+
   return (
-    <div className="fixed inset-0 z-50 bg-[#060913] text-slate-100 flex flex-col justify-between overflow-hidden select-none">
+    <div className="fixed inset-0 z-50 bg-[#060913] text-slate-100 flex flex-col justify-between h-[100dvh] max-h-[100dvh] w-full overflow-hidden select-none box-border">
       {/* Top HUD Bar */}
-      <div className="p-3.5 sm:p-4 glass-panel border-b border-white/[0.08] backdrop-blur-2xl flex items-center justify-between gap-3 shrink-0">
+      <header className="px-3 py-2.5 sm:px-4 sm:py-3 glass-panel border-b border-white/[0.08] backdrop-blur-2xl flex items-center justify-between gap-2 shrink-0 w-full min-w-0">
         {/* Workout elapsed timer & Pause */}
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
           <button
+            type="button"
             onClick={toggleWorkoutPause}
-            className={`p-2.5 rounded-2xl border transition active:scale-95 ${
+            className={`w-10 h-10 rounded-2xl border transition active:scale-95 flex items-center justify-center shrink-0 ${
               isWorkoutPaused
                 ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 glow-amber'
                 : 'glass-card text-slate-300 hover:text-white border-white/10'
             }`}
             title={isWorkoutPaused ? 'Retomar treino' : 'Pausar treino'}
+            aria-label={isWorkoutPaused ? 'Retomar treino' : 'Pausar treino'}
           >
             {isWorkoutPaused ? <Play className="w-4 h-4 fill-current" /> : <Pause className="w-4 h-4" />}
           </button>
 
-          <div>
+          <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-emerald-400">
-              <Clock className="w-3.5 h-3.5" />
-              <span className="tracking-wider">{formatMmSs(totalElapsedSeconds)}</span>
+              <Clock className="w-3.5 h-3.5 shrink-0" />
+              <span className="tracking-wider tabular-nums inline-block min-w-[42px]">{formatMmSs(totalElapsedSeconds)}</span>
               {isWorkoutPaused && (
-                <span className="text-[10px] uppercase font-sans px-2 py-0.2 rounded-md bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30">
+                <span className="text-[9px] uppercase font-sans px-1.5 py-0.5 rounded-md bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30 shrink-0">
                   Pausado
                 </span>
               )}
             </div>
-            <div className="text-[11px] text-slate-400 truncate max-w-[150px] sm:max-w-xs font-semibold">
+            <div className="text-[11px] text-slate-400 font-semibold truncate block w-full max-w-full">
               {routine.title}
             </div>
           </div>
         </div>
 
         {/* Right HUD Controls: Sound & Exit */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 shrink-0">
           <button
+            type="button"
             onClick={toggleSound}
-            className={`p-2.5 rounded-2xl border transition active:scale-95 ${
+            className={`w-10 h-10 rounded-2xl border transition active:scale-95 flex items-center justify-center shrink-0 ${
               soundEnabled
                 ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30 glow-emerald'
                 : 'glass-card text-slate-500 border-white/5'
             }`}
             title={soundEnabled ? 'Silenciar bipes' : 'Ativar bipes de áudio'}
+            aria-label={soundEnabled ? 'Silenciar bipes' : 'Ativar bipes de áudio'}
           >
             {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
           </button>
 
           <button
+            type="button"
             onClick={() => setShowExitConfirm(true)}
-            className="p-2.5 rounded-2xl glass-card text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 border border-white/10 transition active:scale-95"
+            className="w-10 h-10 rounded-2xl glass-card text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 border border-white/10 transition active:scale-95 flex items-center justify-center shrink-0"
             title="Encerrar ou Sair do Treino"
+            aria-label="Encerrar ou Sair do Treino"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
-      </div>
+      </header>
 
       {/* Progress Bar under HUD */}
       <div className="w-full bg-slate-900/80 h-1.5 shrink-0 overflow-hidden">
@@ -713,31 +749,31 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
       </div>
 
       {/* Main Active Training Stage */}
-      <div className="flex-1 overflow-y-auto p-4 sm:p-6 flex flex-col items-center justify-center max-w-xl mx-auto w-full">
+      <main className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-4 flex flex-col items-center justify-start max-w-md sm:max-w-xl mx-auto w-full box-border pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))]">
         {phase === 'exercise' ? (
           /* ================= PHASE 1: EXECUTING SET ================= */
-          <div className="w-full flex flex-col items-center space-y-5 animate-in fade-in zoom-in-95 duration-200">
+          <div className="w-full flex flex-col items-center space-y-4 animate-in fade-in zoom-in-95 duration-200">
             {/* Exercise Header & Posture/Adaptation Triggers */}
-            <div className="w-full glass-card border border-white/10 rounded-3xl p-5 shadow-2xl flex items-center justify-between gap-3">
-              <div>
-                <div className="flex items-center gap-2 mb-1.5">
-                  <span className="px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold uppercase tracking-widest bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
-                    Exercício {exerciseIndex + 1} de {activeRoutine.exercises.length}
+            <div className="w-full glass-card border border-white/10 rounded-2xl p-3.5 sm:p-4 shadow-xl flex items-center justify-between gap-2.5">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1.5 mb-1 flex-wrap">
+                  <span className="px-2 py-0.5 rounded-lg text-[10px] font-extrabold uppercase tracking-widest bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 tabular-nums">
+                    Exercício {exerciseIndex + 1} de {routine.exercises.length}
                   </span>
-                  <span className="px-2 py-0.5 rounded-lg text-[11px] font-semibold bg-white/[0.06] text-slate-300 border border-white/[0.08]">
+                  <span className="px-2 py-0.5 rounded-lg text-[10px] font-semibold bg-white/[0.06] text-slate-300 border border-white/[0.08]">
                     {currentExerciseData?.difficulty}
                   </span>
                 </div>
-                <h2 className="text-xl sm:text-2xl font-black text-slate-100 tracking-tight">
+                <h2 className="text-lg sm:text-xl font-black text-slate-100 tracking-tight truncate">
                   {currentExerciseData ? currentExerciseData.name : currentRoutineExercise.exerciseId}
                 </h2>
                 {currentRoutineExercise.notes && (
-                  <p className="text-xs text-amber-300/90 mt-1 italic font-medium">
+                  <p className="text-[11px] text-amber-300/90 mt-1 italic font-medium truncate">
                     💡 {currentRoutineExercise.notes}
                   </p>
                 )}
                 {currentExerciseData?.safetyCautions && currentExerciseData.safetyCautions.length > 0 && (
-                  <div className="flex items-center gap-1.5 text-[10px] text-amber-300/90 bg-amber-500/10 px-2.5 py-1 rounded-xl border border-amber-500/20 mt-1.5 max-w-sm">
+                  <div className="flex items-center gap-1.5 text-[10px] text-amber-300/90 bg-amber-500/10 px-2 py-0.5 rounded-lg border border-amber-500/20 mt-1.5 max-w-full">
                     <AlertTriangle className="w-3 h-3 text-amber-400 shrink-0" />
                     <span className="truncate">{currentExerciseData.safetyCautions[0]}</span>
                   </div>
@@ -745,25 +781,27 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
               </div>
 
               {/* View Posture Guide & Quick Adapt Buttons */}
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex items-center gap-1.5 shrink-0">
                 {currentExerciseData && (
                   <button
+                    type="button"
                     onClick={() => setShowPostureDrawer(true)}
-                    className="px-3 py-2.5 rounded-2xl glass-card text-emerald-300 hover:text-white hover:bg-white/[0.08] border border-white/10 text-xs font-bold flex items-center gap-1.5 transition active:scale-95 glow-emerald min-h-[44px]"
+                    className="px-2.5 py-2 rounded-xl glass-card text-emerald-300 hover:text-white hover:bg-white/[0.08] border border-white/10 text-xs font-bold flex items-center gap-1 transition active:scale-95 glow-emerald min-h-[40px]"
                     title="Guia de postura biomecânica"
                   >
-                    <HelpCircle className="w-4 h-4 text-emerald-400" />
+                    <HelpCircle className="w-4 h-4 text-emerald-400 shrink-0" />
                     <span className="hidden sm:inline">Postura</span>
                   </button>
                 )}
 
                 {currentExerciseData && (
                   <button
+                    type="button"
                     onClick={() => setShowAdaptationModal(true)}
-                    className="px-3 py-2.5 rounded-2xl glass-card text-amber-300 hover:text-white hover:bg-white/[0.08] border border-amber-500/30 text-xs font-bold flex items-center gap-1.5 transition active:scale-95 min-h-[44px]"
+                    className="px-2.5 py-2 rounded-xl glass-card text-amber-300 hover:text-white hover:bg-white/[0.08] border border-amber-500/30 text-xs font-bold flex items-center gap-1 transition active:scale-95 min-h-[40px]"
                     title="Sentiu dor ou está pesado? Trocar versão"
                   >
-                    <ShieldCheck className="w-4 h-4 text-amber-400" />
+                    <ShieldCheck className="w-4 h-4 text-amber-400 shrink-0" />
                     <span className="hidden sm:inline">Adaptar</span>
                   </button>
                 )}
@@ -772,28 +810,28 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
 
             {/* Quick Notice / Celebration Banner */}
             {quickNotice && (
-              <div className="w-full bg-gradient-to-r from-emerald-500/20 via-teal-500/20 to-emerald-500/20 border border-emerald-500/40 text-emerald-200 text-xs font-bold p-3.5 rounded-2xl shadow-xl flex items-center justify-between gap-2 animate-in fade-in slide-in-from-top-2">
-                <div className="flex items-center gap-2">
+              <div className="w-full bg-gradient-to-r from-emerald-500/20 via-teal-500/20 to-emerald-500/20 border border-emerald-500/40 text-emerald-200 text-xs font-bold p-3 rounded-2xl shadow-xl flex items-center justify-between gap-2 animate-in fade-in slide-in-from-top-2">
+                <div className="flex items-center gap-2 truncate">
                   <Sparkles className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <span>{quickNotice}</span>
+                  <span className="truncate">{quickNotice}</span>
                 </div>
-                <button onClick={() => setQuickNotice(null)} className="text-slate-400 hover:text-white">
+                <button type="button" onClick={() => setQuickNotice(null)} className="text-slate-400 hover:text-white shrink-0">
                   <X className="w-4 h-4" />
                 </button>
               </div>
             )}
 
             {/* Set Progression Pills */}
-            <div className="flex items-center gap-2 flex-wrap justify-center">
+            <div className="flex items-center gap-1.5 flex-wrap justify-center w-full">
               {Array.from({ length: currentRoutineExercise.sets }).map((_, idx) => {
                 const isCompleted = completedRecords[exerciseIndex]?.sets[idx]?.completed;
                 const isCurrent = idx === setIndex;
                 return (
                   <div
                     key={idx}
-                    className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-2xl text-xs font-black transition-all ${
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black transition-all tabular-nums ${
                       isCurrent
-                        ? 'bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 shadow-xl shadow-emerald-500/30 scale-105 glow-emerald'
+                        ? 'bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 shadow-md shadow-emerald-500/30 glow-emerald'
                         : isCompleted
                         ? 'bg-emerald-500/15 border border-emerald-500/30 text-emerald-300'
                         : 'glass-card text-slate-500 border-white/5'
@@ -806,45 +844,35 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
               })}
             </div>
 
-            {/* Real-time Continuous Video Illustration Loop */}
-            {currentExerciseData && (
-              <ExerciseVideoPlayer
-                exercise={currentExerciseData}
-                isPaused={isWorkoutPaused}
-                phase={phase}
-                autoLoop={true}
-              />
-            )}
-
-            {/* Execution Card: Isometric vs Reps */}
+            {/* Execution Card: Isometric vs Reps (Directly after title & set pills) */}
             {isIsometric ? (
               /* ISOMETRIC EXERCISE HUD */
-              <div className="w-full glass-card border border-white/10 rounded-3xl p-6 sm:p-8 flex flex-col items-center justify-center space-y-6 shadow-2xl relative">
-                <div className="text-xs uppercase font-extrabold tracking-widest text-slate-400 flex items-center gap-1.5">
+              <div className="w-full glass-card border border-white/10 rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center space-y-4 shadow-xl relative">
+                <div className="text-[11px] uppercase font-extrabold tracking-widest text-slate-400 flex items-center gap-1.5">
                   <Flame className="w-4 h-4 text-amber-400 animate-bounce" /> Sustentação Isométrica
                 </div>
 
                 {/* Big Isometric Timer */}
-                <div className="relative w-48 h-48 flex items-center justify-center">
+                <div className="relative w-44 h-44 sm:w-48 sm:h-48 flex items-center justify-center">
                   <svg className="w-full h-full -rotate-90 filter drop-shadow-md">
                     <circle
-                      cx="96"
-                      cy="96"
-                      r="80"
+                      cx="50%"
+                      cy="50%"
+                      r="76"
                       stroke="rgba(255,255,255,0.08)"
-                      strokeWidth="12"
+                      strokeWidth="10"
                       fill="none"
                     />
                     <circle
-                      cx="96"
-                      cy="96"
-                      r="80"
+                      cx="50%"
+                      cy="50%"
+                      r="76"
                       stroke="#10b981"
-                      strokeWidth="12"
-                      strokeDasharray={2 * Math.PI * 80}
+                      strokeWidth="10"
+                      strokeDasharray={2 * Math.PI * 76}
                       strokeDashoffset={
-                        2 * Math.PI * 80 -
-                        (isometricSecondsLeft / (isometricInitialSeconds || 1)) * (2 * Math.PI * 80)
+                        2 * Math.PI * 76 -
+                        (isometricSecondsLeft / (isometricInitialSeconds || 1)) * (2 * Math.PI * 76)
                       }
                       strokeLinecap="round"
                       fill="none"
@@ -852,31 +880,34 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
                     />
                   </svg>
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-5xl font-black font-mono text-slate-100 tracking-tight">
+                    <span className="text-5xl font-black font-mono text-slate-100 tracking-tight tabular-nums">
                       {isometricSecondsLeft}s
                     </span>
-                    <span className="text-xs text-slate-400 font-semibold mt-1">Meta: {isometricInitialSeconds}s</span>
+                    <span className="text-xs text-slate-400 font-semibold mt-1 tabular-nums">Meta: {isometricInitialSeconds}s</span>
                   </div>
                 </div>
 
-                {/* Isometric Controls */}
-                <div className="flex items-center gap-3">
+                {/* Isometric Controls (min 48px touch targets) */}
+                <div className="flex items-center gap-2.5 w-full max-w-xs justify-center">
                   <button
+                    type="button"
                     onClick={toggleIsometricTimer}
-                    className={`px-7 py-3.5 rounded-2xl font-black text-sm flex items-center gap-2 shadow-xl transition active:scale-95 ${
+                    className={`h-12 px-6 rounded-2xl font-black text-xs flex items-center justify-center gap-2 shadow-lg transition active:scale-95 flex-1 ${
                       isometricTimerRunning
                         ? 'bg-amber-500 text-slate-950 shadow-amber-500/25 glow-amber'
                         : 'bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 text-slate-950 shadow-emerald-500/25 glow-emerald hover:brightness-110'
                     }`}
                   >
                     {isometricTimerRunning ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 fill-current" />}
-                    {isometricTimerRunning ? 'Pausar Isometria' : 'Iniciar Contagem'}
+                    <span>{isometricTimerRunning ? 'Pausar' : 'Iniciar'}</span>
                   </button>
 
                   <button
+                    type="button"
                     onClick={resetIsometricTimer}
-                    className="p-3.5 rounded-2xl glass-card text-slate-300 hover:text-white border border-white/10 transition active:scale-95"
+                    className="w-12 h-12 rounded-2xl glass-card text-slate-300 hover:text-white border border-white/10 transition active:scale-95 flex items-center justify-center shrink-0"
                     title="Reiniciar tempo"
+                    aria-label="Reiniciar tempo"
                   >
                     <RotateCcw className="w-4 h-4" />
                   </button>
@@ -884,47 +915,51 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
 
                 {/* Complete Isometric Set Button */}
                 <button
+                  type="button"
                   onClick={() => {
                     soundManager.triggerHaptic([40]);
                     handleCompleteIsometricSet();
                   }}
-                  className="w-full py-3.5 rounded-2xl glass-card hover:bg-white/[0.08] text-emerald-300 font-bold text-xs border border-emerald-500/30 flex items-center justify-center gap-2 transition active:scale-98"
+                  className="w-full h-12 rounded-2xl glass-card hover:bg-white/[0.08] text-emerald-300 font-bold text-xs border border-emerald-500/30 flex items-center justify-center gap-2 transition active:scale-98"
                 >
                   <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Concluir Série Isométrica
                 </button>
               </div>
             ) : (
               /* REPETITIONS EXERCISE HUD */
-              <div className="w-full glass-card border border-white/10 rounded-3xl p-6 sm:p-8 flex flex-col items-center justify-center space-y-6 shadow-2xl">
-                <div className="text-xs uppercase font-extrabold tracking-widest text-slate-400">
+              <div className="w-full glass-card border border-white/10 rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center space-y-4 shadow-xl">
+                <div className="text-[11px] uppercase font-extrabold tracking-widest text-slate-400 text-center">
                   Repetições Concluídas nesta Série
                 </div>
 
-                {/* Large Reps Counter with Steppers */}
-                <div className="flex items-center justify-center gap-6">
+                {/* Large Reps Counter with Steppers (min 48px touch targets) */}
+                <div className="flex items-center justify-center gap-5 w-full">
                   <button
+                    type="button"
                     onClick={() => {
                       soundManager.triggerHaptic([20]);
                       setCurrentReps(Math.max(1, currentReps - 1));
                     }}
-                    className="w-14 h-14 rounded-2xl glass-card hover:bg-white/[0.1] border border-white/10 text-slate-100 flex items-center justify-center active:scale-90 transition shadow-lg"
+                    className="w-12 h-12 min-w-[48px] min-h-[48px] rounded-2xl glass-card hover:bg-white/[0.1] border border-white/10 text-slate-100 flex items-center justify-center active:scale-90 transition shadow-lg shrink-0"
+                    aria-label="Diminuir repetição"
                   >
                     <Minus className="w-6 h-6" />
                   </button>
 
-                  <div className="flex flex-col items-center">
-                    <span className="text-7xl font-black font-mono tracking-tight text-slate-100 drop-shadow-md">
+                  <div className="flex flex-col items-center min-w-[90px]">
+                    <span className="text-6xl font-black font-mono tracking-tight text-slate-100 drop-shadow-md tabular-nums leading-none">
                       {currentReps}
                     </span>
-                    <span className="text-xs text-slate-400 font-bold uppercase tracking-wider mt-1">repetições</span>
+                    <span className="text-[11px] text-slate-400 font-bold uppercase tracking-wider mt-1">repetições</span>
                   </div>
 
                   <button
+                    type="button"
                     onClick={() => {
                       soundManager.triggerHaptic([20]);
                       setCurrentReps(currentReps + 1);
                     }}
-                    className="w-14 h-14 rounded-2xl glass-card hover:bg-white/[0.1] border border-white/10 text-slate-100 flex items-center justify-center active:scale-90 transition shadow-lg"
+                    className="w-12 h-12 min-w-[48px] min-h-[48px] rounded-2xl glass-card hover:bg-white/[0.1] border border-white/10 text-slate-100 flex items-center justify-center active:scale-90 transition shadow-lg shrink-0"
                     aria-label="Aumentar repetição"
                   >
                     <Plus className="w-6 h-6" />
@@ -932,21 +967,21 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
                 </div>
 
                 {/* Optional Weight / Extra Load Selector */}
-                <div className="flex items-center justify-between w-full max-w-xs px-4 py-2.5 rounded-2xl bg-white/[0.04] border border-white/5 text-xs">
-                  <span className="font-bold text-slate-400">Carga Extra:</span>
-                  <div className="flex items-center gap-2">
+                <div className="flex items-center justify-between w-full max-w-xs px-3.5 py-2 rounded-xl bg-white/[0.04] border border-white/5 text-xs">
+                  <span className="font-bold text-slate-400 text-[11px]">Carga Extra:</span>
+                  <div className="flex items-center gap-1.5">
                     <button
                       type="button"
                       onClick={() => {
                         soundManager.triggerHaptic([15]);
                         setCurrentWeightKg(prev => Math.max(0, prev - 2));
                       }}
-                      className="w-8 h-8 rounded-xl glass-card text-slate-300 font-bold active:scale-90 flex items-center justify-center border border-white/5"
+                      className="w-8 h-8 rounded-lg glass-card text-slate-300 font-bold active:scale-90 flex items-center justify-center border border-white/5 text-[11px]"
                       aria-label="Diminuir 2kg"
                     >
                       -2
                     </button>
-                    <span className="font-mono font-extrabold text-xs text-emerald-400 min-w-14 text-center">
+                    <span className="font-mono font-extrabold text-xs text-emerald-400 min-w-14 text-center tabular-nums">
                       {currentWeightKg > 0 ? `+${currentWeightKg}kg` : '0kg (Livre)'}
                     </span>
                     <button
@@ -955,7 +990,7 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
                         soundManager.triggerHaptic([15]);
                         setCurrentWeightKg(prev => prev + 2);
                       }}
-                      className="w-8 h-8 rounded-xl glass-card text-slate-300 font-bold active:scale-90 flex items-center justify-center border border-white/5"
+                      className="w-8 h-8 rounded-lg glass-card text-slate-300 font-bold active:scale-90 flex items-center justify-center border border-white/5 text-[11px]"
                       aria-label="Aumentar 2kg"
                     >
                       +2
@@ -963,13 +998,14 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
                   </div>
                 </div>
 
-                {/* Big Finish Set CTA */}
+                {/* Big Finish Set CTA (48px touch height) */}
                 <button
+                  type="button"
                   onClick={() => {
                     soundManager.triggerHaptic([50]);
                     handleCompleteRepsSet();
                   }}
-                  className="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 text-slate-950 font-black text-base tracking-wide flex items-center justify-center gap-2.5 shadow-2xl shadow-emerald-500/30 hover:brightness-110 active:scale-98 transition animate-pulse-ring glow-emerald"
+                  className="w-full h-12 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 text-slate-950 font-black text-sm tracking-wide flex items-center justify-center gap-2 shadow-xl shadow-emerald-500/25 hover:brightness-110 active:scale-98 transition glow-emerald shrink-0"
                 >
                   <CheckCircle2 className="w-5 h-5 stroke-[3]" /> CONCLUIR SÉRIE
                 </button>
@@ -978,35 +1014,45 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
                 <CadenceMetronome />
               </div>
             )}
+
+            {/* Continuous Video / Biomechanical Illustration Loop (Scrolling underneath) */}
+            {currentExerciseData && (
+              <ExerciseVideoPlayer
+                exercise={currentExerciseData}
+                isPaused={isWorkoutPaused}
+                phase={phase}
+                autoLoop={true}
+              />
+            )}
           </div>
         ) : (
           /* ================= PHASE 2: REST TIMER SCREEN ================= */
-          <div className="w-full flex flex-col items-center space-y-6 animate-in fade-in zoom-in-95 duration-200">
+          <div className="w-full flex flex-col items-center space-y-5 animate-in fade-in zoom-in-95 duration-200">
             <div className="text-center">
               <span className="px-3.5 py-1 rounded-full text-xs font-black uppercase tracking-widest bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 glow-emerald">
                 Intervalo de Recuperação
               </span>
-              <h3 className="text-2xl font-black text-slate-100 mt-2 tracking-tight">Respire Fundo</h3>
+              <h3 className="text-xl sm:text-2xl font-black text-slate-100 mt-2 tracking-tight">Respire Fundo</h3>
             </div>
 
             {/* Glowing Circular Countdown */}
-            <div className="relative w-64 h-64 flex items-center justify-center">
+            <div className="relative w-56 h-56 sm:w-64 sm:h-64 flex items-center justify-center">
               <div className="absolute inset-4 rounded-full bg-emerald-500/5 blur-2xl animate-pulse" />
               <svg className="w-full h-full -rotate-90 filter drop-shadow-xl">
                 <circle
                   cx="50%"
                   cy="50%"
-                  r="85"
+                  r="80"
                   stroke="rgba(255,255,255,0.08)"
-                  strokeWidth="14"
+                  strokeWidth="12"
                   fill="none"
                 />
                 <circle
                   cx="50%"
                   cy="50%"
-                  r="85"
+                  r="80"
                   stroke={restSecondsLeft <= 5 ? '#f43f5e' : '#10b981'}
-                  strokeWidth="14"
+                  strokeWidth="12"
                   strokeDasharray={restCircumference}
                   strokeDashoffset={restStrokeDashoffset}
                   strokeLinecap="round"
@@ -1017,7 +1063,7 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
 
               <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <span
-                  className={`text-6xl font-black font-mono tracking-tight ${
+                  className={`text-5xl sm:text-6xl font-black font-mono tracking-tight tabular-nums ${
                     restSecondsLeft <= 5 ? 'text-rose-400 animate-pulse' : 'text-slate-100'
                   }`}
                 >
@@ -1027,33 +1073,40 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
               </div>
             </div>
 
-            {/* Rest Adjusters (-15s / +15s) */}
-            <div className="flex items-center gap-3">
+            {/* Rest Adjusters (-15s / +15s) with 48px touch height */}
+            <div className="flex items-center gap-2.5 w-full max-w-xs justify-center">
               <button
+                type="button"
                 onClick={() => handleAdjustRest(-15)}
-                className="px-4 py-2.5 rounded-2xl glass-card text-slate-200 text-xs font-black hover:bg-white/[0.08] transition active:scale-95"
+                className="h-12 px-4 rounded-2xl glass-card text-slate-200 text-xs font-black hover:bg-white/[0.08] transition active:scale-95 flex items-center justify-center shrink-0"
+                aria-label="Diminuir 15 segundos"
               >
                 -15s
               </button>
               <button
+                type="button"
                 onClick={() => {
                   soundManager.triggerHaptic([40]);
                   handleSkipRest();
                 }}
-                className="px-6 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-xl shadow-emerald-500/25 hover:brightness-110 active:scale-95 transition glow-emerald"
+                className="h-12 px-5 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 shadow-xl shadow-emerald-500/25 hover:brightness-110 active:scale-95 transition glow-emerald flex-1 truncate"
+                aria-label="Pular Descanso"
               >
-                <SkipForward className="w-4 h-4 fill-current" /> Pular Descanso
+                <SkipForward className="w-4 h-4 fill-current shrink-0" />
+                <span className="truncate">Pular</span>
               </button>
               <button
+                type="button"
                 onClick={() => handleAdjustRest(15)}
-                className="px-4 py-2.5 rounded-2xl glass-card text-slate-200 text-xs font-black hover:bg-white/[0.08] transition active:scale-95"
+                className="h-12 px-4 rounded-2xl glass-card text-slate-200 text-xs font-black hover:bg-white/[0.08] transition active:scale-95 flex items-center justify-center shrink-0"
+                aria-label="Aumentar 15 segundos"
               >
                 +15s
               </button>
             </div>
 
             {/* Quick Intensity / Joint Comfort Feedback during Rest */}
-            <div className="w-full glass-card rounded-3xl p-4 border border-white/10 space-y-2.5">
+            <div className="w-full glass-card rounded-2xl p-3.5 sm:p-4 border border-white/10 space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-slate-300">Como sentiu a última série?</span>
                 {lastSetFeedback && (
@@ -1064,7 +1117,7 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
                 <button
                   type="button"
                   onClick={() => setLastSetFeedback('facil')}
-                  className={`py-2 rounded-xl text-xs font-semibold transition ${
+                  className={`h-10 rounded-xl text-xs font-semibold transition ${
                     lastSetFeedback === 'facil' ? 'bg-cyan-500 text-slate-950 font-bold' : 'bg-white/[0.04] text-slate-400 hover:text-white'
                   }`}
                 >
@@ -1073,7 +1126,7 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
                 <button
                   type="button"
                   onClick={() => setLastSetFeedback('ideal')}
-                  className={`py-2 rounded-xl text-xs font-semibold transition ${
+                  className={`h-10 rounded-xl text-xs font-semibold transition ${
                     lastSetFeedback === 'ideal' ? 'bg-emerald-500 text-slate-950 font-bold' : 'bg-white/[0.04] text-slate-400 hover:text-white'
                   }`}
                 >
@@ -1082,7 +1135,7 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
                 <button
                   type="button"
                   onClick={() => setLastSetFeedback('dificil')}
-                  className={`py-2 rounded-xl text-xs font-semibold transition ${
+                  className={`h-10 rounded-xl text-xs font-semibold transition ${
                     lastSetFeedback === 'dificil' ? 'bg-amber-400 text-slate-950 font-bold' : 'bg-white/[0.04] text-slate-400 hover:text-white'
                   }`}
                 >
@@ -1094,7 +1147,7 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
                     setLastSetFeedback('dor');
                     setShowAdaptationModal(true);
                   }}
-                  className={`py-2 rounded-xl text-xs font-semibold transition ${
+                  className={`h-10 rounded-xl text-xs font-semibold transition ${
                     lastSetFeedback === 'dor' ? 'bg-rose-500 text-white font-bold' : 'bg-white/[0.04] text-rose-300 hover:text-white'
                   }`}
                 >
@@ -1105,7 +1158,7 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
               {(lastSetFeedback === 'dificil' || lastSetFeedback === 'dor') && (
                 <div className="pt-2 border-t border-white/5 flex items-center justify-between">
                   <span className="text-[11px] text-amber-300 flex items-center gap-1">
-                    <ShieldCheck className="w-3.5 h-3.5" /> Sentiu sobrecarga ou desconforto?
+                    <ShieldCheck className="w-3.5 h-3.5 shrink-0" /> Sentiu desconforto?
                   </span>
                   <button
                     type="button"
@@ -1120,83 +1173,81 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
 
             {/* Up Next Card Preview */}
             {nextExerciseData && (
-              <div className="w-full glass-card rounded-3xl p-4 flex items-center justify-between gap-3 text-xs border border-white/10 shadow-lg">
-                <div className="flex items-center gap-3">
+              <div className="w-full glass-card rounded-2xl p-3.5 flex items-center justify-between gap-3 text-xs border border-white/10 shadow-lg">
+                <div className="flex items-center gap-3 min-w-0">
                   {nextExerciseData.videoThumbnail ? (
                     <img
                       src={nextExerciseData.videoThumbnail}
                       alt={nextExerciseData.name}
-                      className="w-12 h-12 rounded-xl object-cover bg-black/40 border border-white/10 shrink-0 shadow-md"
+                      className="w-11 h-11 rounded-xl object-cover bg-black/40 border border-white/10 shrink-0 shadow-md"
                     />
                   ) : (
-                    <div className="w-12 h-12 rounded-xl bg-white/[0.06] border border-white/10 flex items-center justify-center shrink-0">
-                      <Play className="w-5 h-5 text-emerald-400" />
+                    <div className="w-11 h-11 rounded-xl bg-white/[0.06] border border-white/10 flex items-center justify-center shrink-0">
+                      <Play className="w-4 h-4 text-emerald-400" />
                     </div>
                   )}
-                  <div>
+                  <div className="min-w-0">
                     <span className="text-emerald-400 font-extrabold block text-[10px] uppercase tracking-widest">
                       A Seguir:
                     </span>
-                    <span className="font-black text-slate-100 text-sm">
+                    <span className="font-black text-slate-100 text-xs sm:text-sm truncate block">
                       {nextExerciseData.name}
                     </span>
-                    <span className="text-slate-400 block text-[11px] mt-0.5 font-medium">
-                      {nextIsSameExercise ? `Série ${setIndex + 2} de ${currentRoutineExercise.sets}` : 'Primeira série do próximo exercício'}
+                    <span className="text-slate-400 block text-[10px] sm:text-[11px] mt-0.5 font-medium truncate">
+                      {nextIsSameExercise ? `Série ${setIndex + 2} de ${currentRoutineExercise.sets}` : 'Primeira série do próximo'}
                     </span>
                   </div>
                 </div>
-                <div className="p-3 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 glow-emerald shrink-0">
+                <div className="p-2.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 glow-emerald shrink-0">
                   <Play className="w-4 h-4 fill-current" />
                 </div>
               </div>
             )}
           </div>
         )}
-      </div>
+      </main>
 
-      {/* Bottom Workout Navigation Bar */}
-      <div className="p-3.5 sm:p-4 glass-panel border-t border-white/10 backdrop-blur-2xl flex items-center justify-between gap-3 shrink-0">
-        <button
-          disabled={exerciseIndex === 0}
-          onClick={() => {
-            soundManager.triggerHaptic([20]);
-            if (exerciseIndex > 0) {
-              setExerciseIndex(exerciseIndex - 1);
-              setSetIndex(0);
-              setPhase('exercise');
-            }
-          }}
-          className="px-4 py-2.5 rounded-2xl glass-card text-slate-200 text-xs font-bold flex items-center gap-1.5 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/[0.08] transition active:scale-95"
-        >
-          <ChevronLeft className="w-4 h-4" /> Anterior
-        </button>
+      {/* Bottom Workout Navigation Bar (Equal 48px height, 3-column grid) */}
+      <footer className="w-full shrink-0 glass-panel border-t border-white/10 backdrop-blur-2xl px-3 py-2.5 pb-[calc(0.625rem+env(safe-area-inset-bottom,0px))] box-border">
+        <div className="grid grid-cols-3 gap-2 w-full max-w-md mx-auto">
+          {/* Button 1: Anterior */}
+          <button
+            type="button"
+            disabled={isFirstSetOfFirstExercise}
+            onClick={handlePreviousStep}
+            className="h-12 rounded-2xl glass-card text-slate-200 text-xs font-bold flex items-center justify-center gap-1 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/[0.08] active:scale-95 transition"
+            aria-label="Série anterior"
+          >
+            <ChevronLeft className="w-4 h-4 shrink-0" />
+            <span>Anterior</span>
+          </button>
 
-        {/* Finish workout button */}
-        <button
-          onClick={() => {
-            soundManager.triggerHaptic([30]);
-            handleTriggerFinish();
-          }}
-          className="px-5 py-2.5 rounded-2xl glass-card text-slate-200 hover:text-white hover:bg-white/[0.08] text-xs font-black border border-white/10 transition active:scale-95"
-        >
-          Finalizar Treino
-        </button>
+          {/* Button 2: Finalizar Treino (Destaque Principal) */}
+          <button
+            type="button"
+            onClick={() => {
+              soundManager.triggerHaptic([30]);
+              handleTriggerFinish();
+            }}
+            className="h-12 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-500/20 hover:brightness-110 active:scale-95 transition glow-emerald"
+            aria-label="Finalizar Treino"
+          >
+            <span>Finalizar</span>
+          </button>
 
-        <button
-          disabled={exerciseIndex >= routine.exercises.length - 1}
-          onClick={() => {
-            soundManager.triggerHaptic([20]);
-            if (exerciseIndex < routine.exercises.length - 1) {
-              setExerciseIndex(exerciseIndex + 1);
-              setSetIndex(0);
-              setPhase('exercise');
-            }
-          }}
-          className="px-4 py-2.5 rounded-2xl glass-card text-slate-200 text-xs font-bold flex items-center gap-1.5 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/[0.08] transition active:scale-95"
-        >
-          Próximo <ChevronRight className="w-4 h-4" />
-        </button>
-      </div>
+          {/* Button 3: Próximo */}
+          <button
+            type="button"
+            disabled={isLastSetOfLastExercise}
+            onClick={handleNextStep}
+            className="h-12 rounded-2xl glass-card text-slate-200 text-xs font-bold flex items-center justify-center gap-1 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/[0.08] active:scale-95 transition"
+            aria-label="Próxima série"
+          >
+            <span>Próximo</span>
+            <ChevronRight className="w-4 h-4 shrink-0" />
+          </button>
+        </div>
+      </footer>
 
       {/* Slide-over Posture Drawer during Workout */}
       {showPostureDrawer && currentExerciseData && (

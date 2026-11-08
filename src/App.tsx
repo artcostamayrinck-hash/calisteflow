@@ -305,7 +305,7 @@ export function App() {
         <div className="bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-amber-500/20 border-b border-amber-500/30 px-4 py-2.5 backdrop-blur-md">
           <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
             <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping shrink-0" />
+              <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse shrink-0" />
               <span className="text-xs text-amber-200 font-bold">
                 Treino interrompido detectado ({Math.max(1, Math.round((Date.now() - activeBackup.timestamp) / 60000))} min atrás):{' '}
                 <strong className="text-white">{activeBackup.routine.title}</strong> (Ex. {activeBackup.exerciseIndex + 1}, Série {activeBackup.setIndex + 1})

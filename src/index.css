@@ -6,6 +6,19 @@
     --font-mono: 'JetBrains Mono', monospace;
   }
 
+  html,
+  body {
+    overflow-x: hidden;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
   body {
     @apply bg-slate-950 text-slate-100 antialiased selection:bg-emerald-500/30 selection:text-emerald-300;
     font-family: var(--font-sans);
