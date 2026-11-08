@@ -144,11 +144,10 @@ export const ChangelogFaqModal: React.FC<ChangelogFaqModalProps> = ({
               soundManager.triggerHaptic([15]);
               setActiveTab('faq');
             }}
-            className={`py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 active:scale-95 ${
-              activeTab === 'faq'
+            className={`py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 active:scale-95 ${activeTab === 'faq'
                 ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 glow-emerald'
                 : 'text-slate-400 hover:text-slate-200'
-            }`}
+              }`}
           >
             <HelpCircle className="w-4 h-4" />
             <span>Perguntas (FAQ)</span>
@@ -158,11 +157,10 @@ export const ChangelogFaqModal: React.FC<ChangelogFaqModalProps> = ({
               soundManager.triggerHaptic([15]);
               setActiveTab('changelog');
             }}
-            className={`py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 active:scale-95 ${
-              activeTab === 'changelog'
+            className={`py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 active:scale-95 ${activeTab === 'changelog'
                 ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 glow-emerald'
                 : 'text-slate-400 hover:text-slate-200'
-            }`}
+              }`}
           >
             <History className="w-4 h-4" />
             <span>Novidades (Changelog)</span>

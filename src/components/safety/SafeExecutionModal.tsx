@@ -86,11 +86,10 @@ export const SafeExecutionModal: React.FC<SafeExecutionModalProps> = ({
                   soundManager.triggerHaptic([20]);
                   setActiveTab(t.id);
                 }}
-                className={`py-2 px-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 active:scale-95 ${
-                  isActive
+                className={`py-2 px-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 active:scale-95 ${isActive
                     ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 glow-emerald'
                     : 'text-slate-400 hover:text-slate-200'
-                }`}
+                  }`}
               >
                 <Icon className="w-3.5 h-3.5" />
                 <span className="truncate">{t.label}</span>

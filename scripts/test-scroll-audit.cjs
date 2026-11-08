@@ -89,3 +89,4 @@ if (errors === 0) {
   console.error(`💥 FORAM ENCONTRADOS ${errors} ERROS NA AUDITORIA DE SCROLL.\n`);
   process.exit(1);
 }
+
