@@ -13,28 +13,28 @@
   "categories": ["fitness", "health", "sports", "lifestyle"],
   "icons": [
     {
-      "src": "/calisteflow/assets/img/icon-192.png?v=2",
+      "src": "/calisteflow/assets/img/icon-192.png?v=3",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
-      "src": "/calisteflow/assets/img/icon-512.png?v=2",
+      "src": "/calisteflow/assets/img/logo-512.png?v=3",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
-      "src": "/calisteflow/icon-192.png?v=2",
+      "src": "/calisteflow/icon-192.png?v=3",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
-      "src": "/calisteflow/icon-512.png?v=2",
+      "src": "/calisteflow/logo-512.png?v=3",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
   ],
   "shortcuts": [
@@ -43,21 +43,21 @@
       "short_name": "Treinar",
       "description": "Iniciar a rotina agendada para hoje",
       "url": "/calisteflow/?shortcut=today",
-      "icons": [{ "src": "/calisteflow/assets/img/icon-192.png?v=2", "sizes": "192x192" }]
+      "icons": [{ "src": "/calisteflow/assets/img/icon-192.png?v=3", "sizes": "192x192" }]
     },
     {
       "name": "Cronômetro de Descanso",
       "short_name": "Cronômetro",
       "description": "Abrir temporizador inteligente com feedback tátil",
       "url": "/calisteflow/?shortcut=timer",
-      "icons": [{ "src": "/calisteflow/assets/img/icon-192.png?v=2", "sizes": "192x192" }]
+      "icons": [{ "src": "/calisteflow/assets/img/icon-192.png?v=3", "sizes": "192x192" }]
     },
     {
       "name": "Biblioteca de Exercícios",
       "short_name": "Exercícios",
       "description": "Explorar biomecânica, variações e mapa muscular",
       "url": "/calisteflow/?shortcut=exercises",
-      "icons": [{ "src": "/calisteflow/assets/img/icon-192.png?v=2", "sizes": "192x192" }]
+      "icons": [{ "src": "/calisteflow/assets/img/icon-192.png?v=3", "sizes": "192x192" }]
     }
   ]
 }

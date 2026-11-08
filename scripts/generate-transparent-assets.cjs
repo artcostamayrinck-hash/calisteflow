@@ -42,101 +42,126 @@ function createIco(png16Buffer, png32Buffer) {
   return Buffer.concat([header, entry1, entry2, png16Buffer, png32Buffer]);
 }
 
-async function renderOnDark(logoBuffer, canvasW, canvasH, logoTargetW, logoTargetH) {
-  const resized = await sharp(logoBuffer)
-    .resize(logoTargetW, logoTargetH, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
+async function renderTransparentSquare(srcBuffer, size) {
+  // Resize logo proportionally to fit within square canvas with 10% padding
+  const padding = Math.round(size * 0.08);
+  const targetSize = size - padding * 2;
+  const resized = await sharp(srcBuffer)
+    .resize(targetSize, targetSize, {
+      fit: 'contain',
+      background: { r: 0, g: 0, b: 0, alpha: 0 }
+    })
     .toBuffer();
 
   return await sharp({
     create: {
-      width: canvasW,
-      height: canvasH,
+      width: size,
+      height: size,
       channels: 4,
-      background: { r: 2, g: 4, b: 18, alpha: 1 } // #020412
+      background: { r: 0, g: 0, b: 0, alpha: 0 }
     }
   })
   .composite([{ input: resized, gravity: 'center' }])
-  .png({ quality: 95 })
+  .png({ quality: 100 })
   .toBuffer();
 }
 
 async function main() {
-  console.log('Generating new CalisteFlow logo assets from:', srcPath);
-  const srcBuf = fs.readFileSync(srcPath);
+  console.log('Generating transparent PNG assets from:', srcPath);
+  const rawSrc = fs.readFileSync(srcPath);
 
-  // 1. logo-original.png & logo-transparente.png
-  const transparentPng = await sharp(srcBuf).png({ quality: 100, compressionLevel: 9 }).toBuffer();
-  fs.writeFileSync(path.join(publicAssetsDir, 'logo-original.png'), transparentPng);
-  fs.writeFileSync(path.join(publicAssetsDir, 'logo-transparente.png'), transparentPng);
-  fs.writeFileSync(path.join(srcAssetsDir, 'logo-original.png'), transparentPng);
-  fs.writeFileSync(path.join(srcAssetsDir, 'logo-transparente.png'), transparentPng);
-  fs.writeFileSync(path.join(publicDir, 'logo-transparente.png'), transparentPng);
-  console.log('✓ logo-original.png & logo-transparente.png');
+  // 1. logo.png - pure transparent original PNG
+  const logoPng = await sharp(rawSrc).png({ quality: 100, compressionLevel: 9 }).toBuffer();
+  fs.writeFileSync(path.join(publicAssetsDir, 'logo.png'), logoPng);
+  fs.writeFileSync(path.join(srcAssetsDir, 'logo.png'), logoPng);
+  fs.writeFileSync(path.join(publicDir, 'logo.png'), logoPng);
+  console.log('✓ logo.png');
 
-  // 2. logo.webp
-  const logoWebp = await sharp(srcBuf).webp({ quality: 95, effort: 6 }).toBuffer();
-  fs.writeFileSync(path.join(publicAssetsDir, 'logo.webp'), logoWebp);
-  fs.writeFileSync(path.join(srcAssetsDir, 'logo.webp'), logoWebp);
-  fs.writeFileSync(path.join(publicDir, 'logo.webp'), logoWebp);
-  console.log('✓ logo.webp');
-
-  // 3. logo-512.png (512x512 on #020412)
-  const logo512 = await renderOnDark(srcBuf, 512, 512, 430, 310);
+  // 2. logo-512.png - 512x512 transparent
+  const logo512 = await renderTransparentSquare(rawSrc, 512);
   fs.writeFileSync(path.join(publicAssetsDir, 'logo-512.png'), logo512);
   fs.writeFileSync(path.join(srcAssetsDir, 'logo-512.png'), logo512);
   fs.writeFileSync(path.join(publicDir, 'logo-512.png'), logo512);
   console.log('✓ logo-512.png');
 
-  // 4. logo-header-256.png (256x256 on #020412)
-  const logoHeader256 = await renderOnDark(srcBuf, 256, 256, 220, 160);
-  fs.writeFileSync(path.join(publicAssetsDir, 'logo-header-256.png'), logoHeader256);
-  fs.writeFileSync(path.join(srcAssetsDir, 'logo-header-256.png'), logoHeader256);
-  fs.writeFileSync(path.join(publicDir, 'logo-header-256.png'), logoHeader256);
-  console.log('✓ logo-header-256.png');
+  // 3. logo-256.png - 256x256 transparent
+  const logo256 = await renderTransparentSquare(rawSrc, 256);
+  fs.writeFileSync(path.join(publicAssetsDir, 'logo-256.png'), logo256);
+  fs.writeFileSync(path.join(srcAssetsDir, 'logo-256.png'), logo256);
+  fs.writeFileSync(path.join(publicDir, 'logo-256.png'), logo256);
+  console.log('✓ logo-256.png');
 
-  // 5. icon-192.png (192x192 on #020412, safe for maskable)
-  const icon192 = await renderOnDark(srcBuf, 192, 192, 150, 110);
+  // 4. icon-192.png - 192x192 transparent
+  const icon192 = await renderTransparentSquare(rawSrc, 192);
   fs.writeFileSync(path.join(publicAssetsDir, 'icon-192.png'), icon192);
   fs.writeFileSync(path.join(publicDir, 'icon-192.png'), icon192);
   console.log('✓ icon-192.png');
 
-  // 6. icon-512.png (512x512 on #020412, safe for maskable)
-  const icon512 = await renderOnDark(srcBuf, 512, 512, 400, 290);
-  fs.writeFileSync(path.join(publicAssetsDir, 'icon-512.png'), icon512);
-  fs.writeFileSync(path.join(publicDir, 'icon-512.png'), icon512);
-  console.log('✓ icon-512.png');
+  // 5. favicon-16x16.png & favicon-32x32.png - transparent
+  const fav16 = await sharp(rawSrc)
+    .resize(16, 16, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
+    .png()
+    .toBuffer();
+  const fav32 = await sharp(rawSrc)
+    .resize(32, 32, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
+    .png()
+    .toBuffer();
 
-  // 7. apple-touch-icon.png (180x180 on #020412)
-  const appleTouch = await renderOnDark(srcBuf, 180, 180, 144, 105);
-  fs.writeFileSync(path.join(publicAssetsDir, 'apple-touch-icon.png'), appleTouch);
-  fs.writeFileSync(path.join(publicDir, 'apple-touch-icon.png'), appleTouch);
-  console.log('✓ apple-touch-icon.png');
-
-  // 8. favicon-16x16.png & favicon-32x32.png
-  const fav16 = await renderOnDark(srcBuf, 16, 16, 14, 11);
-  const fav32 = await renderOnDark(srcBuf, 32, 32, 28, 21);
   fs.writeFileSync(path.join(publicAssetsDir, 'favicon-16x16.png'), fav16);
   fs.writeFileSync(path.join(publicDir, 'favicon-16x16.png'), fav16);
   fs.writeFileSync(path.join(publicAssetsDir, 'favicon-32x32.png'), fav32);
   fs.writeFileSync(path.join(publicDir, 'favicon-32x32.png'), fav32);
   console.log('✓ favicon-16x16.png & favicon-32x32.png');
 
-  // 9. favicon.ico
+  // 6. favicon.ico (multi-size 16 & 32 transparent ICO)
   const ico = createIco(fav16, fav32);
   fs.writeFileSync(path.join(publicAssetsDir, 'favicon.ico'), ico);
   fs.writeFileSync(path.join(publicDir, 'favicon.ico'), ico);
   console.log('✓ favicon.ico');
 
-  // 10. og-image.png (1200x630 on #020412)
-  const ogPng = await renderOnDark(srcBuf, 1200, 630, 640, 451);
+  // 7. apple-touch-icon.png - 180x180 on site background #020617 (to prevent iOS turning transparent into black/white)
+  const appleTouch = await sharp({
+    create: {
+      width: 180,
+      height: 180,
+      channels: 4,
+      background: { r: 2, g: 6, b: 23, alpha: 1 } // #020617 exact site color
+    }
+  })
+  .composite([{
+    input: await sharp(rawSrc).resize(144, 105, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } }).toBuffer(),
+    gravity: 'center'
+  }])
+  .png({ quality: 95 })
+  .toBuffer();
+  fs.writeFileSync(path.join(publicAssetsDir, 'apple-touch-icon.png'), appleTouch);
+  fs.writeFileSync(path.join(publicDir, 'apple-touch-icon.png'), appleTouch);
+  console.log('✓ apple-touch-icon.png');
+
+  // 8. og-image.png - 1200x630 on site background #020617
+  const ogPng = await sharp({
+    create: {
+      width: 1200,
+      height: 630,
+      channels: 4,
+      background: { r: 2, g: 6, b: 23, alpha: 1 } // #020617 exact site color
+    }
+  })
+  .composite([{
+    input: await sharp(rawSrc).resize(620, 437, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } }).toBuffer(),
+    gravity: 'center'
+  }])
+  .png({ quality: 95 })
+  .toBuffer();
   fs.writeFileSync(path.join(publicAssetsDir, 'og-image.png'), ogPng);
   fs.writeFileSync(path.join(publicDir, 'og-image.png'), ogPng);
+
   const ogJpg = await sharp(ogPng).jpeg({ quality: 92 }).toBuffer();
   fs.writeFileSync(path.join(publicAssetsDir, 'og-image.jpg'), ogJpg);
   fs.writeFileSync(path.join(publicDir, 'og-image.jpg'), ogJpg);
-  console.log('✓ og-image.png (1200x630) & og-image.jpg');
+  console.log('✓ og-image.png & og-image.jpg (on #020617)');
 
-  console.log('\nAll new logo assets generated successfully!');
+  console.log('\nAll transparent assets successfully generated!');
 }
 
 main().catch(err => {

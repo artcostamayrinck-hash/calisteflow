@@ -35,7 +35,7 @@ import { BottomNav, type NavTab } from './components/layout/BottomNav';
 import { soundManager } from './utils/audio';
 import { requestPersistentStorage } from './utils/platform';
 import { Flame, ShieldCheck } from 'lucide-react';
-import logoHeaderImg from './assets/img/logo-header-256.png';
+import logoImg from './assets/img/logo.png';
 
 export function App() {
   // App Navigation — default to 'home'
@@ -227,7 +227,7 @@ export function App() {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between selection:bg-emerald-500/20 selection:text-emerald-300">
       {/* Top Main Navigation Header */}
-      <header className="sticky top-0 z-30 bg-[#020412]/95 border-b border-white/[0.08] px-4 py-3 sm:px-6 backdrop-blur-2xl">
+      <header className="sticky top-0 z-30 bg-[#020617]/95 border-b border-white/[0.08] px-4 py-3 sm:px-6 backdrop-blur-2xl">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           {/* Logo Brand Link */}
           <a
@@ -243,11 +243,11 @@ export function App() {
             aria-label="CalisteFlow"
           >
             <img
-              src={logoHeaderImg}
+              src={logoImg}
               alt="CalisteFlow"
-              width="40"
+              width="57"
               height="40"
-              className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl object-contain shadow-md shadow-cyan-500/15 group-hover:scale-105 transition-transform duration-200"
+              className="h-9 sm:h-10 w-auto object-contain transition-transform duration-200 group-hover:scale-105"
               loading="eager"
             />
             <div>

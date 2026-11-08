@@ -1,38 +1,38 @@
 /**
  * CalisteFlow Service Worker
- * Versão do Cache: calisteflow-v3.0.0
+ * Versão do Cache: calisteflow-v4.0.0
  * Escopo: /calisteflow/
  *
  * Estratégia de Cache:
  * - HTML / Navegação: Network-First com fallback para cache offline (/calisteflow/index.html)
  * - Assets estáticos (/calisteflow/assets/*): Cache-First com fallback para rede
- * - Recursos estáticos raiz e ícones (manifest, ícones com ?v=2, favicons, og-image): Stale-While-Revalidate
+ * - Recursos estáticos raiz e ícones (manifest, ícones transparentes com ?v=3, favicons, og-image): Stale-While-Revalidate
  * - Não recarrega o app no meio de um treino ativo (skipWaiting só sob comando do usuário)
  */
 
-const CACHE_NAME = 'calisteflow-v3.0.0';
+const CACHE_NAME = 'calisteflow-v4.0.0';
 
 // Lista de arquivos fundamentais para inicialização offline no escopo /calisteflow/
 const PRECACHE_ASSETS = [
   '/calisteflow/',
   '/calisteflow/index.html',
   '/calisteflow/manifest.json',
-  '/calisteflow/assets/img/favicon.ico?v=2',
-  '/calisteflow/assets/img/favicon-32x32.png?v=2',
-  '/calisteflow/assets/img/favicon-16x16.png?v=2',
-  '/calisteflow/assets/img/apple-touch-icon.png?v=2',
-  '/calisteflow/assets/img/icon-192.png?v=2',
-  '/calisteflow/assets/img/icon-512.png?v=2',
-  '/calisteflow/assets/img/logo-512.png?v=2',
-  '/calisteflow/assets/img/logo-header-256.png',
-  '/calisteflow/assets/img/logo-transparente.png',
+  '/calisteflow/assets/img/favicon.ico?v=3',
+  '/calisteflow/assets/img/favicon-32x32.png?v=3',
+  '/calisteflow/assets/img/favicon-16x16.png?v=3',
+  '/calisteflow/assets/img/apple-touch-icon.png?v=3',
+  '/calisteflow/assets/img/icon-192.png?v=3',
+  '/calisteflow/assets/img/logo-512.png?v=3',
+  '/calisteflow/assets/img/logo-256.png?v=3',
+  '/calisteflow/assets/img/logo.png',
   '/calisteflow/assets/img/og-image.png',
-  '/calisteflow/favicon.ico?v=2',
-  '/calisteflow/favicon-32x32.png?v=2',
-  '/calisteflow/favicon-16x16.png?v=2',
-  '/calisteflow/apple-touch-icon.png?v=2',
-  '/calisteflow/icon-192.png?v=2',
-  '/calisteflow/icon-512.png?v=2',
+  '/calisteflow/favicon.ico?v=3',
+  '/calisteflow/favicon-32x32.png?v=3',
+  '/calisteflow/favicon-16x16.png?v=3',
+  '/calisteflow/apple-touch-icon.png?v=3',
+  '/calisteflow/icon-192.png?v=3',
+  '/calisteflow/logo-512.png?v=3',
+  '/calisteflow/logo.png',
   '/calisteflow/og-image.png',
   '/calisteflow/robots.txt',
   '/calisteflow/sitemap.xml',

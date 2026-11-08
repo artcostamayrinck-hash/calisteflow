@@ -172,7 +172,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 alt="CalisteFlow"
                 width="48"
                 height="48"
-                className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl object-contain shadow-lg shadow-cyan-500/15 border border-white/10 shrink-0"
+                className="w-10 sm:w-12 h-auto object-contain shrink-0"
               />
               <div>
                 <p className={`${lt ? 'text-sm' : 'text-xs'} text-slate-400 font-medium`}>
