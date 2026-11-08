@@ -5,6 +5,7 @@ interface MuscleMapProps {
   primaryMuscles?: MuscleGroup[];
   secondaryMuscles?: MuscleGroup[];
   selectedMuscle?: MuscleGroup | null;
+  selectedMuscles?: MuscleGroup[];
   onSelectMuscle?: (muscle: MuscleGroup) => void;
   className?: string;
   size?: 'sm' | 'md' | 'lg';
@@ -14,12 +15,20 @@ export const MuscleMap = ({
   primaryMuscles = [],
   secondaryMuscles = [],
   selectedMuscle = null,
+  selectedMuscles,
   onSelectMuscle,
   className = '',
   size = 'md',
 }: MuscleMapProps) => {
+  const isMuscleSelected = (muscle: MuscleGroup) => {
+    if (selectedMuscles && selectedMuscles.length > 0) {
+      return selectedMuscles.includes(muscle);
+    }
+    return selectedMuscle === muscle;
+  };
+
   const getMuscleColor = (muscle: MuscleGroup) => {
-    if (selectedMuscle === muscle) {
+    if (isMuscleSelected(muscle)) {
       return '#f59e0b'; // Amber for currently selected
     }
     if (primaryMuscles.includes(muscle)) {
@@ -32,7 +41,7 @@ export const MuscleMap = ({
   };
 
   const getMuscleOpacity = (muscle: MuscleGroup) => {
-    if (primaryMuscles.includes(muscle) || secondaryMuscles.includes(muscle) || selectedMuscle === muscle) {
+    if (primaryMuscles.includes(muscle) || secondaryMuscles.includes(muscle) || isMuscleSelected(muscle)) {
       return 1;
     }
     return 0.45;

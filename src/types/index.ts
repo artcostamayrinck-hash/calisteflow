@@ -12,6 +12,14 @@ export type MuscleGroup =
   | 'panturrilhas'
   | 'antebraco';
 
+export interface MuscleDefinition {
+  id: MuscleGroup;
+  name: string;
+  category: 'superior' | 'tronco' | 'inferior';
+  synonyms: string[];
+  views: ('frontal' | 'posterior')[];
+}
+
 export type ExerciseDifficulty = 'Iniciante' | 'Intermediário' | 'Avançado' | 'Elite';
 
 export type ExerciseCategory = 'Push' | 'Pull' | 'Legs' | 'Core' | 'Skill' | 'Full Body';

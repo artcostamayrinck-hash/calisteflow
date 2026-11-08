@@ -1,6 +1,6 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import type { Exercise, MuscleGroup, MovementPattern, ExerciseDifficulty, EquipmentType } from '../../types';
-import { EXERCISES_DATABASE, MUSCLE_LABELS, getExerciseById, CREF_REVIEWER_SPECIALIST } from '../../data/exercisesData';
+import { EXERCISES_DATABASE, MUSCLE_LABELS, MUSCLE_DEFINITIONS, getExerciseById, CREF_REVIEWER_SPECIALIST } from '../../data/exercisesData';
 import { MuscleMap } from '../visuals/MuscleMap';
 import { ExerciseVideoPlayer } from '../workout/ExerciseVideoPlayer';
 import { soundManager } from '../../utils/audio';
@@ -45,6 +45,42 @@ const MOVEMENT_PATTERN_LABELS: Record<MovementPattern, string> = {
   'alongamento': 'Alongamento & Relaxamento'
 };
 
+const DIFFICULTY_ORDER: Record<ExerciseDifficulty, number> = {
+  'Iniciante': 1,
+  'Intermediário': 2,
+  'Avançado': 3,
+  'Elite': 4
+};
+
+function sortExerciseGroup(list: Exercise[], muscles: MuscleGroup[], isPrimaryGroup: boolean): Exercise[] {
+  return [...list].sort((a, b) => {
+    // 1. Quantidade de músculos selecionados contemplados (mais primeiro em multi-seleção)
+    if (muscles.length > 1) {
+      const aMatches = muscles.filter(m => (isPrimaryGroup ? a.primaryMuscles : a.secondaryMuscles).includes(m)).length;
+      const bMatches = muscles.filter(m => (isPrimaryGroup ? b.primaryMuscles : b.secondaryMuscles).includes(m)).length;
+      if (bMatches !== aMatches) return bMatches - aMatches;
+    }
+
+    // 2. Nível de dificuldade (Iniciante -> Intermediário -> Avançado -> Elite)
+    const diffA = DIFFICULTY_ORDER[a.difficulty] || 99;
+    const diffB = DIFFICULTY_ORDER[b.difficulty] || 99;
+    if (diffA !== diffB) return diffA - diffB;
+
+    // 3. Ordem da cadeia de progressão (regressões antes de progressões)
+    if (b.regressoes?.includes(a.id)) return -1;
+    if (a.regressoes?.includes(b.id)) return 1;
+    if (a.progressoes?.includes(b.id)) return -1;
+    if (b.progressoes?.includes(a.id)) return 1;
+
+    const regA = a.regressoes?.length || 0;
+    const regB = b.regressoes?.length || 0;
+    if (regA !== regB) return regA - regB;
+
+    // 4. Ordem alfabética por nome
+    return a.name.localeCompare(b.name, 'pt-BR');
+  });
+}
+
 export const ExerciseLibraryView = ({
   initialExerciseId = null,
   onSelectExerciseToSwap
@@ -54,7 +90,10 @@ export const ExerciseLibraryView = ({
   const [selectedDifficulty, setSelectedDifficulty] = useState<ExerciseDifficulty | 'Todos'>('Todos');
   const [selectedEquipment, setSelectedEquipment] = useState<EquipmentType | 'Todos'>('Todos');
   const [selectedJointSafety, setSelectedJointSafety] = useState<'punho' | 'ombro' | 'joelho' | 'lombar' | 'sem-equipamento' | 'Todos'>('Todos');
-  const [selectedMuscle, setSelectedMuscle] = useState<MuscleGroup | null>(null);
+  const [selectedMuscles, setSelectedMuscles] = useState<MuscleGroup[]>([]);
+
+  const listTopRef = useRef<HTMLDivElement>(null);
+  const prevFilterKeyRef = useRef<string>('');
 
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(() => {
     if (initialExerciseId) {
@@ -71,19 +110,36 @@ export const ExerciseLibraryView = ({
 
   // Normalização de texto para busca com acentos
   const normalize = (str: string) =>
-    str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    str.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 
-  // Filtragem multifatorial com busca inteligente por sinônimos
-  const filteredExercises = useMemo(() => {
+  const handleSelectMuscle = (m: MuscleGroup) => {
+    soundManager.triggerHaptic([20]);
+    setSelectedMuscles(prev => {
+      const isAlreadySelected = prev.includes(m);
+      const next = isAlreadySelected ? prev.filter(item => item !== m) : [...prev, m];
+      // Ao selecionar ou alterar um músculo, aplicar o filtro em TODOS os padrões
+      if (next.length > 0 && selectedPattern !== 'Todos') {
+        setSelectedPattern('Todos');
+      }
+      return next;
+    });
+  };
+
+  // Filtragem e particionamento ordenado: Alvo (Grupo 1) e Secundário (Grupo 2)
+  const { primaryExercises, secondaryExercises, hiddenByPatternCount } = useMemo(() => {
     const query = normalize(searchQuery.trim());
 
-    return EXERCISES_DATABASE.filter(ex => {
-      // 1. Busca textual por nome, descrição, músculos ou sinônimos
+    const matchesGeneralFilters = (ex: Exercise, checkPattern = true) => {
       if (query) {
         const nameMatch = normalize(ex.name).includes(query);
         const descMatch = normalize(ex.description).includes(query);
         const synonymMatch = ex.sinonimos?.some(s => normalize(s).includes(query));
-        const muscleMatch = ex.primaryMuscles.some(m => normalize(MUSCLE_LABELS[m] || m).includes(query));
+        const muscleMatch = ex.primaryMuscles.some(m => {
+          const def = MUSCLE_DEFINITIONS[m];
+          const labelMatch = normalize(def?.name || MUSCLE_LABELS[m] || m).includes(query);
+          const synMatch = def?.synonyms?.some(syn => normalize(syn).includes(query));
+          return labelMatch || synMatch;
+        });
         const patternMatch = ex.padrao ? normalize(MOVEMENT_PATTERN_LABELS[ex.padrao] || ex.padrao).includes(query) : false;
 
         if (!nameMatch && !descMatch && !synonymMatch && !muscleMatch && !patternMatch) {
@@ -91,17 +147,14 @@ export const ExerciseLibraryView = ({
         }
       }
 
-      // 2. Filtro por Padrão de Movimento
-      if (selectedPattern !== 'Todos' && ex.padrao !== selectedPattern) {
+      if (checkPattern && selectedPattern !== 'Todos' && ex.padrao !== selectedPattern) {
         return false;
       }
 
-      // 3. Filtro por Nível de Dificuldade
       if (selectedDifficulty !== 'Todos' && ex.difficulty !== selectedDifficulty) {
         return false;
       }
 
-      // 4. Filtro por Equipamento
       if (selectedEquipment !== 'Todos') {
         const equips = ex.equipamento || ['nenhum'];
         if (!equips.includes(selectedEquipment)) {
@@ -109,32 +162,74 @@ export const ExerciseLibraryView = ({
         }
       }
 
-      // 5. Filtro por Adaptação de Articulação / Sem equipamento
       if (selectedJointSafety !== 'Todos') {
         if (!ex.adaptacoes || !ex.adaptacoes[selectedJointSafety]) {
           return false;
         }
       }
 
-      // 6. Filtro por Músculo selecionado no Mapa 3D
-      if (selectedMuscle) {
-        const isPrimary = ex.primaryMuscles.includes(selectedMuscle);
-        const isSecondary = ex.secondaryMuscles.includes(selectedMuscle);
-        if (!isPrimary && !isSecondary) {
-          return false;
-        }
-      }
-
       return true;
+    };
+
+    if (selectedMuscles.length === 0) {
+      const allFiltered = EXERCISES_DATABASE.filter(ex => matchesGeneralFilters(ex, true));
+      return {
+        primaryExercises: allFiltered,
+        secondaryExercises: [] as Exercise[],
+        hiddenByPatternCount: 0
+      };
+    }
+
+    const rawPrimary: Exercise[] = [];
+    const rawSecondary: Exercise[] = [];
+
+    EXERCISES_DATABASE.forEach(ex => {
+      if (!matchesGeneralFilters(ex, true)) return;
+
+      const isPrim = selectedMuscles.some(m => ex.primaryMuscles.includes(m));
+      const isSec = selectedMuscles.some(m => ex.secondaryMuscles.includes(m));
+
+      if (isPrim) {
+        rawPrimary.push(ex);
+      } else if (isSec) {
+        rawSecondary.push(ex);
+      }
     });
+
+    const primarySorted = sortExerciseGroup(rawPrimary, selectedMuscles, true);
+    const secondarySorted = sortExerciseGroup(rawSecondary, selectedMuscles, false);
+
+    let hiddenCount = 0;
+    if (selectedPattern !== 'Todos') {
+      hiddenCount = EXERCISES_DATABASE.filter(ex => {
+        const matchesMuscle = selectedMuscles.some(m => ex.primaryMuscles.includes(m) || ex.secondaryMuscles.includes(m));
+        const matchesOthers = matchesGeneralFilters(ex, false);
+        return matchesMuscle && matchesOthers && ex.padrao !== selectedPattern;
+      }).length;
+    }
+
+    return {
+      primaryExercises: primarySorted,
+      secondaryExercises: secondarySorted,
+      hiddenByPatternCount: hiddenCount
+    };
   }, [
     searchQuery,
     selectedPattern,
     selectedDifficulty,
     selectedEquipment,
     selectedJointSafety,
-    selectedMuscle
+    selectedMuscles
   ]);
+
+  // Efeito para rolar suavemente ao topo da lista ao alterar filtros
+  useEffect(() => {
+    const currentKey = `${[...selectedMuscles].sort().join(',')}|${selectedPattern}|${selectedDifficulty}|${selectedEquipment}|${selectedJointSafety}|${searchQuery}`;
+    if (prevFilterKeyRef.current && prevFilterKeyRef.current !== currentKey) {
+      listTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    prevFilterKeyRef.current = currentKey;
+  }, [selectedMuscles, selectedPattern, selectedDifficulty, selectedEquipment, selectedJointSafety, searchQuery]);
 
   const patterns: Array<MovementPattern | 'Todos'> = [
     'Todos',
@@ -167,14 +262,120 @@ export const ExerciseLibraryView = ({
     }
   };
 
+  const renderExerciseCard = (ex: Exercise) => (
+    <div
+      key={ex.id}
+      className="glass-card rounded-3xl p-5 shadow-xl hover:border-white/15 transition-all duration-300 flex flex-col justify-between space-y-4"
+    >
+      <div>
+        {/* Chips de Metadados */}
+        <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
+          <div className="flex items-center gap-1.5">
+            <span className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+              {ex.padrao ? MOVEMENT_PATTERN_LABELS[ex.padrao] || ex.category : ex.category}
+            </span>
+            <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-slate-800 text-slate-300">
+              {ex.difficulty}
+            </span>
+            <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-slate-800 text-slate-400">
+              {ex.type === 'isometric' ? 'Isometria' : 'Repetições'}
+            </span>
+          </div>
+          {ex.cadencia && (
+            <span className="text-[10px] font-mono text-slate-400 flex items-center gap-1">
+              <Timer className="w-3 h-3 text-cyan-400" /> {ex.cadencia}
+            </span>
+          )}
+        </div>
+
+        {/* Título & Descrição */}
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex-1">
+            <h3 className="text-base sm:text-lg font-bold text-slate-100">{ex.name}</h3>
+            <p className="text-xs text-slate-400 mt-1 leading-relaxed line-clamp-2">{ex.description}</p>
+          </div>
+          {ex.videoThumbnail && (
+            <img
+              src={ex.videoThumbnail}
+              alt={ex.name}
+              loading="lazy"
+              className="w-14 h-14 rounded-2xl object-cover bg-black/40 border border-white/10 shrink-0 shadow-md"
+            />
+          )}
+        </div>
+
+        {/* Músculos Alvo e Secundários com Destaque para o Músculo Filtrado */}
+        <div className="flex flex-wrap gap-1 mt-3">
+          {ex.primaryMuscles.map(m => {
+            const isFiltered = selectedMuscles.includes(m);
+            return (
+              <span
+                key={m}
+                className={`px-2 py-0.5 rounded-md text-[10px] font-semibold transition ${
+                  isFiltered
+                    ? 'bg-emerald-500/25 text-emerald-200 border border-emerald-400 font-bold glow-emerald'
+                    : 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20'
+                }`}
+              >
+                Alvo: {MUSCLE_LABELS[m] || m}
+              </span>
+            );
+          })}
+          {selectedMuscles.length > 0 &&
+            ex.secondaryMuscles
+              .filter(m => selectedMuscles.includes(m))
+              .map(m => (
+                <span
+                  key={`sec-filtered-${m}`}
+                  className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-cyan-500/25 text-cyan-200 border border-cyan-400 glow-cyan"
+                >
+                  Secundário: {MUSCLE_LABELS[m] || m}
+                </span>
+              ))}
+          {ex.secondaryMuscles
+            .filter(m => !selectedMuscles.includes(m))
+            .slice(0, 2)
+            .map(m => (
+              <span key={m} className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-slate-800 text-slate-400">
+                {MUSCLE_LABELS[m] || m}
+              </span>
+            ))}
+        </div>
+      </div>
+
+      {/* Ações do Card */}
+      <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between">
+        <span className="text-xs text-slate-400 font-medium">
+          {ex.executionSteps.length} passos biomecânicos
+        </span>
+        <div className="flex items-center gap-2">
+          {onSelectExerciseToSwap && (
+            <button
+              onClick={() => onSelectExerciseToSwap(ex)}
+              className="px-3 py-2 rounded-2xl bg-emerald-500 text-slate-950 font-bold text-xs shadow-md active:scale-95 transition"
+            >
+              Selecionar
+            </button>
+          )}
+          <button
+            onClick={() => handleOpenExerciseModal(ex)}
+            className="px-4 py-2 rounded-2xl glass-card text-emerald-300 hover:text-white hover:bg-white/[0.08] text-xs font-bold border border-white/10 flex items-center gap-1.5 transition active:scale-95 glow-emerald min-h-[44px]"
+          >
+            <Sparkles className="w-3.5 h-3.5" /> Detalhes & Progressões
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
-    <div className="space-y-6 pb-24">
+    <div className="space-y-6 pb-[calc(7rem+env(safe-area-inset-bottom))]">
       {/* Banner de Cabeçalho */}
       <div className="relative glass-card rounded-3xl p-5 sm:p-7 overflow-hidden border border-white/10 shadow-2xl">
         <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
         <div className="space-y-1.5 relative z-10">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
-            <Sparkles className="w-3.5 h-3.5" /> 140+ Exercícios • Auditoria CREF
+            <Sparkles className="w-3.5 h-3.5" /> 160+ Exercícios • Auditoria CREF
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-slate-100 tracking-tight flex items-center gap-2">
             <Dumbbell className="w-7 h-7 text-emerald-400" />
@@ -258,22 +459,49 @@ export const ExerciseLibraryView = ({
             >
               <Activity className="w-3.5 h-3.5 text-cyan-400" />
               <span>Mapa Muscular 3D</span>
-              {showInteractiveMap ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+              {showInteractiveMap ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
             </button>
 
-            {selectedMuscle && (
-              <div className="flex items-center gap-1.5 bg-amber-500/15 border border-amber-500/30 text-amber-300 px-3 py-1.5 rounded-2xl text-xs font-bold glow-amber">
-                <span>Músculo: {MUSCLE_LABELS[selectedMuscle]}</span>
-                <button onClick={() => setSelectedMuscle(null)} className="hover:text-white ml-1">
-                  <X className="w-3.5 h-3.5" />
-                </button>
+            {selectedMuscles.length > 0 && (
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {selectedMuscles.map(m => (
+                  <div
+                    key={`badge-${m}`}
+                    className="flex items-center gap-1.5 bg-amber-500/15 border border-amber-500/30 text-amber-300 px-3 py-1.5 rounded-2xl text-xs font-bold glow-amber"
+                  >
+                    <span>Músculo: {MUSCLE_LABELS[m] || m}</span>
+                    <button
+                      onClick={() => handleSelectMuscle(m)}
+                      className="hover:text-white ml-1 p-0.5 rounded-full"
+                      aria-label={`Remover filtro de ${MUSCLE_LABELS[m] || m}`}
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))}
+                {selectedMuscles.length > 1 && (
+                  <button
+                    onClick={() => setSelectedMuscles([])}
+                    className="text-[11px] text-slate-400 hover:text-white underline ml-1"
+                  >
+                    Limpar todos
+                  </button>
+                )}
               </div>
             )}
           </div>
 
-          <span className="text-xs text-slate-400 shrink-0 font-medium font-mono">
-            {filteredExercises.length} exercícios encontrados
-          </span>
+          {selectedMuscles.length > 0 ? (
+            <span className="text-xs text-slate-300 shrink-0 font-medium font-mono flex items-center gap-1.5">
+              <span className="text-emerald-400 font-bold">{primaryExercises.length} alvo</span>
+              <span className="text-slate-500">•</span>
+              <span className="text-cyan-400 font-bold">{secondaryExercises.length} secundários</span>
+            </span>
+          ) : (
+            <span className="text-xs text-slate-400 shrink-0 font-medium font-mono">
+              {primaryExercises.length} exercícios encontrados
+            </span>
+          )}
         </div>
 
         {/* Gaveta de Filtros Avançados */}
@@ -354,122 +582,149 @@ export const ExerciseLibraryView = ({
               <span className="text-xs font-black uppercase tracking-wider text-slate-300">
                 Toque no músculo para filtrar exercícios alvo:
               </span>
-              {selectedMuscle && (
+              {selectedMuscles.length > 0 && (
                 <button
-                  onClick={() => setSelectedMuscle(null)}
+                  onClick={() => setSelectedMuscles([])}
                   className="text-xs text-emerald-400 hover:underline font-bold"
                 >
-                  Limpar seleção
+                  Limpar seleção ({selectedMuscles.length})
                 </button>
               )}
             </div>
             <MuscleMap
-              selectedMuscle={selectedMuscle}
-              onSelectMuscle={m => setSelectedMuscle(m === selectedMuscle ? null : m)}
+              selectedMuscles={selectedMuscles}
+              onSelectMuscle={handleSelectMuscle}
               size="md"
             />
           </div>
         )}
       </div>
 
-      {/* Grade de Exercícios */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
-        {filteredExercises.map(ex => (
-          <div
-            key={ex.id}
-            className="glass-card rounded-3xl p-5 shadow-xl hover:border-white/15 transition-all duration-300 flex flex-col justify-between space-y-4"
-          >
-            <div>
-              {/* Chips de Metadados */}
-              <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
-                <div className="flex items-center gap-1.5">
-                  <span className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-                    {ex.padrao ? MOVEMENT_PATTERN_LABELS[ex.padrao] || ex.category : ex.category}
-                  </span>
-                  <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-slate-800 text-slate-300">
-                    {ex.difficulty}
-                  </span>
-                  <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-slate-800 text-slate-400">
-                    {ex.type === 'isometric' ? 'Isometria' : 'Repetições'}
-                  </span>
-                </div>
-                {ex.cadencia && (
-                  <span className="text-[10px] font-mono text-slate-400 flex items-center gap-1">
-                    <Timer className="w-3 h-3 text-cyan-400" /> {ex.cadencia}
-                  </span>
-                )}
-              </div>
+      {/* Âncora de Rolagem do Topo da Lista */}
+      <div ref={listTopRef} />
 
-              {/* Título & Descrição */}
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1">
-                  <h3 className="text-base sm:text-lg font-bold text-slate-100">{ex.name}</h3>
-                  <p className="text-xs text-slate-400 mt-1 leading-relaxed line-clamp-2">{ex.description}</p>
-                </div>
-                {ex.videoThumbnail && (
-                  <img
-                    src={ex.videoThumbnail}
-                    alt={ex.name}
-                    loading="lazy"
-                    className="w-14 h-14 rounded-2xl object-cover bg-black/40 border border-white/10 shrink-0 shadow-md"
-                  />
-                )}
-              </div>
-
-              {/* Músculos Alvo */}
-              <div className="flex flex-wrap gap-1 mt-3">
-                {ex.primaryMuscles.map(m => (
-                  <span
-                    key={m}
-                    className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-500/10 text-emerald-300 border border-emerald-500/20"
-                  >
-                    Alvo: {MUSCLE_LABELS[m] || m}
-                  </span>
-                ))}
-                {ex.secondaryMuscles.slice(0, 2).map(m => (
-                  <span key={m} className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-slate-800 text-slate-400">
-                    {MUSCLE_LABELS[m] || m}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Ações do Card */}
-            <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between">
-              <span className="text-xs text-slate-400 font-medium">
-                {ex.executionSteps.length} passos biomecânicos
-              </span>
-              <div className="flex items-center gap-2">
-                {onSelectExerciseToSwap && (
-                  <button
-                    onClick={() => onSelectExerciseToSwap(ex)}
-                    className="px-3 py-2 rounded-2xl bg-emerald-500 text-slate-950 font-bold text-xs shadow-md active:scale-95 transition"
-                  >
-                    Selecionar
-                  </button>
-                )}
-                <button
-                  onClick={() => handleOpenExerciseModal(ex)}
-                  className="px-4 py-2 rounded-2xl glass-card text-emerald-300 hover:text-white hover:bg-white/[0.08] text-xs font-bold border border-white/10 flex items-center gap-1.5 transition active:scale-95 glow-emerald min-h-[44px]"
-                >
-                  <Sparkles className="w-3.5 h-3.5" /> Detalhes & Progressões
-                </button>
-              </div>
-            </div>
+      {/* Banner de Aviso: Exercícios Ocultos pelo Filtro de Padrão */}
+      {hiddenByPatternCount > 0 && (
+        <div className="glass-card p-4 rounded-3xl border border-amber-500/30 bg-amber-500/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-amber-200 shadow-lg">
+          <div className="flex items-center gap-2.5">
+            <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+            <span>
+              Padrão <strong>{selectedPattern === 'Todos' ? '' : MOVEMENT_PATTERN_LABELS[selectedPattern]}</strong> ativo:{' '}
+              <strong>{hiddenByPatternCount}</strong> exercício{hiddenByPatternCount > 1 ? 's deste músculo estão ocultos' : ' deste músculo está oculto'} em outros padrões de movimento.
+            </span>
           </div>
-        ))}
-      </div>
-
-      {filteredExercises.length === 0 && (
-        <div className="p-12 text-center glass-card rounded-3xl border border-white/10 space-y-3">
-          <Dumbbell className="w-10 h-10 text-slate-600 mx-auto" />
-          <h4 className="text-base font-bold text-slate-200">Nenhum exercício encontrado</h4>
-          <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
-            Tente buscar com outro termo ou limpe os filtros de padrão de movimento, nível ou músculo.
-          </p>
+          <button
+            onClick={() => {
+              soundManager.triggerHaptic([20]);
+              setSelectedPattern('Todos');
+            }}
+            className="px-3.5 py-1.5 rounded-xl bg-amber-400 text-slate-950 font-black text-xs hover:bg-amber-300 transition shrink-0 active:scale-95 shadow-md"
+          >
+            Ver todos os padrões
+          </button>
         </div>
       )}
 
+      {/* Grade de Exercícios: Agrupamento em Alvo e Secundário */}
+      <div className="space-y-8 pb-[calc(2rem+env(safe-area-inset-bottom))]">
+        {/* Caso 1: Músculo(s) Selecionado(s) - Dividir em Grupo Alvo e Grupo Secundário */}
+        {selectedMuscles.length > 0 && (
+          <>
+            {/* GRUPO 1: ALVO (MÚSCULO PRIMÁRIO) */}
+            {primaryExercises.length > 0 && (
+              <section aria-labelledby="section-primary-muscles" className="space-y-4">
+                <div className="flex items-center justify-between gap-3 border-b border-emerald-500/20 pb-2.5">
+                  <div className="flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full bg-emerald-400 glow-emerald" aria-hidden="true" />
+                    <h2 id="section-primary-muscles" className="text-sm sm:text-base font-black text-slate-100 tracking-tight">
+                      Alvo: {selectedMuscles.map(m => MUSCLE_LABELS[m] || m).join(', ')} ({primaryExercises.length})
+                    </h2>
+                  </div>
+                  <span className="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-0.5 rounded-full">
+                    Músculo Principal
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+                  {primaryExercises.map(ex => renderExerciseCard(ex))}
+                </div>
+              </section>
+            )}
+
+            {/* GRUPO 2: TRABALHA COMO SECUNDÁRIO */}
+            {secondaryExercises.length > 0 && (
+              <section aria-labelledby="section-secondary-muscles" className="space-y-4 pt-4">
+                <div className="flex items-center justify-between gap-3 border-b border-cyan-500/20 pb-2.5">
+                  <div className="flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full bg-cyan-400 glow-cyan" aria-hidden="true" />
+                    <h2 id="section-secondary-muscles" className="text-sm sm:text-base font-black text-slate-100 tracking-tight">
+                      Trabalha como secundário ({secondaryExercises.length})
+                    </h2>
+                  </div>
+                  <span className="text-[11px] font-bold text-cyan-400 bg-cyan-500/10 border border-cyan-500/30 px-2.5 py-0.5 rounded-full">
+                    Sinergista / Suporte
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+                  {secondaryExercises.map(ex => renderExerciseCard(ex))}
+                </div>
+              </section>
+            )}
+
+            {/* Aviso quando ambos os grupos ficam vazios */}
+            {primaryExercises.length === 0 && secondaryExercises.length === 0 && (
+              <div className="glass-card rounded-3xl p-8 sm:p-10 border border-white/10 text-center space-y-4 shadow-2xl">
+                <div className="w-16 h-16 rounded-full bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center mx-auto text-cyan-400">
+                  <Activity className="w-8 h-8" />
+                </div>
+                <div className="space-y-1.5 max-w-md mx-auto">
+                  <h3 className="text-lg font-bold text-slate-100">
+                    Nenhum exercício encontrado para esta combinação
+                  </h3>
+                  <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
+                    Não há exercícios cadastrados que atendam simultaneamente aos filtros ativos para {selectedMuscles.map(m => MUSCLE_LABELS[m] || m).join(', ')}. Tente desativar filtros de equipamento, dificuldade ou padrão de movimento.
+                  </p>
+                </div>
+                <div className="pt-2 flex items-center justify-center gap-3">
+                  <button
+                    onClick={() => {
+                      setSelectedMuscles([]);
+                      setSelectedPattern('Todos');
+                      setSelectedDifficulty('Todos');
+                      setSelectedEquipment('Todos');
+                      setSelectedJointSafety('Todos');
+                      setSearchQuery('');
+                    }}
+                    className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 font-black text-xs shadow-lg shadow-emerald-500/20 active:scale-95 transition"
+                  >
+                    Limpar todos os filtros
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Caso 2: Nenhum Músculo Selecionado - Lista Unificada Padrão */}
+        {selectedMuscles.length === 0 && (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+              {primaryExercises.map(ex => renderExerciseCard(ex))}
+            </div>
+
+            {primaryExercises.length === 0 && (
+              <div className="p-12 text-center glass-card rounded-3xl border border-white/10 space-y-3">
+                <Dumbbell className="w-10 h-10 text-slate-600 mx-auto" />
+                <h4 className="text-base font-bold text-slate-200">Nenhum exercício encontrado</h4>
+                <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
+                  Tente buscar com outro termo ou limpe os filtros de padrão de movimento, nível ou equipamento.
+                </p>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      
       {/* MODAL MULTI-ABAS DE DETALHES COMPLETOS DO EXERCÍCIO */}
       {selectedExercise && (
         <div

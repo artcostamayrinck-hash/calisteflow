@@ -1,4 +1,4 @@
-import type { Exercise } from '../types';
+import type { Exercise, MuscleGroup, MuscleDefinition } from '../types';
 import { CREF_REVIEWER_SPECIALIST } from './exercises/reviewer';
 import { PUSH_HORIZONTAL_EXERCISES } from './exercises/pushHorizontal';
 import { PUSH_VERTICAL_EXERCISES } from './exercises/pushVertical';
@@ -69,17 +69,93 @@ export const getExerciseById = (id: string): Exercise | undefined => {
   return undefined;
 };
 
-export const MUSCLE_LABELS: Record<string, string> = {
-  peito: 'Peitoral',
-  costas: 'Costas / Dorsais',
-  ombros: 'Deltoides / Ombros',
-  triceps: 'Tríceps',
-  biceps: 'Bíceps',
-  abdomen: 'Abdômen / Core',
-  lombar: 'Lombar',
-  quadriceps: 'Quadríceps',
-  posteriores: 'Isquiotibiais',
-  gluteos: 'Glúteos',
-  panturrilhas: 'Panturrilhas',
-  antebraco: 'Antebraços'
+export const MUSCLE_DEFINITIONS: Record<MuscleGroup, MuscleDefinition> = {
+  peito: {
+    id: 'peito',
+    name: 'Peitoral',
+    category: 'superior',
+    synonyms: ['peito', 'peitoral', 'peitoral maior', 'peitoral menor', 'chest'],
+    views: ['frontal']
+  },
+  costas: {
+    id: 'costas',
+    name: 'Costas / Dorsais',
+    category: 'superior',
+    synonyms: ['costas', 'dorsal', 'dorsais', 'latissimo', 'trapezio', 'back'],
+    views: ['posterior']
+  },
+  ombros: {
+    id: 'ombros',
+    name: 'Deltoides / Ombros',
+    category: 'superior',
+    synonyms: ['ombro', 'ombros', 'deltoide', 'deltoides', 'shoulders'],
+    views: ['frontal', 'posterior']
+  },
+  triceps: {
+    id: 'triceps',
+    name: 'Tríceps',
+    category: 'superior',
+    synonyms: ['triceps', 'tríceps', 'triceps braquial'],
+    views: ['posterior']
+  },
+  biceps: {
+    id: 'biceps',
+    name: 'Bíceps',
+    category: 'superior',
+    synonyms: ['biceps', 'bíceps', 'biceps braquial', 'braquial'],
+    views: ['frontal']
+  },
+  abdomen: {
+    id: 'abdomen',
+    name: 'Abdômen / Core',
+    category: 'tronco',
+    synonyms: ['abdomen', 'abdômen', 'abdominal', 'core', 'reto abdominal', 'obliquos', 'oblíquos', 'transverso'],
+    views: ['frontal']
+  },
+  lombar: {
+    id: 'lombar',
+    name: 'Lombar',
+    category: 'tronco',
+    synonyms: ['lombar', 'eretores da espinha', 'costas baixa', 'lower back', 'paravertebrais'],
+    views: ['posterior']
+  },
+  quadriceps: {
+    id: 'quadriceps',
+    name: 'Quadríceps',
+    category: 'inferior',
+    synonyms: ['quadriceps', 'quadríceps', 'coxa anterior', 'reto femoral', 'quads'],
+    views: ['frontal']
+  },
+  posteriores: {
+    id: 'posteriores',
+    name: 'Isquiotibiais',
+    category: 'inferior',
+    synonyms: ['posteriores', 'posterior de coxa', 'isquiotibiais', 'isquios', 'isquiossurais', 'hamstrings'],
+    views: ['posterior']
+  },
+  gluteos: {
+    id: 'gluteos',
+    name: 'Glúteos',
+    category: 'inferior',
+    synonyms: ['gluteo', 'glúteo', 'gluteos', 'glúteos', 'gluteo maximo', 'gluteo medio'],
+    views: ['posterior']
+  },
+  panturrilhas: {
+    id: 'panturrilhas',
+    name: 'Panturrilhas',
+    category: 'inferior',
+    synonyms: ['panturrilha', 'panturrilhas', 'gemeos', 'gêmeos', 'gastrocnemio', 'gastrocêmio', 'soleo', 'sóleo', 'calves'],
+    views: ['frontal', 'posterior']
+  },
+  antebraco: {
+    id: 'antebraco',
+    name: 'Antebraços',
+    category: 'superior',
+    synonyms: ['antebraco', 'antebraço', 'antebracos', 'antebraços', 'punho', 'flexores de punho', 'forearms'],
+    views: ['frontal', 'posterior']
+  }
 };
+
+export const MUSCLE_LABELS: Record<string, string> = Object.fromEntries(
+  Object.entries(MUSCLE_DEFINITIONS).map(([id, def]) => [id, def.name])
+);
