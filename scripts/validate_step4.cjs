@@ -175,3 +175,4 @@ searchTerms.forEach(term => {
   const uniqueMatches = new Set(matches.map(m => m.id));
   console.log(`Busca "${term}": ${matches.length} itens encontrados (${uniqueMatches.size} únicos)`);
 });
+
