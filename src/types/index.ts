@@ -86,7 +86,8 @@ export interface Exercise {
   breathingTip: string;
   videoUrl?: string;
   videoThumbnail?: string;
-  reviewedBy?: ExerciseReviewer;
+  reviewedBy?: ExerciseReviewer | null;
+  revisadoPor?: string | null;
   safetyCautions?: string[];
   padrao?: MovementPattern;
   equipamento?: EquipmentType[];

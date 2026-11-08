@@ -65,7 +65,7 @@ export const CORE_EXERCISES: Exercise[] = [
     estatico: true,
     cadencia: 'isometria',
     regressoes: ['prancha-joelhos', 'dead-bug'],
-    progressoes: ['prancha-toque-ombro', 'hollowbody'],
+    progressoes: ['prancha-toque-ombro', 'prancha-elevacao-perna', 'hollowbody'],
     variacoes: ['prancha-toque-ombro', 'prancha-lateral'],
     adaptacoes: {
       lombar: ['prancha-joelhos', 'dead-bug'],
@@ -105,7 +105,7 @@ export const CORE_EXERCISES: Exercise[] = [
     estatico: false,
     cadencia: '2-1-2',
     regressoes: ['plank', 'prancha-joelhos'],
-    progressoes: ['hollowbody', 'elevacao-pernas-chao'],
+    progressoes: ['prancha-elevacao-perna', 'hollowbody', 'elevacao-pernas-chao'],
     variacoes: ['prancha-joelhos'],
     adaptacoes: {
       punho: ['plank'],
@@ -144,7 +144,7 @@ export const CORE_EXERCISES: Exercise[] = [
     estatico: false,
     cadencia: '2-1-2',
     regressoes: ['elevacao-joelhos-chao'],
-    progressoes: ['hollow-hold-tuck', 'plank'],
+    progressoes: ['dead-bug-perna-estendida', 'hollow-hold-tuck', 'plank'],
     variacoes: ['hollow-hold-tuck'],
     adaptacoes: {
       lombar: ['dead-bug'],
@@ -184,7 +184,7 @@ export const CORE_EXERCISES: Exercise[] = [
     estatico: true,
     cadencia: 'isometria',
     regressoes: ['dead-bug'],
-    progressoes: ['hollowbody'],
+    progressoes: ['hollow-hold-uma-perna', 'hollowbody'],
     variacoes: ['dead-bug'],
     adaptacoes: {
       lombar: ['dead-bug'],
@@ -222,8 +222,8 @@ export const CORE_EXERCISES: Exercise[] = [
     tipoExercicio: 'principal',
     estatico: true,
     cadencia: 'isometria',
-    regressoes: ['hollow-hold-tuck', 'dead-bug'],
-    progressoes: ['elevacao-pernas-barra', 'dragon-flag-tuck'],
+    regressoes: ['hollow-hold-uma-perna', 'hollow-hold-tuck', 'dead-bug'],
+    progressoes: ['hollow-rock', 'elevacao-pernas-barra', 'dragon-flag-tuck'],
     variacoes: ['hollow-hold-tuck'],
     adaptacoes: {
       lombar: ['hollow-hold-tuck', 'dead-bug'],
@@ -301,7 +301,7 @@ export const CORE_EXERCISES: Exercise[] = [
     estatico: false,
     cadencia: '2-1-2',
     regressoes: ['elevacao-joelhos-chao'],
-    progressoes: ['elevacao-joelhos-barra', 'elevacao-pernas-barra'],
+    progressoes: ['elevacao-pernas-chao-pausa', 'flutter-kicks', 'elevacao-joelhos-barra', 'elevacao-pernas-barra'],
     variacoes: ['hollowbody'],
     adaptacoes: {
       lombar: ['elevacao-joelhos-chao', 'dead-bug']
@@ -455,9 +455,9 @@ export const CORE_EXERCISES: Exercise[] = [
     tipoExercicio: 'principal',
     estatico: false,
     cadencia: '2-1-2',
-    regressoes: ['plank', 'hollowbody'],
+    regressoes: ['ab-wheel-negativa', 'plank', 'hollowbody'],
     progressoes: ['ab-wheel-pe', 'dragon-flag-negativa'],
-    variacoes: ['plank'],
+    variacoes: ['ab-wheel-negativa', 'plank'],
     adaptacoes: {
       lombar: ['hollowbody', 'dead-bug'],
       ombro: ['plank', 'dead-bug'],
@@ -496,7 +496,7 @@ export const CORE_EXERCISES: Exercise[] = [
     estatico: false,
     cadencia: '3-1-2',
     regressoes: ['ab-wheel-joelhos'],
-    progressoes: ['dragon-flag'],
+    progressoes: ['dragon-flag-adv-tuck', 'dragon-flag'],
     variacoes: ['ab-wheel-joelhos'],
     adaptacoes: {
       lombar: ['ab-wheel-joelhos'],
@@ -613,7 +613,7 @@ export const CORE_EXERCISES: Exercise[] = [
     tipoExercicio: 'skill',
     estatico: false,
     cadencia: '2-1-2',
-    regressoes: ['dragon-flag-tuck', 'dragon-flag-negativa'],
+    regressoes: ['dragon-flag-uma-perna', 'dragon-flag-tuck', 'dragon-flag-negativa'],
     progressoes: ['frontlever'],
     variacoes: ['dragon-flag-tuck'],
     adaptacoes: {
@@ -852,8 +852,8 @@ export const CORE_EXERCISES: Exercise[] = [
     estatico: false,
     cadencia: '2-1-2',
     regressoes: ['prancha-toque-ombro'],
-    progressoes: ['prancha-lateral-elevacao-quadril'],
-    variacoes: ['prancha-toque-ombro'],
+    progressoes: ['russian-twist-pes-elevados', 'prancha-lateral-elevacao-quadril'],
+    variacoes: ['mountain-climbers', 'prancha-toque-ombro'],
     adaptacoes: {
       lombar: ['dead-bug', 'prancha-lateral']
     },
@@ -889,7 +889,7 @@ export const CORE_EXERCISES: Exercise[] = [
     tipoExercicio: 'principal',
     estatico: false,
     cadencia: '2-1-2',
-    regressoes: ['prancha-joelhos'],
+    regressoes: ['mountain-climbers', 'prancha-joelhos'],
     progressoes: ['prancha-toque-ombro'],
     variacoes: ['prancha-toque-ombro'],
     adaptacoes: {
@@ -933,7 +933,7 @@ export const CORE_EXERCISES: Exercise[] = [
     estatico: false,
     cadencia: '2-1-2',
     regressoes: ['ponte-gluteo'],
-    progressoes: ['superman', 'superman-alternado'],
+    progressoes: ['bird-dog-pausa', 'superman', 'superman-alternado'],
     variacoes: ['superman-alternado'],
     adaptacoes: {
       lombar: ['bird-dog'],
@@ -1261,6 +1261,903 @@ export const CORE_EXERCISES: Exercise[] = [
     commonMistakes: [
       { mistake: 'Usar impulso dos braços no solo para iniciar a subida', correction: 'Se necessário impulso, treine com elástico de suporte amarrado ao peito.' }
     ]
-  }
-];
+  },
 
+  // ==========================================
+  // EXPANSÃO DE CORE - LOTE 1 (PRANCHAS, HOLLOW, ELEVAÇÕES E ROTAÇÕES)
+  // ==========================================
+  {
+    id: 'prancha-elevacao-perna',
+    name: 'Prancha com Elevação Unilateral de Perna',
+    category: 'Core',
+    difficulty: 'Intermediário',
+    type: 'isometric',
+    primaryMuscles: ['abdomen'],
+    secondaryMuscles: ['gluteos', 'lombar', 'ombros'],
+    defaultSets: 3,
+    defaultHoldSeconds: 30,
+    defaultRestSeconds: 60,
+    description: 'Variação anti-extensão e anti-rotação da prancha no solo, onde a redução da base de sustentação para 3 apoios intensifica o recrutamento do core profundo e dos estabilizadores do quadril.',
+    breathingTip: 'Mantenha a respiração diafragmática ritmada sem prender o ar ao sustentar a perna elevada.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Não hiperestenda a coluna lombar ao erguer a perna.',
+      'Pare se houver dor aguda.'
+    ],
+    padrao: 'core-anterior',
+    equipamento: ['nenhum'],
+    tipoExercicio: 'principal',
+    estatico: true,
+    cadencia: 'isometria',
+    regressoes: ['prancha-toque-ombro', 'plank'],
+    progressoes: ['prancha-apoio-instavel'],
+    variacoes: ['prancha-toque-ombro', 'prancha-joelhos'],
+    adaptacoes: {
+      lombar: ['prancha-joelhos', 'dead-bug'],
+      punho: ['prancha-elevacao-perna'],
+      ombro: ['dead-bug'],
+      semEquipamento: ['prancha-elevacao-perna']
+    },
+    criterioAvanco: 'Sustentar 3 séries de 30 segundos cada lado sem oscilação pélvica',
+    sinonimos: ['single leg plank', 'prancha 3 apoios', 'prancha com perna levantada'],
+    animationType: 'plank',
+    executionSteps: [
+      { step: 1, title: 'Base de Prancha', description: 'Assuma a posição de prancha nos antebraços com escápulas protrusas e pelve em retroversão.' },
+      { step: 2, title: 'Elevação Controlada', description: 'Erga uma das pernas cerca de 10 a 15 cm do solo, ativando intensamente o glúteo e o abdômen sem girar a bacia.' },
+      { step: 3, title: 'Sustentação Rígida', description: 'Permaneça imóvel evitando qualquer afundamento lombar durante o tempo estipulado, alternando o lado.' }
+    ],
+    commonMistakes: [
+      { mistake: 'Elevar a perna excessivamente arqueando a lombar', correction: 'Suba o calcanhar apenas até a linha do tronco, mantendo o abdômen contraído.' },
+      { mistake: 'Girar a bacia para o lado da perna elevada', correction: 'Mantenha as duas cristas ilíacas apontadas diretamente para o chão.' }
+    ]
+  },
+  {
+    id: 'prancha-apoio-instavel',
+    name: 'Prancha com Pés em Apoio Instável',
+    category: 'Core',
+    difficulty: 'Avançado',
+    type: 'isometric',
+    primaryMuscles: ['abdomen'],
+    secondaryMuscles: ['ombros', 'lombar', 'peito'],
+    defaultSets: 3,
+    defaultHoldSeconds: 30,
+    defaultRestSeconds: 60,
+    description: 'Prancha executada com os pés ou antebraços apoiados sobre uma superfície móvel ou escorregadia (toalha, meias em piso liso ou apoio flexível), exigindo controle reflexo extremo do core.',
+    breathingTip: 'Solte o ar de forma cadenciada mantendo a parede abdominal em contração máxima contínua.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Mantenha controle estrito da superfície para evitar escorregamento descontrolado.',
+      'Pare se houver dor aguda.'
+    ],
+    padrao: 'core-anterior',
+    equipamento: ['nenhum'],
+    tipoExercicio: 'principal',
+    estatico: true,
+    cadencia: 'isometria',
+    regressoes: ['plank', 'prancha-toque-ombro'],
+    progressoes: ['ab-wheel-joelhos'],
+    variacoes: ['plank'],
+    adaptacoes: {
+      lombar: ['plank', 'prancha-joelhos'],
+      punho: ['plank'],
+      ombro: ['dead-bug'],
+      semEquipamento: ['plank']
+    },
+    criterioAvanco: 'Sustentar 3 séries de 40 segundos com alinhamento neutro e estabilidade total',
+    sinonimos: ['unstable plank', 'prancha na toalha', 'prancha instável'],
+    animationType: 'plank',
+    executionSteps: [
+      { step: 1, title: 'Posicionamento', description: 'Apoie os pés sobre uma toalha em piso liso ou apoio móvel e posicione os antebraços no chão.' },
+      { step: 2, title: 'Ativação e Alinhamento', description: 'Estenda o corpo travando glúteos e abdômen, impedindo que o ponto instável se desloque.' },
+      { step: 3, title: 'Controle Antidistúrbio', description: 'Mantenha a postura resistindo a qualquer micro-oscilação até o fim da série.' }
+    ],
+    commonMistakes: [
+      { mistake: 'Perder a retroversão pélvica e arquear a lombar', correction: 'Aperte os glúteos com força máxima e reduza a distância se necessário.' }
+    ]
+  },
+  {
+    id: 'dead-bug-perna-estendida',
+    name: 'Dead Bug com Perna Estendida',
+    category: 'Core',
+    difficulty: 'Iniciante',
+    type: 'reps',
+    primaryMuscles: ['abdomen'],
+    secondaryMuscles: ['lombar', 'quadriceps'],
+    defaultSets: 3,
+    defaultReps: 16,
+    defaultRestSeconds: 45,
+    description: 'Evolução do Dead Bug tradicional onde a alavanca dos membros inferiores é aumentada estendendo o joelho próximo ao solo, aumentando a demanda de anti-extensão lombo-pélvica.',
+    breathingTip: 'Solte o ar pela boca ao estender braço e perna opostos, inspirando ao retornar ao centro.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'A lombar jamais deve descolar do solo durante a extensão da perna.',
+      'Pare se houver dor aguda.'
+    ],
+    padrao: 'core-anterior',
+    equipamento: ['nenhum'],
+    tipoExercicio: 'principal',
+    estatico: false,
+    cadencia: '2-1-2',
+    regressoes: ['dead-bug'],
+    progressoes: ['hollow-hold-tuck'],
+    variacoes: ['dead-bug', 'hollow-hold-tuck'],
+    adaptacoes: {
+      lombar: ['dead-bug'],
+      punho: ['dead-bug-perna-estendida'],
+      pescoco: ['dead-bug-perna-estendida'],
+      semEquipamento: ['dead-bug-perna-estendida']
+    },
+    criterioAvanco: 'Completar 3 séries de 20 repetições alternadas com a coluna lombar 100% colada ao chão',
+    sinonimos: ['dead bug pernas retas', 'straight leg dead bug'],
+    animationType: 'plank',
+    executionSteps: [
+      { step: 1, title: 'Posição Inicial', description: 'Deite de costas no solo, braços estendidos para o teto e joelhos a 90 graus, pressionando a lombar contra o chão.' },
+      { step: 2, title: 'Extensão Simultânea', description: 'Estenda um braço para trás da cabeça enquanto estende a perna oposta em linha reta a poucos centímetros do chão.' },
+      { step: 3, title: 'Retorno Ativo', description: 'Retorne ao centro com controle e repita com o membro contralateral.' }
+    ],
+    commonMistakes: [
+      { mistake: 'Arquear a lombar criando espaço entre a coluna e o solo', correction: 'Interrompa a descida da perna na angulação exata em que sua lombar conseguir ficar colada.' }
+    ]
+  },
+  {
+    id: 'bird-dog-pausa',
+    name: 'Bird Dog com Pausa Isométrica',
+    category: 'Core',
+    difficulty: 'Iniciante',
+    type: 'reps',
+    primaryMuscles: ['lombar'],
+    secondaryMuscles: ['gluteos', 'ombros', 'abdomen'],
+    defaultSets: 3,
+    defaultReps: 12,
+    defaultRestSeconds: 45,
+    description: 'Exercício de estabilização lombo-pélvica e cadeia cruzada posterior, sustentando a posição de extensão máxima com pausa de 3 a 5 segundos no topo.',
+    breathingTip: 'Inspire ao estender e sustente o ar e a tensão durante a pausa; expire ao recolher.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Não faça hiperextensão da coluna cervical nem gire a pelve.',
+      'Pare se houver dor aguda.'
+    ],
+    padrao: 'costas-baixa',
+    equipamento: ['nenhum'],
+    tipoExercicio: 'principal',
+    estatico: false,
+    cadencia: '2-3-2',
+    regressoes: ['bird-dog'],
+    progressoes: ['superman', 'superman-alternado'],
+    variacoes: ['bird-dog'],
+    adaptacoes: {
+      lombar: ['bird-dog'],
+      punho: ['bird-dog'],
+      joelho: ['bird-dog'],
+      semEquipamento: ['bird-dog-pausa']
+    },
+    criterioAvanco: 'Executar 3 séries de 12 repetições com pausa sólida de 3 segundos sem rotação do quadril',
+    sinonimos: ['perdigueiro com pausa', 'isometric bird dog hold'],
+    animationType: 'plank',
+    executionSteps: [
+      { step: 1, title: 'Quatro Apoios', description: 'Mãos sob os ombros e joelhos sob o quadril, mantendo a coluna em posição neutra.' },
+      { step: 2, title: 'Extensão Cruzada', description: 'Estenda o braço direito para a frente e a perna esquerda para trás até alinharem-se com o tronco.' },
+      { step: 3, title: 'Pausa Isométrica', description: 'Congele na posição por 3 a 5 segundos apertando glúteo e abdômen, e retorne suavemente.' }
+    ],
+    commonMistakes: [
+      { mistake: 'Girar a bacia para cima do lado da perna estendida', correction: 'Mantenha os dois ossos do quadril rigorosamente paralelos ao piso.' }
+    ]
+  },
+  {
+    id: 'hollow-hold-uma-perna',
+    name: 'Hollow Hold com Uma Perna Estendida',
+    category: 'Core',
+    difficulty: 'Iniciante',
+    type: 'isometric',
+    primaryMuscles: ['abdomen'],
+    secondaryMuscles: ['quadriceps', 'lombar', 'ombros'],
+    defaultSets: 3,
+    defaultHoldSeconds: 30,
+    defaultRestSeconds: 45,
+    description: 'Degrau intermediário entre a canoa encolhida (tuck) e a canoa completa, mantendo um joelho flexionado junto ao peito e a outra perna totalmente estendida à frente.',
+    breathingTip: 'Respire curto e superficial pelas costelas, mantendo a pressão intra-abdominal e o umbigo sugado.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Se a lombar sair do solo, puxe ambos os joelhos para o tuck.',
+      'Pare se houver dor aguda.'
+    ],
+    padrao: 'core-anterior',
+    equipamento: ['nenhum'],
+    tipoExercicio: 'principal',
+    estatico: true,
+    cadencia: 'isometria',
+    regressoes: ['hollow-hold-tuck', 'dead-bug'],
+    progressoes: ['hollowbody'],
+    variacoes: ['hollow-hold-tuck'],
+    adaptacoes: {
+      lombar: ['hollow-hold-tuck', 'dead-bug'],
+      pescoco: ['dead-bug'],
+      semEquipamento: ['hollow-hold-uma-perna']
+    },
+    criterioAvanco: 'Manter 3 séries de 30 segundos cada perna com retroversão pélvica impecável',
+    sinonimos: ['single leg hollow hold', 'canoa uma perna', 'hollow body unilateral'],
+    animationType: 'plank',
+    executionSteps: [
+      { step: 1, title: 'Decúbito Dorsal', description: 'Deite de costas e pressione a coluna lombar contra o solo sem deixar frestas.' },
+      { step: 2, title: 'Posição Assimétrica', description: 'Eleve escápulas e cabeça do solo; traga um joelho dobrado próximo ao peito e estenda a outra perna à frente a 45 graus.' },
+      { step: 3, title: 'Sustentação', description: 'Estenda os braços ao lado do corpo ou para trás da cabeça, sustentando a firmeza do core.' }
+    ],
+    commonMistakes: [
+      { mistake: 'Permitir que a lombar descole do solo', correction: 'Eleve um pouco mais o ângulo da perna estendida para manter o contato lombar completo.' }
+    ]
+  },
+  {
+    id: 'hollow-rock',
+    name: 'Hollow Rock (Balanço na Canoa)',
+    category: 'Core',
+    difficulty: 'Avançado',
+    type: 'reps',
+    primaryMuscles: ['abdomen'],
+    secondaryMuscles: ['quadriceps', 'lombar', 'ombros'],
+    defaultSets: 3,
+    defaultReps: 15,
+    defaultRestSeconds: 60,
+    description: 'Exercício clássico da ginástica olímpica: o corpo mantém a forma estrita de canoa (hollow) enquanto oscila suavemente como um arco contínuo, sem quebrar o alinhamento corporal.',
+    breathingTip: 'Ritme a respiração mantendo o core selado: expire no balanço para trás e inspire no retorno.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'O movimento deve ser suave como uma canoa na água; não desabe em impacto sobre as costas.',
+      'Pare se houver dor aguda.'
+    ],
+    padrao: 'core-anterior',
+    equipamento: ['nenhum'],
+    tipoExercicio: 'principal',
+    estatico: false,
+    cadencia: '1-0-1',
+    regressoes: ['hollowbody'],
+    progressoes: ['dragon-flag-tuck', 'toes-to-bar'],
+    variacoes: ['hollowbody'],
+    adaptacoes: {
+      lombar: ['hollow-hold-tuck', 'dead-bug'],
+      pescoco: ['hollowbody'],
+      semEquipamento: ['hollow-rock']
+    },
+    criterioAvanco: '3 séries de 20 oscilações ritmadas e contínuas sem dobrar joelhos ou quebrar o arco lombar',
+    sinonimos: ['balanço na canoa', 'hollow body rocks', 'canoa oscilante'],
+    animationType: 'plank',
+    executionSteps: [
+      { step: 1, title: 'Forma da Canoa', description: 'Assuma a posição de hollow body completo: pernas estendidas e unidas, braços estendidos atrás da cabeça e lombar arredondada contra o chão.' },
+      { step: 2, title: 'Início da Oscilação', description: 'Com o corpo completamente rígido e travado, use uma leve inclinação de pernas para iniciar o balanço.' },
+      { step: 3, title: 'Balanço Contínuo', description: 'Oscile da região lombar até as escápulas mantendo a curvatura sólida sem mexer os membros isoladamente.' }
+    ],
+    commonMistakes: [
+      { mistake: 'Balançar dobrando e chutando os joelhos', correction: 'Tranque completamente as articulações dos joelhos e quadris; o movimento vem do conjunto inteiro.' }
+    ]
+  },
+  {
+    id: 'elevacao-pernas-chao-pausa',
+    name: 'Elevação de Pernas Deitado com Pausa no Ponto Zero',
+    category: 'Core',
+    difficulty: 'Intermediário',
+    type: 'reps',
+    primaryMuscles: ['abdomen'],
+    secondaryMuscles: ['quadriceps', 'lombar'],
+    defaultSets: 3,
+    defaultReps: 12,
+    defaultRestSeconds: 60,
+    description: 'Variação avançada da elevação de pernas no solo que elimina qualquer inércia ao sustentar 2 segundos de pausa isométrica a poucos centímetros do chão, onde a alavanca é máxima.',
+    breathingTip: 'Solte o ar enquanto sobe as pernas; inspire e segure o ar brevemente durante a pausa no fundo.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Não deixe a coluna lombar arquear durante a parada próxima ao chão.',
+      'Pare se houver dor aguda.'
+    ],
+    padrao: 'core-anterior',
+    equipamento: ['nenhum'],
+    tipoExercicio: 'principal',
+    estatico: false,
+    cadencia: '2-2-1',
+    regressoes: ['elevacao-pernas-chao'],
+    progressoes: ['elevacao-joelhos-barra', 'flutter-kicks'],
+    variacoes: ['elevacao-pernas-chao', 'flutter-kicks'],
+    adaptacoes: {
+      lombar: ['elevacao-joelhos-chao', 'dead-bug'],
+      pescoco: ['elevacao-pernas-chao'],
+      semEquipamento: ['elevacao-pernas-chao-pausa']
+    },
+    criterioAvanco: '3 séries de 12 repetições com 2 segundos de pausa precisa sem arquear a coluna',
+    sinonimos: ['leg raise com pausa', 'lying leg raise pause', 'infra com pausa'],
+    animationType: 'leg-raise',
+    executionSteps: [
+      { step: 1, title: 'Posição Inicial', description: 'Deite de barriga para cima, mãos sob o quadril ou estendidas ao lado do tronco, pernas esticadas.' },
+      { step: 2, title: 'Subida e Descida', description: 'Erga as pernas até a vertical e desça controladamente até quase tocar os calcanhares no chão.' },
+      { step: 3, title: 'Pausa no Ponto Crítico', description: 'Congele a 5 cm do solo por 2 segundos completos mantendo a coluna pressionada para baixo, antes de subir novamente.' }
+    ],
+    commonMistakes: [
+      { mistake: 'Descansar os calcanhares no chão durante a pausa', correction: 'Mantenha os calcanhares flutuando sob constante tensão abdominal.' }
+    ]
+  },
+  {
+    id: 'flutter-kicks',
+    name: 'Tesoura Abdominal no Solo (Flutter Kicks)',
+    category: 'Core',
+    difficulty: 'Intermediário',
+    type: 'reps',
+    primaryMuscles: ['abdomen'],
+    secondaryMuscles: ['quadriceps', 'lombar'],
+    defaultSets: 3,
+    defaultReps: 30,
+    defaultRestSeconds: 60,
+    description: 'Exercício de resistência e estabilização lombo-pélvica onde as pernas realizam movimentos rápidos e alternados para cima e para baixo com joelhos estendidos e lombar protegida.',
+    breathingTip: 'Mantenha respiração contínua e rítmica, sem trancar a glote.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Se sentir desconforto na lombar, apoie as mãos sob a bacia ou eleve o ângulo das pernas.',
+      'Pare se houver dor aguda.'
+    ],
+    padrao: 'core-anterior',
+    equipamento: ['nenhum'],
+    tipoExercicio: 'principal',
+    estatico: false,
+    cadencia: '1-0-1',
+    regressoes: ['elevacao-pernas-chao', 'elevacao-joelhos-chao'],
+    progressoes: ['hollowbody', 'hollow-rock'],
+    variacoes: ['elevacao-pernas-chao'],
+    adaptacoes: {
+      lombar: ['elevacao-joelhos-chao', 'dead-bug'],
+      pescoco: ['flutter-kicks'],
+      semEquipamento: ['flutter-kicks']
+    },
+    criterioAvanco: '3 séries de 40 batidas de perna com lombar cravada ao solo',
+    sinonimos: ['tesourinha', 'chute tesoura', 'flutter kicks abdominal'],
+    animationType: 'leg-raise',
+    executionSteps: [
+      { step: 1, title: 'Postura Inicial', description: 'Deite de costas, eleve levemente ombros e cabeça, com as mãos sob o glúteo para suporte pélvico.' },
+      { step: 2, title: 'Elevação dos Pés', description: 'Tire os calcanhares do chão em torno de 15 a 25 cm, mantendo as pontas dos pés ativas.' },
+      { step: 3, title: 'Batimento Alternado', description: 'Oscile as pernas para cima e para baixo em movimentos curtos e firmes, contraindo o abdômen sem parar.' }
+    ],
+    commonMistakes: [
+      { mistake: 'Flexionar os joelhos durante a batida', correction: 'Mantenha os joelhos completamente estendidos para exigir o trabalho do abdômen e flexores.' }
+    ]
+  },
+  {
+    id: 'crunch-solo',
+    name: 'Abdominal Curto no Solo (Crunch Tradicional)',
+    category: 'Core',
+    difficulty: 'Iniciante',
+    type: 'reps',
+    primaryMuscles: ['abdomen'],
+    secondaryMuscles: ['lombar'],
+    defaultSets: 3,
+    defaultReps: 15,
+    defaultRestSeconds: 45,
+    description: 'Movimento fundamental de flexão da coluna torácica aproximando as costelas da pelve, isolando o reto abdominal superior sem sobrecarga na coluna lombar.',
+    breathingTip: 'Solte todo o ar pela boca na subida ao espremer o abdômen; inspire ao descer.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Não puxe a cabeça com as mãos; apoie os dedos suavemente na nuca ou cruze os braços no peito.',
+      'Pare se houver dor aguda.'
+    ],
+    padrao: 'core-anterior',
+    equipamento: ['nenhum'],
+    tipoExercicio: 'principal',
+    estatico: false,
+    cadencia: '2-1-2',
+    regressoes: ['dead-bug'],
+    progressoes: ['abdominal-bicicleta', 'russian-twist'],
+    variacoes: ['dead-bug', 'heel-touch'],
+    adaptacoes: {
+      lombar: ['dead-bug', 'crunch-solo'],
+      pescoco: ['dead-bug'],
+      semEquipamento: ['crunch-solo']
+    },
+    criterioAvanco: '3 séries de 20 repetições com contração máxima de 1 segundo no pico sem puxar o pescoço',
+    sinonimos: ['crunch tradicional', 'abdominal clássico', 'abdominal supra'],
+    animationType: 'plank',
+    executionSteps: [
+      { step: 1, title: 'Posicionamento', description: 'Deite de costas com os joelhos dobrados e os pés apoiados no chão na largura dos quadris.' },
+      { step: 2, title: 'Flexão Torácica', description: 'Eleve os ombros e escápulas do chão enrolando o tronco em direção ao quadril, mantendo a lombar encostada.' },
+      { step: 3, title: 'Pico e Retorno', description: 'Aperte a musculatura no topo por um instante e desça de forma lenta e controlada.' }
+    ],
+    commonMistakes: [
+      { mistake: 'Puxar o pescoço com as mãos forçando a cervical', correction: 'Fixe o olhar em diagonal para cima e mantenha espaço de uma maçã entre queixo e peito.' }
+    ]
+  },
+  {
+    id: 'abdominal-bicicleta',
+    name: 'Abdominal Bicicleta (Bicycle Crunch)',
+    category: 'Core',
+    difficulty: 'Iniciante',
+    type: 'reps',
+    primaryMuscles: ['abdomen'],
+    secondaryMuscles: ['lombar', 'quadriceps'],
+    defaultSets: 3,
+    defaultReps: 20,
+    defaultRestSeconds: 45,
+    description: 'Exercício de alta ativação muscular com flexão e rotação de tronco sincronizadas, recrutando intensamente os oblíquos internos, externos e o reto abdominal.',
+    breathingTip: 'Expire a cada cruzamento de cotovelo com o joelho oposto, inspirando suavemente na transição.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Faça o movimento com cadência controlada; evite girar no impulso rápido.',
+      'Pare se houver dor aguda.'
+    ],
+    padrao: 'core-lateral',
+    equipamento: ['nenhum'],
+    tipoExercicio: 'principal',
+    estatico: false,
+    cadencia: '2-1-2',
+    regressoes: ['crunch-solo', 'dead-bug'],
+    progressoes: ['russian-twist', 'prancha-lateral'],
+    variacoes: ['crunch-solo', 'russian-twist'],
+    adaptacoes: {
+      lombar: ['dead-bug', 'crunch-solo'],
+      pescoco: ['dead-bug'],
+      semEquipamento: ['abdominal-bicicleta']
+    },
+    criterioAvanco: '3 séries de 24 repetições alternadas com rotação ampla do tórax e extensão completa da perna',
+    sinonimos: ['bicycle crunch', 'abdominal pedalada', 'crunch com rotação'],
+    animationType: 'plank',
+    executionSteps: [
+      { step: 1, title: 'Preparação', description: 'Deite de costas, mãos ao lado das orelhas, joelhos suspensos a 90 graus e escápulas fora do chão.' },
+      { step: 2, title: 'Giro e Extensão', description: 'Gire o tórax levando a axila/cotovelo direito em direção ao joelho esquerdo, estendendo a perna direita à frente.' },
+      { step: 3, title: 'Transição Contínua', description: 'Alterne o lado suavemente sem deixar os ombros tocarem no chão entre as repetições.' }
+    ],
+    commonMistakes: [
+      { mistake: 'Apenas mover os cotovelos sem girar o tronco', correction: 'Foque em apontar o ombro em direção ao joelho oposto, girando toda a caixa torácica.' }
+    ]
+  },
+
+  // ==========================================
+  // EXPANSÃO DE CORE - LOTE 2 (ROTAÇÃO, ANTI-EXTENSÃO, DRAGON FLAG E COMPRESSÕES)
+  // ==========================================
+  {
+    id: 'russian-twist-pes-elevados',
+    name: 'Russian Twist com Pés Elevados',
+    category: 'Core',
+    difficulty: 'Intermediário',
+    type: 'reps',
+    primaryMuscles: ['abdomen'],
+    secondaryMuscles: ['lombar', 'quadriceps'],
+    defaultSets: 3,
+    defaultReps: 20,
+    defaultRestSeconds: 45,
+    description: 'Progressão do Russian Twist onde os pés são mantidos fora do solo em suspensão isométrica tipo V-hold, exigindo sustentação contínua do reto abdominal e flexores de quadril enquanto o tronco realiza as rotações laterais.',
+    breathingTip: 'Expire ritmicamente a cada rotação dos braços ao tocar o solo lateralmente.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Mantenha a coluna reta e peito aberto; evite colapsar a torácica.',
+      'Pare se houver dor aguda.'
+    ],
+    padrao: 'core-lateral',
+    equipamento: ['nenhum'],
+    tipoExercicio: 'principal',
+    estatico: false,
+    cadencia: '2-1-2',
+    regressoes: ['russian-twist'],
+    progressoes: ['copenhagen-plank-joelho', 'prancha-lateral-elevacao-quadril'],
+    variacoes: ['russian-twist'],
+    adaptacoes: {
+      lombar: ['russian-twist', 'dead-bug'],
+      pescoco: ['dead-bug'],
+      semEquipamento: ['russian-twist-pes-elevados']
+    },
+    criterioAvanco: '3 séries de 24 rotações alternadas mantendo os pés perfeitamente imóveis no ar',
+    sinonimos: ['giro russo pés elevados', 'elevated russian twist', 'russian twist v-sit'],
+    animationType: 'plank',
+    executionSteps: [
+      { step: 1, title: 'Equilíbrio nos Ísquios', description: 'Sente-se, incline o tronco 45 graus para trás e eleve os pés do chão mantendo os joelhos semiflexionados.' },
+      { step: 2, title: 'Rotação Controlada', description: 'Gire o tronco de um lado para o outro tocando as mãos próximo ao chão sem balançar as pernas.' },
+      { step: 3, title: 'Retorno e Fluidez', description: 'Mantenha a cadência uniforme e o peito ereto até concluir as repetições.' }
+    ],
+    commonMistakes: [
+      { mistake: 'Girar as pernas na direção oposta ao tronco', correction: 'Trave os joelhos e tornozelos juntos; a rotação deve ocorrer exclusivamente na cintura.' }
+    ]
+  },
+  {
+    id: 'mountain-climbers',
+    name: 'Mountain Climbers Frontal Tradicional',
+    category: 'Core',
+    difficulty: 'Iniciante',
+    type: 'reps',
+    primaryMuscles: ['abdomen'],
+    secondaryMuscles: ['ombros', 'quadriceps', 'peito'],
+    defaultSets: 3,
+    defaultReps: 30,
+    defaultRestSeconds: 45,
+    description: 'Movimento dinâmico de corrida horizontal na postura de prancha alta, onde os joelhos sobem em linha reta sagital em direção ao peito, exigindo estabilidade anti-extensão.',
+    breathingTip: 'Mantenha a respiração compassada no ritmo das passadas.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Não eleve excessivamente o quadril nem deixe a lombar ceder.',
+      'Pare se houver dor aguda.'
+    ],
+    padrao: 'core-anterior',
+    equipamento: ['nenhum'],
+    tipoExercicio: 'principal',
+    estatico: false,
+    cadencia: '1-0-1',
+    regressoes: ['plank', 'prancha-joelhos'],
+    progressoes: ['mountain-climber-cruzado', 'prancha-toque-ombro'],
+    variacoes: ['mountain-climber-cruzado'],
+    adaptacoes: {
+      lombar: ['prancha-joelhos', 'dead-bug'],
+      punho: ['plank'],
+      ombro: ['prancha-joelhos'],
+      semEquipamento: ['mountain-climbers']
+    },
+    criterioAvanco: '3 séries de 40 repetições contínuas com ritmo uniforme e alinhamento de prancha estrito',
+    sinonimos: ['escalador frontal', 'alpinista horizontal', 'mountain climber tradicional'],
+    animationType: 'plank',
+    executionSteps: [
+      { step: 1, title: 'Prancha Alta', description: 'Apoie as mãos sob a linha dos ombros e pernas estendidas com abdômen contraído.' },
+      { step: 2, title: 'Puxada Sagital', description: 'Puxe um joelho em linha reta na direção do peito, mantendo o pé no ar sem tocar o chão.' },
+      { step: 3, title: 'Troca Rápida', description: 'Retorne a perna estendida enquanto puxa imediatamente o joelho oposto em movimento fluido.' }
+    ],
+    commonMistakes: [
+      { mistake: 'Balançar o quadril para cima e para baixo a cada passada', correction: 'Mantenha a linha do quadril no nível das escápulas durante toda a série.' }
+    ]
+  },
+  {
+    id: 'heel-touch',
+    name: 'Toque nos Calcanhares Alternado (Penguin Crunch)',
+    category: 'Core',
+    difficulty: 'Iniciante',
+    type: 'reps',
+    primaryMuscles: ['abdomen'],
+    secondaryMuscles: ['lombar'],
+    defaultSets: 3,
+    defaultReps: 24,
+    defaultRestSeconds: 45,
+    description: 'Exercício de flexão lateral da coluna deitado no solo, onde as mãos alternam toques nos calcanhares homolaterais com as escápulas suspensas, isolando os oblíquos com baixíssimo estresse articular.',
+    breathingTip: 'Solte o ar a cada alcance lateral ao calcanhar; inspire ao passar pelo centro.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Não puxe a cabeça com as mãos; apoie o olhar suavemente para cima.',
+      'Pare se houver dor aguda.'
+    ],
+    padrao: 'core-lateral',
+    equipamento: ['nenhum'],
+    tipoExercicio: 'principal',
+    estatico: false,
+    cadencia: '2-1-2',
+    regressoes: ['dead-bug', 'crunch-solo'],
+    progressoes: ['abdominal-bicicleta', 'russian-twist'],
+    variacoes: ['crunch-solo'],
+    adaptacoes: {
+      lombar: ['dead-bug', 'heel-touch'],
+      pescoco: ['dead-bug'],
+      semEquipamento: ['heel-touch']
+    },
+    criterioAvanco: '3 séries de 30 toques alternados com sustentação escapular contínua',
+    sinonimos: ['penguin crunch', 'toque de calcanhar', 'abdominal pinguim', 'alternating heel touch'],
+    animationType: 'plank',
+    executionSteps: [
+      { step: 1, title: 'Decúbito Dorsal', description: 'Deite de costas com os joelhos flexionados e os pés apoiados no solo a cerca de 30 cm do quadril.' },
+      { step: 2, title: 'Elevação Escapular', description: 'Tire os ombros e a parte superior das escápulas do chão mantendo os braços estendidos ao lado do corpo.' },
+      { step: 3, title: 'Flexão Lateral', description: 'Deslize o tronco lateralmente até a mão direita tocar o calcanhar direito, retornando e tocando o esquerdo.' }
+    ],
+    commonMistakes: [
+      { mistake: 'Apenas mexer os braços sem flexionar lateralmente a coluna', correction: 'Concentre o movimento no encurtamento da cintura de cada lado como um acordeão.' }
+    ]
+  },
+  {
+    id: 'ab-wheel-negativa',
+    name: 'Roda Abdominal Excêntrica (Descida Controlada)',
+    category: 'Core',
+    difficulty: 'Intermediário',
+    type: 'reps',
+    primaryMuscles: ['abdomen'],
+    secondaryMuscles: ['costas', 'ombros', 'peito', 'lombar'],
+    defaultSets: 3,
+    defaultReps: 6,
+    defaultRestSeconds: 90,
+    description: 'Treinamento da fase excêntrica da roda abdominal partindo dos joelhos, descendo lentamente até o corpo ficar próximo ao solo e retornando sem exigir a puxada concêntrica total.',
+    breathingTip: 'Inspire profundamente na posição inicial e solte o ar de forma controlada durante a descida.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Não deixe a lombar desabar em momento algum da descida. Pare se houver dor aguda.'
+    ],
+    padrao: 'core-anterior',
+    equipamento: ['nenhum'],
+    tipoExercicio: 'principal',
+    estatico: false,
+    cadencia: '4-0-1',
+    regressoes: ['plank', 'hollowbody'],
+    progressoes: ['ab-wheel-joelhos'],
+    variacoes: ['ab-wheel-joelhos'],
+    adaptacoes: {
+      lombar: ['plank', 'prancha-joelhos'],
+      ombro: ['plank'],
+      punho: ['plank'],
+      semEquipamento: ['plank']
+    },
+    criterioAvanco: '3 séries de 8 repetições de descida com 4 segundos controlados até o solo',
+    sinonimos: ['ab wheel negativa', 'rollout excêntrico', 'roda abdominal descida'],
+    animationType: 'plank',
+    executionSteps: [
+      { step: 1, title: 'Ajoelhado com a Roda', description: 'Ajoelhe-se segurando a roda abdominal (ou toalha no chão liso) diretamente sob o peito.' },
+      { step: 2, title: 'Rolagem Excêntrica', description: 'Role a roda para a frente estendendo os braços e o quadril em velocidade lenta e cadenciada (3 a 5 segundos).' },
+      { step: 3, title: 'Finalização Suave', description: 'Ao atingir o ponto máximo sem perder a retroversão, deite no solo e volte à posição inicial de joelhos com calma.' }
+    ],
+    commonMistakes: [
+      { mistake: 'Arquear a lombar antes de terminar a descida', correction: 'Interrompa a descida e deite suavemente no solo assim que o abdômen perder a tração.' }
+    ]
+  },
+  {
+    id: 'dragon-flag-adv-tuck',
+    name: 'Dragon Flag Advanced Tuck (Coxas a 90°)',
+    category: 'Core',
+    difficulty: 'Avançado',
+    type: 'reps',
+    primaryMuscles: ['abdomen'],
+    secondaryMuscles: ['costas', 'gluteos', 'lombar'],
+    defaultSets: 3,
+    defaultReps: 6,
+    defaultRestSeconds: 90,
+    description: 'Progressão intermediária do Dragon Flag onde o quadril é mantido aberto em ângulo de 90° a 110° em relação ao tronco com os joelhos dobrados, aumentando a alavanca em comparação ao tuck fechado.',
+    breathingTip: 'Solte o ar na subida do tronco; inspire e trave o abdômen na descida excêntrica.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'O apoio deve ser sobre a parte superior das escápulas, NUNCA sobre as vértebras cervicais.',
+      'Pare se houver dor aguda.'
+    ],
+    padrao: 'core-anterior',
+    equipamento: ['barra'],
+    tipoExercicio: 'principal',
+    estatico: false,
+    cadencia: '3-1-2',
+    regressoes: ['dragon-flag-tuck', 'dragon-flag-negativa'],
+    progressoes: ['dragon-flag-uma-perna', 'dragon-flag'],
+    variacoes: ['dragon-flag-tuck'],
+    adaptacoes: {
+      lombar: ['dragon-flag-tuck', 'hollowbody'],
+      pescoco: ['hollowbody'],
+      ombro: ['hollowbody'],
+      semEquipamento: ['dragon-flag-tuck']
+    },
+    criterioAvanco: '3 séries de 6 repetições controladas com descida de 3 segundos sem dobrar o quadril além de 90°',
+    sinonimos: ['advanced tuck dragon flag', 'dragon flag semi estendido'],
+    animationType: 'dragon-flag',
+    executionSteps: [
+      { step: 1, title: 'Ancoragem', description: 'Deite em banco ou solo segurando firme uma barra ou apoio rígido atrás da cabeça.' },
+      { step: 2, title: 'Elevação do Tronco', description: 'Erga o tronco apoiando-se unicamente nas escápulas, mantendo as coxas a 90 graus com o abdômen e joelhos dobrados.' },
+      { step: 3, title: 'Descida Controlada', description: 'Desça o corpo em bloco reto das escápulas até o quadril até quase tocar o banco, e suba novamente.' }
+    ],
+    commonMistakes: [
+      { mistake: 'Apoiar o peso sobre a nuca ou cervical', correction: 'Traga os ombros firmemente contra a superfície e garanta que o pescoço fique livre.' }
+    ]
+  },
+  {
+    id: 'dragon-flag-uma-perna',
+    name: 'Dragon Flag com Uma Perna Estendida',
+    category: 'Core',
+    difficulty: 'Avançado',
+    type: 'reps',
+    primaryMuscles: ['abdomen'],
+    secondaryMuscles: ['costas', 'gluteos', 'lombar'],
+    defaultSets: 3,
+    defaultReps: 5,
+    defaultRestSeconds: 90,
+    description: 'O penúltimo degrau para o Dragon Flag completo: uma das pernas permanece estendida em linha contínua com o tronco enquanto a outra fica dobrada junto ao peito.',
+    breathingTip: 'Solte o ar com força na tração; inspire concentrado durante a descida.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Mantenha o glúteo da perna estendida travado para evitar que o quadril ceda.',
+      'Pare se houver dor aguda.'
+    ],
+    padrao: 'core-anterior',
+    equipamento: ['barra'],
+    tipoExercicio: 'principal',
+    estatico: false,
+    cadencia: '3-1-2',
+    regressoes: ['dragon-flag-adv-tuck'],
+    progressoes: ['dragon-flag'],
+    variacoes: ['dragon-flag-adv-tuck'],
+    adaptacoes: {
+      lombar: ['dragon-flag-tuck', 'hollowbody'],
+      pescoco: ['hollowbody'],
+      semEquipamento: ['dragon-flag-adv-tuck']
+    },
+    criterioAvanco: '3 séries de 5 repetições cada lado com controle absoluto na descida',
+    sinonimos: ['single leg dragon flag', 'dragon flag unilateral'],
+    animationType: 'dragon-flag',
+    executionSteps: [
+      { step: 1, title: 'Pegada Firme', description: 'Segure firme o suporte atrás da cabeça e erga o tronco até a vertical nas escápulas.' },
+      { step: 2, title: 'Alinhamento Unilateral', description: 'Estenda completamente uma perna alinhada ao tronco e mantenha o joelho oposto flexionado.' },
+      { step: 3, title: 'Fase Excêntrica e Retorno', description: 'Desça o corpo em linha reta e puxe de volta com os dorsais e o abdômen sem desabar.' }
+    ],
+    commonMistakes: [
+      { mistake: 'Deixar a perna estendida afundar antes do tronco', correction: 'Pense em formar uma viga única de aço dos ombros até a ponta do pé estendido.' }
+    ]
+  },
+  {
+    id: 'bar-pullover-joelhos',
+    name: 'Bar Pull-Over com Joelhos Flexionados',
+    category: 'Core',
+    difficulty: 'Avançado',
+    type: 'reps',
+    primaryMuscles: ['abdomen'],
+    secondaryMuscles: ['costas', 'biceps', 'ombros', 'antebraco'],
+    defaultSets: 3,
+    defaultReps: 5,
+    defaultRestSeconds: 90,
+    description: 'Movimento dinâmico de ginástica calistênica na barra fixa: flexão de braços e enrolamento abdominal sincronizados com joelhos dobrados para passar o quadril sobre a barra.',
+    breathingTip: 'Solte o ar vigorosamente no momento de puxar o quadril sobre a barra fixa.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Certifique-se de manter pegada pronada firme e controle na rotação sobre a barra.',
+      'Pare se houver dor aguda.'
+    ],
+    padrao: 'core-anterior',
+    equipamento: ['barra'],
+    tipoExercicio: 'principal',
+    estatico: false,
+    cadencia: '2-1-2',
+    regressoes: ['toes-to-bar', 'pullup'],
+    progressoes: ['muscleup'],
+    variacoes: ['toes-to-bar'],
+    adaptacoes: {
+      lombar: ['toes-to-bar', 'elevacao-joelhos-barra'],
+      ombro: ['elevacao-joelhos-barra'],
+      punho: ['elevacao-joelhos-barra'],
+      semEquipamento: ['dragon-flag-tuck']
+    },
+    criterioAvanco: '3 séries de 6 pull-overs limpos e controlados sem impulsos ou chutes soltos',
+    sinonimos: ['pullover na barra', 'bar pullover tuck', 'volta na barra'],
+    animationType: 'pull-up',
+    executionSteps: [
+      { step: 1, title: 'Puxada e Enrolamento', description: 'Inicie uma barra fixa puxando o peito enquanto puxa os joelhos flexionados vigorosamente para cima.' },
+      { step: 2, title: 'Passagem Pélvica', description: 'Gire o quadril para cima e sobre a barra enquanto os cotovelos sobem para a posição de apoio.' },
+      { step: 3, title: 'Apoio Final', description: 'Estenda os braços terminando na posição de suporte reto sobre a barra fixa.' }
+    ],
+    commonMistakes: [
+      { mistake: 'Tentar girar com os braços completamente estendidos', correction: 'Traga a barra bem perto do peito e queixo antes de rolar o quadril sobre ela.' }
+    ]
+  },
+  {
+    id: 'lsit-pes-chao',
+    name: 'L-Sit com Apoio de Calcanhares no Solo',
+    category: 'Core',
+    difficulty: 'Iniciante',
+    type: 'isometric',
+    primaryMuscles: ['abdomen'],
+    secondaryMuscles: ['triceps', 'ombros', 'quadriceps'],
+    defaultSets: 3,
+    defaultHoldSeconds: 20,
+    defaultRestSeconds: 45,
+    description: 'Regressão fundamental do L-Sit no solo ou paralela: as mãos empurram o chão em depressão escapular máxima erguendo o quadril do chão, enquanto os calcanhares permanecem apoiados levemente à frente.',
+    breathingTip: 'Mantenha a respiração contínua enquanto empurra vigorosamente o chão para baixo.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Não deixe os ombros subirem em direção às orelhas; mantenha depressão escapular ativa.',
+      'Pare se houver dor aguda.'
+    ],
+    padrao: 'core-anterior',
+    equipamento: ['nenhum'],
+    tipoExercicio: 'principal',
+    estatico: true,
+    cadencia: 'isometria',
+    regressoes: ['hollow-hold-tuck', 'plank'],
+    progressoes: ['lsit-solo-tuck'],
+    variacoes: ['lsit-solo-tuck'],
+    adaptacoes: {
+      punho: ['lsit-pes-chao'],
+      lombar: ['dead-bug', 'hollow-hold-tuck'],
+      ombro: ['dead-bug'],
+      semEquipamento: ['lsit-pes-chao']
+    },
+    criterioAvanco: '3 séries de 30 segundos sustentados com depressão escapular impecável',
+    sinonimos: ['foot supported l-sit', 'l-sit com pés apoiados', 'l-sit iniciante'],
+    animationType: 'l-sit',
+    executionSteps: [
+      { step: 1, title: 'Posição Sentada', description: 'Sente-se no solo com pernas estendidas à frente e apoie as palmas das mãos ao lado dos quadris.' },
+      { step: 2, title: 'Depressão Escapular', description: 'Empurre o solo com força afastando as orelhas dos ombros e tirando o quadril do chão.' },
+      { step: 3, title: 'Sustentação com Apoio', description: 'Mantenha os calcanhares encostados no solo aliviando parte do peso, ativando abdômen e tríceps.' }
+    ],
+    commonMistakes: [
+      { mistake: 'Permitir que o quadril fique apoiado no solo', correction: 'Empurre o chão com mais intensidade travando os cotovelos totalmente estendidos.' }
+    ]
+  },
+  {
+    id: 'pike-compression',
+    name: 'Compressão Pike no Solo (Elevação de Pernas Sentado)',
+    category: 'Core',
+    difficulty: 'Intermediário',
+    type: 'reps',
+    primaryMuscles: ['abdomen'],
+    secondaryMuscles: ['quadriceps', 'lombar'],
+    defaultSets: 3,
+    defaultReps: 12,
+    defaultRestSeconds: 60,
+    description: 'Exercício de força de compressão ativa da ginástica artística: sentado com pernas estendidas e unidas, as mãos apoiam próximo aos joelhos para erguer os pés do chão sem reclinar o tronco.',
+    breathingTip: 'Solte o ar vigorosamente na subida das pernas; inspire ao tocar o chão com leveza.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Não incline o tronco para trás para compensar a falta de compressão abdominal.',
+      'Pare se houver dor aguda.'
+    ],
+    padrao: 'core-anterior',
+    equipamento: ['nenhum'],
+    tipoExercicio: 'principal',
+    estatico: false,
+    cadencia: '2-1-2',
+    regressoes: ['elevacao-pernas-chao'],
+    progressoes: ['lsit', 'straddle-compression'],
+    variacoes: ['straddle-compression'],
+    adaptacoes: {
+      lombar: ['elevacao-pernas-chao', 'dead-bug'],
+      punho: ['elevacao-pernas-chao'],
+      semEquipamento: ['pike-compression']
+    },
+    criterioAvanco: '3 séries de 12 repetições estritas com as mãos posicionadas além da linha dos joelhos',
+    sinonimos: ['pike leg lift', 'compressão em pike', 'seated leg lift'],
+    animationType: 'l-sit',
+    executionSteps: [
+      { step: 1, title: 'Sentado em L', description: 'Sente-se ereto com pernas unidas e pontas dos pés ativas apontadas para a frente.' },
+      { step: 2, title: 'Mãos à Frente', description: 'Apoie as pontas dos dedos ou palmas no solo entre as coxas e os joelhos.' },
+      { step: 3, title: 'Elevação por Compressão', description: 'Contraia o abdômen e quadríceps erguendo os calcanhares do chão em bloco sem reclinar o tronco para trás.' }
+    ],
+    commonMistakes: [
+      { mistake: 'Inclinar o tronco para trás para alavancar a subida', correction: 'Traga as mãos mais para a frente e incline o tórax levemente sobre as pernas.' }
+    ]
+  },
+  {
+    id: 'straddle-compression',
+    name: 'Compressão Straddle no Solo (Pernas Afastadas)',
+    category: 'Core',
+    difficulty: 'Avançado',
+    type: 'reps',
+    primaryMuscles: ['abdomen'],
+    secondaryMuscles: ['quadriceps', 'lombar', 'gluteos'],
+    defaultSets: 3,
+    defaultReps: 10,
+    defaultRestSeconds: 60,
+    description: 'Compressão ativa com pernas abertas em straddle: as mãos apoiam no solo à frente da virilha e as pernas estendidas são erguidas simultaneamente, exigindo flexibilidade ativa e força pura de core.',
+    breathingTip: 'Expire com força ao erguer as pernas em straddle; inspire ao pousar de leve.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Não faça movimentos balísticos; erga e desça as pernas com controle muscular.',
+      'Pare se houver dor aguda.'
+    ],
+    padrao: 'core-anterior',
+    equipamento: ['nenhum'],
+    tipoExercicio: 'principal',
+    estatico: false,
+    cadencia: '2-1-2',
+    regressoes: ['pike-compression'],
+    progressoes: ['vsit'],
+    variacoes: ['pike-compression'],
+    adaptacoes: {
+      lombar: ['pike-compression', 'elevacao-pernas-chao'],
+      punho: ['pike-compression'],
+      semEquipamento: ['straddle-compression']
+    },
+    criterioAvanco: '3 séries de 10 repetições estritas mantendo a abertura em straddle ampla e tronco firme',
+    sinonimos: ['straddle leg lift', 'compressão straddle', 'elevação em abertura'],
+    animationType: 'l-sit',
+    executionSteps: [
+      { step: 1, title: 'Posição em Straddle', description: 'Sente-se no solo com as pernas abertas em V o máximo que conseguir confortavelmente.' },
+      { step: 2, title: 'Apoio Central', description: 'Apoie as mãos no solo à sua frente, entre as coxas, com os braços retos.' },
+      { step: 3, title: 'Elevação Simultânea', description: 'Esprema o abdômen e flexores de quadril levantando ambos os calcanhares simultaneamente do solo.' }
+    ],
+    commonMistakes: [
+      { mistake: 'Dobrar os joelhos para facilitar a subida', correction: 'Trave os joelhos estendidos e aponte os pés para fora mantendo as pernas ativas.' }
+    ]
+  }
+
+];

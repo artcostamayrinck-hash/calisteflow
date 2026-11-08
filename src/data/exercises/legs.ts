@@ -642,8 +642,8 @@ export const LEGS_EXERCISES: Exercise[] = [
     estatico: false,
     cadencia: '2-1-2',
     regressoes: ['pistol-squat-assistido', 'pistol-squat-caixa'],
-    progressoes: ['shrimp-squat'],
-    variacoes: ['pistol-squat-assistido'],
+    progressoes: [],
+    variacoes: ['shrimp-squat', 'pistol-squat-assistido'],
     adaptacoes: {
       joelho: ['afundo-bulgaro', 'agachamento-pausa'],
       tornozelo: ['pistol-squat-caixa']
@@ -681,7 +681,7 @@ export const LEGS_EXERCISES: Exercise[] = [
     estatico: false,
     cadencia: '2-1-2',
     regressoes: ['afundo-bulgaro', 'pistol-squat-assistido'],
-    progressoes: ['pistolsquat'],
+    progressoes: [],
     variacoes: ['pistolsquat'],
     adaptacoes: {
       joelho: ['afundo-bulgaro', 'agachamento-parede']

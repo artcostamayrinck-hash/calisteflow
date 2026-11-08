@@ -25,7 +25,7 @@ export const SKILL_EXERCISES: Exercise[] = [
     tipoExercicio: 'skill',
     estatico: true,
     cadencia: 'isometria',
-    regressoes: ['hollowbody', 'prancha-joelhos'],
+    regressoes: ['lsit-pes-chao', 'hollowbody', 'prancha-joelhos'],
     progressoes: ['lsit-solo-uma-perna', 'lsit'],
     variacoes: ['hollowbody'],
     adaptacoes: {
