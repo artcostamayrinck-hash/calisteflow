@@ -1,45 +1,34 @@
 {
-  "name": "CalisteFlow • Calistenia & Postura",
+  "name": "CalisteFlow",
   "short_name": "CalisteFlow",
   "description": "App mobile-first de calistenia: treinos guiados, cronômetro inteligente de descanso, postura biomecânica e mapa muscular 100% offline.",
-  "start_url": "./",
-  "id": "./",
+  "start_url": "/calisteflow/",
+  "scope": "/calisteflow/",
+  "id": "/calisteflow/",
   "display": "standalone",
-  "background_color": "#020412",
-  "theme_color": "#020412",
+  "background_color": "#020617",
+  "theme_color": "#020617",
   "orientation": "portrait",
   "lang": "pt-BR",
   "categories": ["fitness", "health", "sports", "lifestyle"],
   "icons": [
     {
-      "src": "./favicon-32x32.png",
-      "sizes": "32x32",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "./pwa-192x192.png",
+      "src": "/calisteflow/pwa-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "./pwa-512x512.png",
+      "src": "/calisteflow/pwa-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "./maskable-icon-512x512.png",
+      "src": "/calisteflow/maskable-icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
-    },
-    {
-      "src": "./assets/img/logo.png",
-      "sizes": "1024x1024",
-      "type": "image/png",
-      "purpose": "any"
     }
   ],
   "shortcuts": [
@@ -47,22 +36,22 @@
       "name": "Treinar Hoje",
       "short_name": "Treinar",
       "description": "Iniciar a rotina agendada para hoje",
-      "url": "./?shortcut=today",
-      "icons": [{ "src": "./pwa-192x192.png", "sizes": "192x192" }]
+      "url": "/calisteflow/?shortcut=today",
+      "icons": [{ "src": "/calisteflow/pwa-192x192.png", "sizes": "192x192" }]
     },
     {
       "name": "Cronômetro de Descanso",
       "short_name": "Cronômetro",
       "description": "Abrir temporizador inteligente com feedback tátil",
-      "url": "./?shortcut=timer",
-      "icons": [{ "src": "./pwa-192x192.png", "sizes": "192x192" }]
+      "url": "/calisteflow/?shortcut=timer",
+      "icons": [{ "src": "/calisteflow/pwa-192x192.png", "sizes": "192x192" }]
     },
     {
       "name": "Biblioteca de Exercícios",
       "short_name": "Exercícios",
       "description": "Explorar biomecânica, variações e mapa muscular",
-      "url": "./?shortcut=exercises",
-      "icons": [{ "src": "./pwa-192x192.png", "sizes": "192x192" }]
+      "url": "/calisteflow/?shortcut=exercises",
+      "icons": [{ "src": "/calisteflow/pwa-192x192.png", "sizes": "192x192" }]
     }
   ]
 }

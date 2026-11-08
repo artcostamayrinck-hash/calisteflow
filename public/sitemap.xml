@@ -1,28 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://calistenflow.vercel.app/</loc>
+    <loc>https://artcostamayrinck-hash.github.io/calisteflow/</loc>
     <lastmod>2026-11-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://calistenflow.vercel.app/?shortcut=exercises</loc>
+    <loc>https://artcostamayrinck-hash.github.io/calisteflow/?shortcut=exercises</loc>
     <lastmod>2026-11-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://calistenflow.vercel.app/?shortcut=today</loc>
+    <loc>https://artcostamayrinck-hash.github.io/calisteflow/?shortcut=today</loc>
     <lastmod>2026-11-08</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://calistenflow.vercel.app/?shortcut=timer</loc>
+    <loc>https://artcostamayrinck-hash.github.io/calisteflow/?shortcut=timer</loc>
     <lastmod>2026-11-08</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
 </urlset>
-

@@ -1,5 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://calistenflow.vercel.app/sitemap.xml
-
+Sitemap: https://artcostamayrinck-hash.github.io/calisteflow/sitemap.xml

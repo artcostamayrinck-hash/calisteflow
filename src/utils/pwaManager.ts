@@ -21,8 +21,10 @@ class PWAManager {
     }
 
     try {
-      const swUrl = import.meta.env.BASE_URL ? `${import.meta.env.BASE_URL}sw.js`.replace(/\/+/g, '/') : './sw.js';
-      const reg = await navigator.serviceWorker.register(swUrl);
+      const isGhPages = window.location.pathname.startsWith('/calisteflow') || window.location.hostname.includes('github.io');
+      const swUrl = isGhPages ? '/calisteflow/sw.js' : './sw.js';
+      const scope = isGhPages ? '/calisteflow/' : './';
+      const reg = await navigator.serviceWorker.register(swUrl, { scope });
       this.registration = reg;
 
       // 1. Caso já exista um worker aguardando na inicialização (ex: aba reaberta)

@@ -1,155 +1,153 @@
 /**
  * CalisteFlow Service Worker
- * Versão do Cache: v1.0.0
- * 
+ * Versão do Cache: calisteflow-v2.0.0
+ * Escopo: /calisteflow/
+ *
  * Estratégia de Cache:
- * - Navegação / HTML: Network-First com fallback para cache offline
- * - Assets imutáveis com hash (/assets/*): Cache-First
- * - Manifest, Favicons e ícones: Stale-While-Revalidate
- * - Não aplicar skipWaiting automaticamente: aguarda confirmação do usuário via postMessage
+ * - HTML / Navegação: Network-First com fallback para cache offline (/calisteflow/index.html)
+ * - Assets estáticos (/calisteflow/assets/*): Cache-First com fallback para rede
+ * - Recursos estáticos raiz (manifest, ícones, favicons, og-image): Stale-While-Revalidate
+ * - Não recarrega o app no meio de um treino ativo (skipWaiting só sob comando do usuário)
  */
 
-const CACHE_VERSION = 'calisteflow-v1.1.0';
+const CACHE_NAME = 'calisteflow-v2.0.0';
+
+// Lista de arquivos fundamentais para inicialização offline no escopo /calisteflow/
 const PRECACHE_ASSETS = [
-  './',
-  './index.html',
-  './manifest.json',
-  './favicon.ico',
-  './favicon-32x32.png',
-  './favicon-16x16.png',
-  './apple-touch-icon.png',
-  './pwa-192x192.png',
-  './pwa-512x512.png',
-  './maskable-icon-512x512.png',
-  './assets/img/logo.png',
-  './assets/img/logo.webp',
-  './assets/img/logo-512x512.png',
-  './assets/img/logo-512x512.webp',
-  './robots.txt',
-  './sitemap.xml',
+  '/calisteflow/',
+  '/calisteflow/index.html',
+  '/calisteflow/manifest.json',
+  '/calisteflow/favicon.ico',
+  '/calisteflow/favicon-32x32.png',
+  '/calisteflow/favicon-16x16.png',
+  '/calisteflow/apple-touch-icon.png',
+  '/calisteflow/pwa-192x192.png',
+  '/calisteflow/pwa-512x512.png',
+  '/calisteflow/maskable-icon-512x512.png',
+  '/calisteflow/og-image.png',
+  '/calisteflow/robots.txt',
+  '/calisteflow/sitemap.xml',
 ];
 
-// Instalação: realiza pré-cache dos recursos críticos mínimos
+// Instalação do Service Worker
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_VERSION).then((cache) => {
-      return cache.addAll(PRECACHE_ASSETS).catch((err) => {
-        console.warn('[Service Worker] Falha no pré-cache parcial:', err);
-      });
+    caches.open(CACHE_NAME).then(async (cache) => {
+      // Caching com resiliência: tenta pre-cachear cada recurso individualmente
+      const results = await Promise.allSettled(
+        PRECACHE_ASSETS.map(async (url) => {
+          try {
+            const response = await fetch(url, { cache: 'no-cache' });
+            if (response.ok) {
+              await cache.put(url, response);
+            }
+          } catch (err) {
+            console.warn('[SW] Pré-cache falhou para:', url, err);
+          }
+        })
+      );
+      return results;
     })
   );
-  // IMPORTANTE: NÃO chamamos self.skipWaiting() aqui para não derrubar treinos ativos
+  // Não chamamos skipWaiting() imediatamente para preservar o estado de treinos em andamento
 });
 
-// Ativação: assume controle e limpa caches de versões anteriores
+// Ativação e limpeza de versões antigas
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
       return Promise.all(
         keys.map((key) => {
-          if (key !== CACHE_VERSION && key.startsWith('calisteflow-')) {
-            console.log('[Service Worker] Removendo cache obsoleto:', key);
+          if (key !== CACHE_NAME && key.startsWith('calisteflow-')) {
+            console.log('[SW] Removendo cache obsoleto:', key);
             return caches.delete(key);
           }
-          return Promise.resolve();
         })
       );
-    }).then(() => {
-      return self.clients.claim();
-    })
+    }).then(() => self.clients.claim())
   );
 });
 
-// Mensageria: recebe instrução segura de skipWaiting enviada pelo frontend
-self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
-    console.log('[Service Worker] Comando SKIP_WAITING recebido e confirmado pelo usuário.');
-    self.skipWaiting();
-  }
-});
-
-// Estratégia de Interceptação de Rede
+// Interceptação de requisições de rede
 self.addEventListener('fetch', (event) => {
-  const { request } = event;
+  const req = event.request;
+  const url = new URL(req.url);
 
-  // Aceitar apenas requisições GET
-  if (request.method !== 'GET') {
+  // Ignorar requisições que não sejam GET ou sejam para extensões do navegador
+  if (req.method !== 'GET' || url.protocol.startsWith('chrome-extension')) {
     return;
   }
 
-  const url = new URL(request.url);
-
-  // Ignorar extensões de navegador ou esquemas não-HTTP
-  if (!url.protocol.startsWith('http')) {
-    return;
-  }
-
-  // 1. Requisição de Navegação (HTML principal / index.html): NETWORK-FIRST
-  // Garante que o usuário sempre receba a versão mais recente quando online
-  if (request.mode === 'navigate') {
+  // 1. Navegação (Documento HTML principal) -> Network-First com fallback para cache offline
+  if (req.mode === 'navigate') {
     event.respondWith(
-      fetch(request)
-        .then((networkResponse) => {
-          if (networkResponse && networkResponse.status === 200) {
-            const responseClone = networkResponse.clone();
-            caches.open(CACHE_VERSION).then((cache) => {
-              cache.put(request, responseClone);
-            });
+      fetch(req)
+        .then((networkRes) => {
+          if (networkRes && networkRes.status === 200) {
+            const resClone = networkRes.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(req, resClone));
           }
-          return networkResponse;
+          return networkRes;
         })
-        .catch(() => {
-          // Fallback offline: entrega index.html do cache
-          return caches.match('/index.html').then((cached) => {
-            return cached || caches.match('/');
-          });
+        .catch(async () => {
+          // Offline fallback
+          const cached = await caches.match(req);
+          if (cached) return cached;
+
+          const cachedHome = await caches.match('/calisteflow/index.html');
+          if (cachedHome) return cachedHome;
+
+          const cachedScope = await caches.match('/calisteflow/');
+          if (cachedScope) return cachedScope;
+
+          return caches.match('./index.html');
         })
     );
     return;
   }
 
-  // 2. Assets estáticos versionados com hash Vite (/assets/*): CACHE-FIRST
-  // Como contêm hash no nome do arquivo, são imutáveis e podem ser servidos do cache
+  // 2. Assets compilados do Vite com hash (/assets/*) -> Cache-First
   if (url.pathname.includes('/assets/')) {
     event.respondWith(
-      caches.match(request).then((cachedResponse) => {
-        if (cachedResponse) {
-          return cachedResponse;
-        }
-        return fetch(request).then((networkResponse) => {
-          if (networkResponse && networkResponse.status === 200) {
-            const responseClone = networkResponse.clone();
-            caches.open(CACHE_VERSION).then((cache) => {
-              cache.put(request, responseClone);
-            });
+      caches.match(req).then((cached) => {
+        if (cached) return cached;
+        return fetch(req).then((networkRes) => {
+          if (networkRes && networkRes.status === 200) {
+            const resClone = networkRes.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(req, resClone));
           }
-          return networkResponse;
+          return networkRes;
         });
       })
     );
     return;
   }
 
-  // 3. Demais recursos estáticos (manifest, ícones, fontes): STALE-WHILE-REVALIDATE
+  // 3. Imagens, fontes e manifest -> Stale-While-Revalidate
   event.respondWith(
-    caches.match(request).then((cachedResponse) => {
-      const fetchPromise = fetch(request)
-        .then((networkResponse) => {
-          if (networkResponse && networkResponse.status === 200) {
-            const responseClone = networkResponse.clone();
-            caches.open(CACHE_VERSION).then((cache) => {
-              cache.put(request, responseClone);
-            });
+    caches.match(req).then((cached) => {
+      const fetchPromise = fetch(req)
+        .then((networkRes) => {
+          if (networkRes && networkRes.status === 200) {
+            const resClone = networkRes.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(req, resClone));
           }
-          return networkResponse;
+          return networkRes;
         })
         .catch(() => {
-          // Falha de rede tolerada se já houver cópia em cache
+          // Falha silenciosa de rede no background
           return null;
         });
 
-      return cachedResponse || fetchPromise;
+      return cached || fetchPromise;
     })
   );
 });
 
+// Mensageria: permite que o usuário atualize o app com segurança
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    console.log('[SW] Recebido SKIP_WAITING aprovado pelo usuário');
+    self.skipWaiting();
+  }
+});
