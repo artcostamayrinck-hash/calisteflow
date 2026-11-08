@@ -27,6 +27,8 @@ const BASE_EXERCISES: Exercise[] = [
 
 // Aliases para retrocompatibilidade total com rotinas salvas no localStorage e presets antigos
 const LEGACY_ALIASES: Record<string, string> = {
+  'spiderman-stretch': 'greatest-stretch',
+  'spiderman_stretch': 'greatest-stretch',
   // Aliases da lista-alvo de core
   'prancha-antebracos': 'plank',
   'copenhagen-joelho-dobrado': 'copenhagen-plank-joelho',

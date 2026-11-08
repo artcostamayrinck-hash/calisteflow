@@ -23,7 +23,7 @@ export const PULL_VERTICAL_EXERCISES: Exercise[] = [
     estatico: true,
     cadencia: 'isometria',
     regressoes: [],
-    progressoes: ['retracao-escapular-barra'],
+    progressoes: ['retracao-escapular-barra', 'suspensao-falsa-pegada', 'dead-hang-toalha', 'skin-the-cat'],
     variacoes: ['dead-hang-passivo'],
     adaptacoes: {
       ombro: ['dead-hang'],
@@ -103,7 +103,7 @@ export const PULL_VERTICAL_EXERCISES: Exercise[] = [
     estatico: false,
     cadencia: '5-1-0',
     regressoes: ['retracao-escapular-barra', 'australianpullup'],
-    progressoes: ['chinup-supinada', 'pullup'],
+    progressoes: ['chinup-supinada', 'pullup', 'suspensao-queixo-acima-barra', 'chinup-excentrico'],
     variacoes: ['barra-com-elastico'],
     adaptacoes: {
       ombro: ['australianpullup'],
@@ -182,7 +182,7 @@ export const PULL_VERTICAL_EXERCISES: Exercise[] = [
     estatico: false,
     cadencia: '2-1-2',
     regressoes: ['barra-negativa', 'barra-com-elastico'],
-    progressoes: ['pullup'],
+    progressoes: ['pullup', 'chinup-pausa-metade'],
     variacoes: ['barra-pegada-neutra'],
     adaptacoes: {
       cotovelo: ['barra-pegada-neutra'],
@@ -225,7 +225,7 @@ export const PULL_VERTICAL_EXERCISES: Exercise[] = [
     estatico: false,
     cadencia: '2-1-2',
     regressoes: ['chinup-supinada', 'barra-negativa'],
-    progressoes: ['barra-aberta', 'barra-arqueiro', 'lsit-pullup'],
+    progressoes: ['barra-aberta', 'barra-arqueiro', 'lsit-pullup', 'barra-fixa-explosiva'],
     variacoes: ['barra-pegada-neutra'],
     adaptacoes: {
       cotovelo: ['barra-pegada-neutra', 'australianpullup'],
@@ -524,6 +524,608 @@ export const PULL_VERTICAL_EXERCISES: Exercise[] = [
     ],
     commonMistakes: [
       { mistake: 'Puxar com a mão da toalha com força igual', correction: 'A mão secundária deve usar apenas 2 ou 3 dedos para apoio.' }
+    ]
+  },
+  {
+    id: 'suspensao-falsa-pegada',
+    name: 'Suspensão com Falsa Pegada (False Grip Hang)',
+    category: 'Pull',
+    difficulty: 'Intermediário',
+    type: 'isometric',
+    primaryMuscles: [
+      'antebraco'
+    ],
+    secondaryMuscles: [
+      'costas',
+      'ombros',
+      'biceps'
+    ],
+    defaultSets: 3,
+    defaultHoldSeconds: 20,
+    defaultRestSeconds: 60,
+    description: 'Sustentação isométrica na barra ou argolas com o punho posicionado acima do implemento (falsa pegada), requisito indispensável para a transição suave do muscle-up.',
+    breathingTip: 'Respire ritmadamente mantendo a tensão máxima nos flexores de punho e antebraço.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Pare se houver dor aguda.',
+      'Se sentir desconforto no túnel do carpo, reduza o tempo sob tensão.'
+    ],
+    padrao: 'puxar-vertical',
+    equipamento: [
+      'barra',
+      'argolas'
+    ],
+    tipoExercicio: 'skill',
+    estatico: true,
+    cadencia: 'isometria',
+    regressoes: [
+      'dead-hang'
+    ],
+    progressoes: [
+      'muscle-up-transicao'
+    ],
+    variacoes: [
+      'dead-hang'
+    ],
+    adaptacoes: {
+      punho: [
+        'dead-hang'
+      ],
+      semEquipamento: [
+        'flexao-extensao-punho-chao'
+      ]
+    },
+    criterioAvanco: 'Sustentar 3 séries de 25 segundos mantendo os punhos fixados sobre o suporte',
+    sinonimos: [
+      'false grip hang',
+      'falsa pegada suspensa',
+      'isometria false grip'
+    ],
+    animationType: 'pullup',
+    executionSteps: [
+      {
+        step: 1,
+        title: 'Posicionamento da Falsa Pegada',
+        description: 'Apoie a base da palma da mão e o osso pisiforme por cima da barra ou argola.'
+      },
+      {
+        step: 2,
+        title: 'Envolvimento dos Dedos',
+        description: 'Feche os dedos com firmeza mantendo os punhos fortemente flexionados em 90°.'
+      },
+      {
+        step: 3,
+        title: 'Suspensão Rígida',
+        description: 'Retire os pés do apoio e sustente o corpo pendurado sem perder o apoio do punho sobre a barra.'
+      }
+    ],
+    commonMistakes: [
+      {
+        mistake: 'Deixar o punho escorregar para a pegada comum',
+        correction: 'Mantenha a dobra do punho travada acima da barra contraindo o antebraço.'
+      },
+      {
+        mistake: 'Desengajar os ombros deixando os braços soltos',
+        correction: 'Mantenha leve tensão escapular protegendo o ombro.'
+      }
+    ]
+  },
+  {
+    id: 'suspensao-queixo-acima-barra',
+    name: 'Suspensão com Queixo Acima da Barra (Flexed-Arm Hang)',
+    category: 'Pull',
+    difficulty: 'Iniciante',
+    type: 'isometric',
+    primaryMuscles: [
+      'costas',
+      'biceps'
+    ],
+    secondaryMuscles: [
+      'antebraco',
+      'ombros',
+      'abdomen'
+    ],
+    defaultSets: 3,
+    defaultHoldSeconds: 20,
+    defaultRestSeconds: 60,
+    description: 'Sustentação isométrica no topo da barra fixa com queixo ultrapassando o suporte e escápulas aduzidas, excelente construtor de força final de puxada.',
+    breathingTip: 'Mantenha respirações curtas e controladas sustentando a contração dorsal e peitoral.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Pare se houver dor aguda.',
+      'Ao falhar, desça controladamente sem despencar de forma brusca.'
+    ],
+    padrao: 'puxar-vertical',
+    equipamento: [
+      'barra'
+    ],
+    tipoExercicio: 'principal',
+    estatico: true,
+    cadencia: 'isometria',
+    regressoes: [
+      'barra-negativa',
+      'barra-com-elastico'
+    ],
+    progressoes: [
+      'pullup',
+      'chinup-supinada'
+    ],
+    variacoes: [
+      'barra-negativa'
+    ],
+    adaptacoes: {
+      ombro: [
+        'remada-invertida-joelhos'
+      ],
+      semEquipamento: [
+        'remada-porta-toalha'
+      ]
+    },
+    criterioAvanco: 'Manter 3 séries de 25 segundos com queixo acima da barra sem tocar o peito no ferro',
+    sinonimos: [
+      'flexed arm hang',
+      'isometria topo da barra',
+      'chin over bar hold'
+    ],
+    animationType: 'pullup',
+    executionSteps: [
+      {
+        step: 1,
+        title: 'Subida com Apoio ou Salto',
+        description: 'Use um banco ou salto para posicionar o queixo acima da barra com pegada pronada ou supinada.'
+      },
+      {
+        step: 2,
+        title: 'Retração e Trava',
+        description: 'Puxe os cotovelos para baixo e para trás juntando as escápulas com o tórax próximo à barra.'
+      },
+      {
+        step: 3,
+        title: 'Sustentação',
+        description: 'Trave o abdômen e permaneça imóvel durante todo o tempo estipulado.'
+      }
+    ],
+    commonMistakes: [
+      {
+        mistake: 'Apoiar o queixo na barra para descansar',
+        correction: 'Mantenha o queixo elevado sem qualquer contato físico de repouso no ferro.'
+      },
+      {
+        mistake: 'Cruzar e balançar as pernas',
+        correction: 'Mantenha as pernas unidas em hollow body firme.'
+      }
+    ]
+  },
+  {
+    id: 'barra-fixa-explosiva',
+    name: 'Barra Fixa Explosiva (Explosive Pull-up)',
+    category: 'Pull',
+    difficulty: 'Avançado',
+    type: 'reps',
+    primaryMuscles: [
+      'costas',
+      'biceps'
+    ],
+    secondaryMuscles: [
+      'antebraco',
+      'ombros',
+      'abdomen'
+    ],
+    defaultSets: 3,
+    defaultReps: 5,
+    defaultRestSeconds: 90,
+    description: 'Puxada vertical executada com velocidade máxima de contração para levar a barra até a linha do esterno ou abdômen superior, base de potência para o muscle-up.',
+    breathingTip: 'Inspire no início da descida; expire fortemente na aceleração da subida.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Pare se houver dor aguda.',
+      'Controle a fase excêntrica para amortecer o impacto nos ombros no ponto zero.'
+    ],
+    padrao: 'puxar-vertical',
+    equipamento: [
+      'barra'
+    ],
+    tipoExercicio: 'principal',
+    estatico: false,
+    cadencia: 'explosiva',
+    regressoes: [
+      'pullup'
+    ],
+    progressoes: [
+      'muscleup'
+    ],
+    variacoes: [
+      'pullup'
+    ],
+    adaptacoes: {
+      ombro: [
+        'australianpullup'
+      ],
+      punho: [
+        'remada-argolas'
+      ],
+      semEquipamento: [
+        'remada-porta-toalha'
+      ]
+    },
+    criterioAvanco: 'Completar 3 séries de 6 repetições encostando a barra abaixo da linha do peitoral',
+    sinonimos: [
+      'explosive pullup',
+      'barra peito na barra',
+      'high pull-up',
+      'chest to bar'
+    ],
+    animationType: 'pullup',
+    executionSteps: [
+      {
+        step: 1,
+        title: 'Suspensão com Tensão Ativa',
+        description: 'Inicie pendurado na barra com cotovelos retos e grande dorsal ativado.'
+      },
+      {
+        step: 2,
+        title: 'Tracionamento Explosivo',
+        description: 'Puxe a barra para baixo com aceleração máxima projetando o tronco para trás e o peito para cima.'
+      },
+      {
+        step: 3,
+        title: 'Descida Controlada',
+        description: 'Retorne amortecendo o movimento com os braços sem soltar o corpo em queda livre.'
+      }
+    ],
+    commonMistakes: [
+      {
+        mistake: 'Chutar com as pernas em kipping excessivo',
+        correction: 'Gere a aceleração primariamente pelos membros superiores e dorsais.'
+      },
+      {
+        mistake: 'Desabar os braços na descida distendendo a cápsula do ombro',
+        correction: 'Mantenha controle na descida ativando as escápulas antes de estender totalmente.'
+      }
+    ]
+  },
+  {
+    id: 'chinup-excentrico',
+    name: 'Chin-up Excêntrico (Descida de 5 s)',
+    category: 'Pull',
+    difficulty: 'Intermediário',
+    type: 'reps',
+    primaryMuscles: [
+      'biceps',
+      'costas'
+    ],
+    secondaryMuscles: [
+      'antebraco',
+      'abdomen'
+    ],
+    defaultSets: 3,
+    defaultReps: 5,
+    defaultRestSeconds: 75,
+    description: 'Fase excêntrica da barra fixa com pegada supinada sustentando a descida por 5 segundos completos, maximizando a síntese de força nos bíceps e grande dorsal.',
+    breathingTip: 'Suba com auxílio inspirando; expire de forma ritmada e contínua durante todos os 5 segundos da descida.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Pare se houver dor aguda.',
+      'Não solte o corpo bruscamente no final da descida.'
+    ],
+    padrao: 'puxar-vertical',
+    equipamento: [
+      'barra'
+    ],
+    tipoExercicio: 'principal',
+    estatico: false,
+    cadencia: '1-0-5',
+    regressoes: [
+      'barra-negativa',
+      'barra-com-elastico'
+    ],
+    progressoes: [
+      'chinup-supinada'
+    ],
+    variacoes: [
+      'barra-negativa'
+    ],
+    adaptacoes: {
+      cotovelo: [
+        'remada-invertida-supinada'
+      ],
+      semEquipamento: [
+        'remada-porta-toalha'
+      ]
+    },
+    criterioAvanco: 'Executar 3 séries de 6 repetições com descida controlada de 5 segundos milimetricamente cadenciada',
+    sinonimos: [
+      'negative chinup',
+      'chin-up negativo',
+      'descida excêntrica supinada'
+    ],
+    animationType: 'pullup',
+    executionSteps: [
+      {
+        step: 1,
+        title: 'Subida com Salto na Pegada Supinada',
+        description: 'Com palmas viradas para o rosto, salte ou use um banco até o queixo ultrapassar a barra.'
+      },
+      {
+        step: 2,
+        title: 'Freamento da Descida',
+        description: 'Inicie a descida resistindo à gravidade em velocidade constante por 5 segundos inteiros.'
+      },
+      {
+        step: 3,
+        title: 'Extensão Final Suave',
+        description: 'Complete a extensão total dos braços sem impacto nos cotovelos e pouse os pés para reiniciar.'
+      }
+    ],
+    commonMistakes: [
+      {
+        mistake: 'Cair rápido na metade final do movimento',
+        correction: 'Distribua o tempo de descida igualmente do topo até a extensão completa dos cotovelos.'
+      },
+      {
+        mistake: 'Projetar os ombros para a frente na descida',
+        correction: 'Mantenha o peito aberto e escápulas ativas durante todo o percurso.'
+      }
+    ]
+  },
+  {
+    id: 'chinup-pausa-metade',
+    name: 'Chin-up com Pausa de 3 s na Metade',
+    category: 'Pull',
+    difficulty: 'Avançado',
+    type: 'reps',
+    primaryMuscles: [
+      'biceps',
+      'costas'
+    ],
+    secondaryMuscles: [
+      'antebraco',
+      'abdomen'
+    ],
+    defaultSets: 3,
+    defaultReps: 6,
+    defaultRestSeconds: 90,
+    description: 'Chin-up completo com pausa isométrica estrita de 3 segundos quando os cotovelos atingem o ângulo crítico de 90°, eliminando qualquer momento e gerando força em ângulo desfavorável.',
+    breathingTip: 'Inspire na subida; prenda a respiração com tronco firme durante a pausa de 3 s; expire no topo ao finalizar.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Pare se houver dor aguda.',
+      'Se sentir dor no tendão do bíceps, retorne à versão contínua.'
+    ],
+    padrao: 'puxar-vertical',
+    equipamento: [
+      'barra'
+    ],
+    tipoExercicio: 'principal',
+    estatico: false,
+    cadencia: '2-3-1',
+    regressoes: [
+      'chinup-supinada'
+    ],
+    progressoes: [
+      'barra-unilateral-assistida'
+    ],
+    variacoes: [
+      'chinup-supinada'
+    ],
+    adaptacoes: {
+      ombro: [
+        'remada-invertida-supinada'
+      ],
+      semEquipamento: [
+        'remada-porta-toalha'
+      ]
+    },
+    criterioAvanco: '3 séries de 7 repetições com pausa estrita de 3 segundos a 90° de flexão em todas as repetições',
+    sinonimos: [
+      'pause chinup',
+      'chin-up com pausa',
+      'isometric chin up hold'
+    ],
+    animationType: 'pullup',
+    executionSteps: [
+      {
+        step: 1,
+        title: 'Início e Tração',
+        description: 'Pendure-se com pegada supinada e puxe o corpo até os cotovelos formarem 90°.'
+      },
+      {
+        step: 2,
+        title: 'Pausa Isométrica a 90°',
+        description: 'Congele imóvel por 3 segundos apertando os bíceps e dorsais sem perder altura.'
+      },
+      {
+        step: 3,
+        title: 'Finalização e Descida',
+        description: 'Complete a puxada levando o queixo acima da barra e desça controladamente.'
+      }
+    ],
+    commonMistakes: [
+      {
+        mistake: 'Balançar o corpo para quebrar a inércia após a pausa',
+        correction: 'Mantenha o corpo reto em canoa sem usar chute de pernas.'
+      },
+      {
+        mistake: 'Fazer uma pausa de menos de 1 segundo',
+        correction: 'Conte 3 segundos completos de forma cadenciada mentalmente.'
+      }
+    ]
+  },
+  {
+    id: 'dead-hang-toalha',
+    name: 'Dead Hang com Toalha (Pegada Grossa)',
+    category: 'Pull',
+    difficulty: 'Intermediário',
+    type: 'isometric',
+    primaryMuscles: [
+      'antebraco'
+    ],
+    secondaryMuscles: [
+      'costas',
+      'ombros'
+    ],
+    defaultSets: 3,
+    defaultHoldSeconds: 20,
+    defaultRestSeconds: 60,
+    description: 'Sustentação pendurada segurando toalhas enroladas na barra, aumentando drasticamente o diâmetro da pegada e exigindo máxima força de pinça e flexores dos dedos.',
+    breathingTip: 'Respire profundamente pelo diafragma mantendo a preensão palmar contraída ao máximo.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Pare se houver dor aguda.',
+      'Certifique-se de que a toalha é resistente e não deslize na barra.'
+    ],
+    padrao: 'puxar-vertical',
+    equipamento: [
+      'barra',
+      'toalha'
+    ],
+    tipoExercicio: 'principal',
+    estatico: true,
+    cadencia: 'isometria',
+    regressoes: [
+      'dead-hang'
+    ],
+    progressoes: [
+      'dead-hang-unilateral-assistido'
+    ],
+    variacoes: [
+      'dead-hang'
+    ],
+    adaptacoes: {
+      punho: [
+        'dead-hang'
+      ],
+      semEquipamento: [
+        'flexao-extensao-punho-chao'
+      ]
+    },
+    criterioAvanco: 'Sustentar 3 séries de 30 segundos com firmeza nas duas toalhas sem escorregar',
+    sinonimos: [
+      'towel dead hang',
+      'suspensão com toalha',
+      'pegada grossa na barra'
+    ],
+    animationType: 'pullup',
+    executionSteps: [
+      {
+        step: 1,
+        title: 'Enrolamento das Toalhas',
+        description: 'Passe duas toalhas resistentes por cima da barra com as pontas verticais para baixo.'
+      },
+      {
+        step: 2,
+        title: 'Pegada Firme',
+        description: 'Segure firmemente as pontas das toalhas com as mãos na largura dos ombros apertando a pinça manual.'
+      },
+      {
+        step: 3,
+        title: 'Suspensão e Estabilidade',
+        description: 'Tire os pés do solo e sustente o corpo pendurado com os ombros ativos.'
+      }
+    ],
+    commonMistakes: [
+      {
+        mistake: 'Segurar com a toalha frouxa escorregando pelos dedos',
+        correction: 'Aperte a toalha com a força máxima de punho antes de tirar o peso do chão.'
+      },
+      {
+        mistake: 'Deixar os ombros subirem encostando nas orelhas',
+        correction: 'Deprima levemente as escápulas mantendo estabilidade articular.'
+      }
+    ]
+  },
+  {
+    id: 'dead-hang-unilateral-assistido',
+    name: 'Dead Hang Unilateral Assistido (One-Arm Hang)',
+    category: 'Pull',
+    difficulty: 'Avançado',
+    type: 'isometric',
+    primaryMuscles: [
+      'antebraco',
+      'costas'
+    ],
+    secondaryMuscles: [
+      'ombros',
+      'abdomen'
+    ],
+    defaultSets: 3,
+    defaultHoldSeconds: 15,
+    defaultRestSeconds: 75,
+    description: 'Sustentação pendurada na barra com foco em um único braço, com 1 ou 2 dedos da outra mão servindo de assistência mínima para estabilidade rotacional.',
+    breathingTip: 'Respire de forma controlada mantendo o ombro do braço de apoio ativo e travado.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Pare se houver dor aguda.',
+      'Não deixe o ombro de apoio desengajar totalmente em suspensão passiva brusca.'
+    ],
+    padrao: 'puxar-vertical',
+    equipamento: [
+      'barra'
+    ],
+    tipoExercicio: 'principal',
+    estatico: true,
+    cadencia: 'isometria',
+    regressoes: [
+      'dead-hang-toalha',
+      'dead-hang'
+    ],
+    progressoes: [
+      'barra-unilateral-assistida'
+    ],
+    variacoes: [
+      'dead-hang'
+    ],
+    adaptacoes: {
+      ombro: [
+        'dead-hang'
+      ],
+      punho: [
+        'dead-hang'
+      ],
+      semEquipamento: [
+        'remada-porta-toalha'
+      ]
+    },
+    criterioAvanco: 'Manter 3 séries de 20 segundos cada braço com apoio de apenas 1 dedo da mão de suporte',
+    sinonimos: [
+      'assisted one arm hang',
+      'dead hang um braço',
+      'suspensão unilateral barra'
+    ],
+    animationType: 'pullup',
+    executionSteps: [
+      {
+        step: 1,
+        title: 'Pegada Principal e Apoio',
+        description: 'Segure a barra com uma mão firme e apoie 1 ou 2 dedos da outra mão na barra para equilíbrio.'
+      },
+      {
+        step: 2,
+        title: 'Ativação do Ombro',
+        description: 'Engaje as escápulas do braço principal evitando torção descontrolada do corpo.'
+      },
+      {
+        step: 3,
+        title: 'Sustentação Unilateral',
+        description: 'Sustente o tempo estipulado reduzindo ao mínimo o peso sobre os dedos auxiliares, alternando os lados.'
+      }
+    ],
+    commonMistakes: [
+      {
+        mistake: 'Girar o corpo descontroladamente no próprio eixo',
+        correction: 'Contraia o abdômen e use a ponta do dedo auxiliar para frear a rotação.'
+      },
+      {
+        mistake: 'Desengajar o ombro deixando o peso puxar a cápsula sem ativação',
+        correction: 'Puxe o ombro levemente para baixo mantendo o dorsal ativado.'
+      }
     ]
   }
 ];

@@ -301,7 +301,7 @@ export const SKILL_EXERCISES: Exercise[] = [
     estatico: true,
     cadencia: 'isometria',
     regressoes: ['planche-lean', 'crane-pose'],
-    progressoes: ['straddle-planche', 'planche'],
+    progressoes: ['straddle-planche', 'planche', 'adv-tuck-planche'],
     variacoes: ['planche-lean'],
     adaptacoes: {
       punho: ['planche-lean']
@@ -419,7 +419,7 @@ export const SKILL_EXERCISES: Exercise[] = [
     estatico: true,
     cadencia: 'isometria',
     regressoes: ['toes-to-bar', 'pullup'],
-    progressoes: ['frontlever'],
+    progressoes: ['frontlever', 'adv-tuck-front-lever'],
     variacoes: ['dragon-flag-tuck'],
     adaptacoes: {
       ombro: ['remada-invertida-pes-elevados'],
@@ -501,7 +501,7 @@ export const SKILL_EXERCISES: Exercise[] = [
     estatico: true,
     cadencia: 'isometria',
     regressoes: ['retracao-escapular-barra', 'superman'],
-    progressoes: ['back-lever'],
+    progressoes: ['back-lever', 'adv-tuck-back-lever'],
     variacoes: ['superman'],
     adaptacoes: {
       cotovelo: ['retracao-escapular-barra'],
@@ -583,7 +583,7 @@ export const SKILL_EXERCISES: Exercise[] = [
     estatico: true,
     cadencia: 'isometria',
     regressoes: ['copenhagen-plank-pe', 'prancha-lateral-elevacao-quadril'],
-    progressoes: ['bandeira-humana'],
+    progressoes: ['bandeira-humana', 'bandeira-humana-straddle'],
     variacoes: ['copenhagen-plank-pe'],
     adaptacoes: {
       ombro: ['prancha-lateral'],
@@ -638,6 +638,873 @@ export const SKILL_EXERCISES: Exercise[] = [
     ],
     commonMistakes: [
       { mistake: 'Girar o peito para o chão perdendo a orientação lateral', correction: 'Mantenha o peito voltado perpendicularmente para frente.' }
+    ]
+  },
+  {
+    id: 'adv-tuck-planche',
+    name: 'Advanced Tuck Planche',
+    category: 'Skill',
+    difficulty: 'Avançado',
+    type: 'isometric',
+    primaryMuscles: [
+      'ombros',
+      'peito',
+      'abdomen'
+    ],
+    secondaryMuscles: [
+      'triceps',
+      'antebraco',
+      'lombar'
+    ],
+    defaultSets: 4,
+    defaultHoldSeconds: 10,
+    defaultRestSeconds: 90,
+    description: 'Evolução crucial do tuck planche onde o quadril se abre para 90° em relação ao tronco e as costas ficam retas, aumentando consideravelmente o torque sobre os deltoides anteriores.',
+    breathingTip: 'Respire de forma controlada mantendo protração escapular máxima e abdômen engajado.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Pare se houver dor aguda.',
+      'Pare imediatamente se sentir queimação no tendão do bíceps braquial.'
+    ],
+    padrao: 'skills',
+    equipamento: [
+      'nenhum'
+    ],
+    tipoExercicio: 'skill',
+    estatico: true,
+    cadencia: 'isometria',
+    regressoes: [
+      'tuck-planche'
+    ],
+    progressoes: [
+      'planche-uma-perna'
+    ],
+    variacoes: [
+      'tuck-planche'
+    ],
+    adaptacoes: {
+      punho: [
+        'planche-lean'
+      ],
+      ombro: [
+        'tuck-planche'
+      ],
+      semEquipamento: [
+        'adv-tuck-planche'
+      ]
+    },
+    criterioAvanco: 'Sustentar 4 séries de 12 segundos com costas planas e coxas a 90°',
+    sinonimos: [
+      'advanced tuck planche',
+      'planche tuck avançado',
+      'adv tuck planche'
+    ],
+    animationType: 'planche',
+    executionSteps: [
+      {
+        step: 1,
+        title: 'Entrada a Partir do Tuck',
+        description: 'Assuma a sustentação em tuck planche com braços retos e escápulas em protração.'
+      },
+      {
+        step: 2,
+        title: 'Abertura do Quadril a 90°',
+        description: 'Afaste os joelhos do peito até que as coxas formem 90° com o tronco e as costas fiquem planas.'
+      },
+      {
+        step: 3,
+        title: 'Inclinação e Bloqueio',
+        description: 'Incline os ombros para a frente compensando o aumento da alavanca com os braços estendidos.'
+      }
+    ],
+    commonMistakes: [
+      {
+        mistake: 'Perder a protração escapular afundando o peito',
+        correction: 'Empurre o chão com força afastando as escápulas em cúpula convexa.'
+      },
+      {
+        mistake: 'Flexionar os cotovelos para aliviar a carga no bíceps',
+        correction: 'Mantenha os braços 100% retos travados com bíceps voltados para a frente.'
+      }
+    ]
+  },
+  {
+    id: 'planche-uma-perna',
+    name: 'Planche com Uma Perna Estendida',
+    category: 'Skill',
+    difficulty: 'Avançado',
+    type: 'isometric',
+    primaryMuscles: [
+      'ombros',
+      'peito',
+      'lombar'
+    ],
+    secondaryMuscles: [
+      'gluteos',
+      'abdomen',
+      'triceps',
+      'antebraco'
+    ],
+    defaultSets: 4,
+    defaultHoldSeconds: 8,
+    defaultRestSeconds: 90,
+    description: 'Variação assimétrica preparatória para a straddle planche, onde uma perna fica estendida em linha com o corpo e a outra permanece dobrada no tuck.',
+    breathingTip: 'Mantenha respiração ritmada sustentando a inclinação profunda dos ombros.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Pare se houver dor aguda.',
+      'Mantenha aquecimento minucioso dos punhos e bíceps antes da execução.'
+    ],
+    padrao: 'skills',
+    equipamento: [
+      'nenhum'
+    ],
+    tipoExercicio: 'skill',
+    estatico: true,
+    cadencia: 'isometria',
+    regressoes: [
+      'adv-tuck-planche'
+    ],
+    progressoes: [
+      'straddle-planche'
+    ],
+    variacoes: [
+      'adv-tuck-planche'
+    ],
+    adaptacoes: {
+      punho: [
+        'adv-tuck-planche'
+      ],
+      semEquipamento: [
+        'planche-uma-perna'
+      ]
+    },
+    criterioAvanco: 'Sustentar 4 séries de 10 segundos cada lado com alinhamento horizontal',
+    sinonimos: [
+      'one leg planche',
+      'single leg planche',
+      'planche uma perna'
+    ],
+    animationType: 'planche',
+    executionSteps: [
+      {
+        step: 1,
+        title: 'Base de Tuck Avançado',
+        description: 'Inicie no advanced tuck planche com escápulas protraídas e braços estendidos.'
+      },
+      {
+        step: 2,
+        title: 'Extensão de Uma Perna',
+        description: 'Estenda uma das pernas para trás em linha reta com o tronco, mantendo a outra encolhida.'
+      },
+      {
+        step: 3,
+        title: 'Equilíbrio da Alavanca',
+        description: 'Incline ligeiramente mais os ombros à frente para equilibrar a extensão da perna.'
+      }
+    ],
+    commonMistakes: [
+      {
+        mistake: 'Deixar a perna estendida cair abaixo da linha do tronco',
+        correction: 'Ative o glúteo e a lombar para sustentar a perna perfeitamente horizontal.'
+      },
+      {
+        mistake: 'Girar o quadril para o lado da perna dobrada',
+        correction: 'Mantenha a bacia rigorosamente paralela ao solo.'
+      }
+    ]
+  },
+  {
+    id: 'adv-tuck-front-lever',
+    name: 'Advanced Tuck Front Lever',
+    category: 'Skill',
+    difficulty: 'Avançado',
+    type: 'isometric',
+    primaryMuscles: [
+      'costas',
+      'abdomen'
+    ],
+    secondaryMuscles: [
+      'antebraco',
+      'ombros',
+      'biceps',
+      'lombar'
+    ],
+    defaultSets: 4,
+    defaultHoldSeconds: 10,
+    defaultRestSeconds: 90,
+    description: 'Evolução do tuck front lever onde as coxas se abrem a 90° em relação ao tronco e as costas ficam retas, aumentando a sobrecarga dorsal de puxada estática.',
+    breathingTip: 'Expire ao assumir a posição; respire continuamente pelo diafragma com o core travado.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Pare se houver dor aguda.',
+      'Mantenha depressão escapular ativa para proteger os ombros.'
+    ],
+    padrao: 'skills',
+    equipamento: [
+      'barra'
+    ],
+    tipoExercicio: 'skill',
+    estatico: true,
+    cadencia: 'isometria',
+    regressoes: [
+      'tuck-front-lever'
+    ],
+    progressoes: [
+      'front-lever-uma-perna'
+    ],
+    variacoes: [
+      'tuck-front-lever'
+    ],
+    adaptacoes: {
+      ombro: [
+        'tuck-front-lever'
+      ],
+      semEquipamento: [
+        'dragon-flag-tuck'
+      ]
+    },
+    criterioAvanco: 'Sustentar 4 séries de 12 segundos com costas perfeitamente horizontais e coxas a 90°',
+    sinonimos: [
+      'advanced tuck front lever',
+      'front lever tuck avançado',
+      'adv tuck front lever'
+    ],
+    animationType: 'frontlever',
+    executionSteps: [
+      {
+        step: 1,
+        title: 'Suspensão e Puxada de Braços Retos',
+        description: 'Empurre a barra para baixo com braços esticados trazendo o tronco para a linha horizontal.'
+      },
+      {
+        step: 2,
+        title: 'Abertura das Pernas a 90°',
+        description: 'Afaste os joelhos do peito até as coxas formarem um ângulo reto com o tronco e as costas ficarem planas.'
+      },
+      {
+        step: 3,
+        title: 'Sustentação Rígida',
+        description: 'Trave as dorsais e mantenha a cabeça neutra alinhada ao tronco.'
+      }
+    ],
+    commonMistakes: [
+      {
+        mistake: 'Deixar o quadril cair abaixo da linha dos ombros',
+        correction: 'Pressione a barra com força para baixo como se fizesse um pullover estático.'
+      },
+      {
+        mistake: 'Dobrar os cotovelos para facilitar o movimento',
+        correction: 'Mantenha os cotovelos totalmente estendidos com tríceps engajados.'
+      }
+    ]
+  },
+  {
+    id: 'front-lever-uma-perna',
+    name: 'Front Lever com Uma Perna Estendida',
+    category: 'Skill',
+    difficulty: 'Avançado',
+    type: 'isometric',
+    primaryMuscles: [
+      'costas',
+      'abdomen'
+    ],
+    secondaryMuscles: [
+      'antebraco',
+      'ombros',
+      'gluteos',
+      'lombar'
+    ],
+    defaultSets: 4,
+    defaultHoldSeconds: 8,
+    defaultRestSeconds: 90,
+    description: 'Variação assimétrica preparatória onde uma perna se projeta totalmente estendida na horizontal e a outra permanece dobrada, equilibrando a transição para a straddle.',
+    breathingTip: 'Mantenha a parede abdominal compacta e respirações curtas e controladas.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Pare se houver dor aguda.',
+      'Não realize balanços bruscos ao entrar na posição.'
+    ],
+    padrao: 'skills',
+    equipamento: [
+      'barra'
+    ],
+    tipoExercicio: 'skill',
+    estatico: true,
+    cadencia: 'isometria',
+    regressoes: [
+      'adv-tuck-front-lever'
+    ],
+    progressoes: [
+      'straddle-front-lever'
+    ],
+    variacoes: [
+      'adv-tuck-front-lever'
+    ],
+    adaptacoes: {
+      ombro: [
+        'adv-tuck-front-lever'
+      ],
+      semEquipamento: [
+        'dragon-flag-uma-perna'
+      ]
+    },
+    criterioAvanco: 'Manter 4 séries de 10 segundos cada lado com corpo paralelo ao solo',
+    sinonimos: [
+      'one leg front lever',
+      'single leg front lever',
+      'front lever uma perna'
+    ],
+    animationType: 'frontlever',
+    executionSteps: [
+      {
+        step: 1,
+        title: 'Elevação a Partir do Tuck Avançado',
+        description: 'Eleve o corpo até a horizontal em advanced tuck com braços esticados.'
+      },
+      {
+        step: 2,
+        title: 'Extensão de Uma Perna',
+        description: 'Estenda uma perna reta à frente apontando a ponta do pé, mantendo a outra flexionada.'
+      },
+      {
+        step: 3,
+        title: 'Sustentação e Alternância',
+        description: 'Segure a posição com máxima contração dorsal e alterne o lado em séries sucessivas.'
+      }
+    ],
+    commonMistakes: [
+      {
+        mistake: 'Girar a bacia para o lado da perna dobrada',
+        correction: 'Mantenha o quadril alinhado horizontalmente sem rotação do quadril.'
+      },
+      {
+        mistake: 'Perder a depressão escapular deixando o peito afundar',
+        correction: 'Traga as escápulas para baixo empurrando a barra ativamente.'
+      }
+    ]
+  },
+  {
+    id: 'straddle-front-lever',
+    name: 'Straddle Front Lever',
+    category: 'Skill',
+    difficulty: 'Avançado',
+    type: 'isometric',
+    primaryMuscles: [
+      'costas',
+      'abdomen'
+    ],
+    secondaryMuscles: [
+      'antebraco',
+      'ombros',
+      'gluteos',
+      'lombar'
+    ],
+    defaultSets: 4,
+    defaultHoldSeconds: 6,
+    defaultRestSeconds: 90,
+    description: 'Front lever completo executado com as pernas abertas em abdução máxima, encurtando o braço de alavanca e servindo de ponte direta para o full front lever.',
+    breathingTip: 'Expulse o ar na entrada; respire com o abdômen e grande dorsal sob máxima contração.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Pare se houver dor aguda.',
+      'Aqueça bem os adutores e isquiotibiais para permitir maior abertura das pernas.'
+    ],
+    padrao: 'skills',
+    equipamento: [
+      'barra'
+    ],
+    tipoExercicio: 'skill',
+    estatico: true,
+    cadencia: 'isometria',
+    regressoes: [
+      'front-lever-uma-perna',
+      'adv-tuck-front-lever'
+    ],
+    progressoes: [
+      'frontlever'
+    ],
+    variacoes: [
+      'front-lever-uma-perna'
+    ],
+    adaptacoes: {
+      ombro: [
+        'adv-tuck-front-lever'
+      ],
+      semEquipamento: [
+        'dragon-flag'
+      ]
+    },
+    criterioAvanco: 'Sustentar 4 séries de 8 segundos com pernas afastadas e corpo estritamente horizontal',
+    sinonimos: [
+      'straddle front lever',
+      'front lever straddle',
+      'front lever pernas abertas'
+    ],
+    animationType: 'frontlever',
+    executionSteps: [
+      {
+        step: 1,
+        title: 'Tracionamento com Braços Retos',
+        description: 'Puxe a barra para baixo com cotovelos travados elevando o corpo do chão.'
+      },
+      {
+        step: 2,
+        title: 'Abertura Máxima em Straddle',
+        description: 'Abra as pernas estendidas o mais amplamente possível mantendo os joelhos travados e pontas dos pés esticadas.'
+      },
+      {
+        step: 3,
+        title: 'Bloqueio na Horizontal',
+        description: 'Alinhe cabeça, tronco e quadris em um único plano horizontal com o solo.'
+      }
+    ],
+    commonMistakes: [
+      {
+        mistake: 'Deixar o quadril dobrar em formato de V (pique)',
+        correction: 'Aperte os glúteos intensamente para manter a extensão do quadril perfeita.'
+      },
+      {
+        mistake: 'Dobrar os joelhos durante a sustentação',
+        correction: 'Trave os quadríceps e aponte os pés para manter as pernas retas.'
+      }
+    ]
+  },
+  {
+    id: 'adv-tuck-back-lever',
+    name: 'Advanced Tuck Back Lever',
+    category: 'Skill',
+    difficulty: 'Avançado',
+    type: 'isometric',
+    primaryMuscles: [
+      'lombar',
+      'gluteos',
+      'ombros'
+    ],
+    secondaryMuscles: [
+      'biceps',
+      'costas',
+      'peito'
+    ],
+    defaultSets: 4,
+    defaultHoldSeconds: 10,
+    defaultRestSeconds: 90,
+    description: 'Variação intermediária de alavanca posterior onde as coxas formam 90° com o tronco e as costas se mantêm planas na linha horizontal viradas para o solo.',
+    breathingTip: 'Respire continuamente com o abdômen e glúteos contraídos, sustentando a pressão nos ombros.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Pare se houver dor aguda.',
+      'Aqueça a extensão de ombro e o tendão do bíceps distal antes da execução.'
+    ],
+    padrao: 'skills',
+    equipamento: [
+      'barra'
+    ],
+    tipoExercicio: 'skill',
+    estatico: true,
+    cadencia: 'isometria',
+    regressoes: [
+      'tuck-back-lever'
+    ],
+    progressoes: [
+      'back-lever-uma-perna'
+    ],
+    variacoes: [
+      'tuck-back-lever'
+    ],
+    adaptacoes: {
+      ombro: [
+        'tuck-back-lever'
+      ],
+      semEquipamento: [
+        'superman'
+      ]
+    },
+    criterioAvanco: 'Sustentar 4 séries de 12 segundos com alinhamento horizontal das costas e coxas a 90°',
+    sinonimos: [
+      'advanced tuck back lever',
+      'back lever tuck avançado',
+      'adv tuck back lever'
+    ],
+    animationType: 'frontlever',
+    executionSteps: [
+      {
+        step: 1,
+        title: 'Descida a Partir do Skin the Cat',
+        description: 'Passe as pernas pela barra até a posição invertida virada para baixo.'
+      },
+      {
+        step: 2,
+        title: 'Abertura das Coxas a 90°',
+        description: 'Afaste os joelhos do peito até as coxas ficarem a 90° do tronco e as costas planas.'
+      },
+      {
+        step: 3,
+        title: 'Sustentação na Horizontal',
+        description: 'Empurre a barra para trás sustentando o corpo paralelo ao solo com braços retos.'
+      }
+    ],
+    commonMistakes: [
+      {
+        mistake: 'Deixar o quadril subir acima da linha dos ombros',
+        correction: 'Mantenha os quadris e ombros na mesma altura horizontal.'
+      },
+      {
+        mistake: 'Flexionar os cotovelos',
+        correction: 'Mantenha os braços completamente estendidos com os cotovelos travados.'
+      }
+    ]
+  },
+  {
+    id: 'back-lever-uma-perna',
+    name: 'Back Lever com Uma Perna Estendida',
+    category: 'Skill',
+    difficulty: 'Avançado',
+    type: 'isometric',
+    primaryMuscles: [
+      'lombar',
+      'gluteos',
+      'ombros'
+    ],
+    secondaryMuscles: [
+      'peito',
+      'biceps',
+      'costas',
+      'abdomen'
+    ],
+    defaultSets: 4,
+    defaultHoldSeconds: 8,
+    defaultRestSeconds: 90,
+    description: 'Variação de back lever em que uma perna é totalmente estendida para trás e a outra se mantém dobrada, aumentando gradualmente a alavanca em direção ao full.',
+    breathingTip: 'Mantenha respiração constante sustentando a extensão do quadril com glúteos contraídos.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Pare se houver dor aguda.',
+      'Não solte os ombros bruscamente no final da série.'
+    ],
+    padrao: 'skills',
+    equipamento: [
+      'barra'
+    ],
+    tipoExercicio: 'skill',
+    estatico: true,
+    cadencia: 'isometria',
+    regressoes: [
+      'adv-tuck-back-lever'
+    ],
+    progressoes: [
+      'back-lever'
+    ],
+    variacoes: [
+      'adv-tuck-back-lever'
+    ],
+    adaptacoes: {
+      ombro: [
+        'adv-tuck-back-lever'
+      ],
+      semEquipamento: [
+        'superman'
+      ]
+    },
+    criterioAvanco: 'Manter 4 séries de 10 segundos cada lado com tronco e perna estendida perfeitamente alinhados',
+    sinonimos: [
+      'one leg back lever',
+      'single leg back lever',
+      'back lever uma perna'
+    ],
+    animationType: 'frontlever',
+    executionSteps: [
+      {
+        step: 1,
+        title: 'Posicionamento Inicial',
+        description: 'Entre em advanced tuck back lever com o corpo alinhado na horizontal.'
+      },
+      {
+        step: 2,
+        title: 'Extensão de Uma Perna',
+        description: 'Estenda uma perna para trás mantendo os glúteos e quadríceps contraídos e a outra perna dobrada.'
+      },
+      {
+        step: 3,
+        title: 'Sustentação Isométrica',
+        description: 'Sustente o corpo imóvel paralelo ao solo e alterne a perna nas séries seguintes.'
+      }
+    ],
+    commonMistakes: [
+      {
+        mistake: 'Arquear excessivamente a lombar',
+        correction: 'Contraia o abdômen e estenda a perna a partir do glúteo sem hiperextensão da coluna.'
+      },
+      {
+        mistake: 'Girar o quadril para o lado',
+        correction: 'Mantenha os quadris paralelos ao chão.'
+      }
+    ]
+  },
+  {
+    id: 'skin-the-cat',
+    name: 'Skin the Cat (Passagem de Ombros na Barra)',
+    category: 'Skill',
+    difficulty: 'Intermediário',
+    type: 'reps',
+    primaryMuscles: [
+      'ombros',
+      'costas'
+    ],
+    secondaryMuscles: [
+      'biceps',
+      'abdomen',
+      'peito',
+      'antebraco'
+    ],
+    defaultSets: 3,
+    defaultReps: 5,
+    defaultRestSeconds: 75,
+    description: 'Movimento ginástico dinâmico fundamental onde o corpo gira 360° através dos braços na barra ou argolas até a posição de suspensão invertida em extensão profunda de ombro.',
+    breathingTip: 'Inspire ao puxar os joelhos para a rotação; expire ao descer na extensão máxima de ombro.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Pare se houver dor aguda.',
+      'Desça apenas até a amplitude de ombro confortável e controlável para retornar com força própria.'
+    ],
+    padrao: 'skills',
+    equipamento: [
+      'barra'
+    ],
+    tipoExercicio: 'skill',
+    estatico: false,
+    cadencia: '3-1-3',
+    regressoes: [
+      'dead-hang',
+      'elevacao-joelhos-barra'
+    ],
+    progressoes: [
+      'tuck-back-lever'
+    ],
+    variacoes: [
+      'tuck-back-lever'
+    ],
+    adaptacoes: {
+      ombro: [
+        'dead-hang'
+      ],
+      semEquipamento: [
+        'alongamento-rotacao-coluna'
+      ]
+    },
+    criterioAvanco: 'Executar 3 séries de 6 repetições controladas do início ao fim sem tocar os pés no chão',
+    sinonimos: [
+      'skin the cat',
+      'passagem de ombros barra',
+      'german hang rotation'
+    ],
+    animationType: 'pullup',
+    executionSteps: [
+      {
+        step: 1,
+        title: 'Puxada em Inversão',
+        description: 'Pendurado na barra, puxe os joelhos ao peito e passe as pernas entre os braços em rotação contínua.'
+      },
+      {
+        step: 2,
+        title: 'Descida em German Hang',
+        description: 'Desça o quadril e pernas para trás com os braços esticados sentindo o alongamento dos ombros e peitorais.'
+      },
+      {
+        step: 3,
+        title: 'Tração de Retorno',
+        description: 'Puxe o corpo de volta com a força das dorsais e abdômen até a posição inicial de dead hang.'
+      }
+    ],
+    commonMistakes: [
+      {
+        mistake: 'Soltar a pegada ou despencar na descida do German Hang',
+        correction: 'Mantenha a musculatura escapular e o abdômen ativos controlando cada centímetro da descida.'
+      },
+      {
+        mistake: 'Fazer o movimento com impulsos ou trancos bruscos',
+        correction: 'Execute o giro com suavidade e velocidade lenta e constante.'
+      }
+    ]
+  },
+  {
+    id: 'bandeira-humana-straddle',
+    name: 'Bandeira Humana Straddle',
+    category: 'Skill',
+    difficulty: 'Avançado',
+    type: 'isometric',
+    primaryMuscles: [
+      'ombros',
+      'abdomen',
+      'costas'
+    ],
+    secondaryMuscles: [
+      'triceps',
+      'biceps',
+      'gluteos'
+    ],
+    defaultSets: 4,
+    defaultHoldSeconds: 5,
+    defaultRestSeconds: 90,
+    description: 'Variação de bandeira humana em barra vertical ou poste onde as pernas se abrem em straddle (afastadas), reduzindo o braço de alavanca e facilitando a sustentação horizontal.',
+    breathingTip: 'Expulse o ar ao subir na horizontal; mantenha respirações superficiais sob tensão muscular extrema.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Pare se houver dor aguda.',
+      'Alterne os lados para evitar desequilíbrios de força e sobrecarga assimétrica na coluna.'
+    ],
+    padrao: 'skills',
+    equipamento: [
+      'barra'
+    ],
+    tipoExercicio: 'skill',
+    estatico: true,
+    cadencia: 'isometria',
+    regressoes: [
+      'bandeira-humana-tuck'
+    ],
+    progressoes: [
+      'bandeira-humana'
+    ],
+    variacoes: [
+      'bandeira-humana-tuck'
+    ],
+    adaptacoes: {
+      ombro: [
+        'bandeira-humana-tuck'
+      ],
+      semEquipamento: [
+        'prancha-lateral'
+      ]
+    },
+    criterioAvanco: 'Sustentar 4 séries de 6 segundos cada lado perfeitamente na linha horizontal',
+    sinonimos: [
+      'straddle human flag',
+      'bandeira humana pernas abertas',
+      'human flag straddle'
+    ],
+    animationType: 'frontlever',
+    executionSteps: [
+      {
+        step: 1,
+        title: 'Pegada no Poste ou Barra Vertical',
+        description: 'Braço inferior estendido empurrando o suporte e braço superior fletido puxando com pegada firme.'
+      },
+      {
+        step: 2,
+        title: 'Elevação com Pernas Afastadas',
+        description: 'Eleve o corpo abrindo as pernas o máximo possível em straddle para encurtar a alavanca lateral.'
+      },
+      {
+        step: 3,
+        title: 'Sustentação na Linha Horizontal',
+        description: 'Trave os oblíquos e o grande dorsal mantendo o corpo perpendicular ao poste.'
+      }
+    ],
+    commonMistakes: [
+      {
+        mistake: 'Deixar o quadril ceder para baixo perdendo o alinhamento',
+        correction: 'Empurre com máxima força o braço de baixo e contraia o oblíquo superior.'
+      },
+      {
+        mistake: 'Girar o peito para cima virado para o céu',
+        correction: 'Mantenha o peito virado para a frente em plano estritamente frontal.'
+      }
+    ]
+  },
+  {
+    id: 'chute-parada-maos',
+    name: 'Chute para Parada de Mãos (Kick-up)',
+    category: 'Skill',
+    difficulty: 'Intermediário',
+    type: 'reps',
+    primaryMuscles: [
+      'ombros',
+      'abdomen'
+    ],
+    secondaryMuscles: [
+      'triceps',
+      'antebraco',
+      'gluteos'
+    ],
+    defaultSets: 4,
+    defaultReps: 6,
+    defaultRestSeconds: 60,
+    description: 'Treino de entrada dinâmica e controle de subida para o handstand contra a parede ou no solo livre, desenvolvendo a dosagem precisa de força da perna de impulso e tração dos dedos.',
+    breathingTip: 'Inspire na preparação do passo; expire no momento do chute mantendo o core compacto.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Pare se houver dor aguda.',
+      'Pratique inicialmente com uma parede de segurança atrás para evitar quedas descontroladas.'
+    ],
+    padrao: 'skills',
+    equipamento: [
+      'parede'
+    ],
+    tipoExercicio: 'skill',
+    estatico: false,
+    cadencia: '1-1-1',
+    regressoes: [
+      'prancha-peito-parede'
+    ],
+    progressoes: [
+      'handstand',
+      'handstand-livre'
+    ],
+    variacoes: [
+      'prancha-peito-parede'
+    ],
+    adaptacoes: {
+      punho: [
+        'prancha-peito-parede'
+      ],
+      semEquipamento: [
+        'chute-parada-maos'
+      ]
+    },
+    criterioAvanco: 'Completar 3 séries de 6 entradas suaves controlando o pouso contra a parede sem impacto ruidoso',
+    sinonimos: [
+      'handstand kick up',
+      'entrada de parada de mãos',
+      'chute para pino'
+    ],
+    animationType: 'handstand',
+    executionSteps: [
+      {
+        step: 1,
+        title: 'Posição de Saída em Afundo',
+        description: 'Fique em pé de frente para a parede, dê um passo à frente apoiando as mãos no solo a ~20 cm da parede.'
+      },
+      {
+        step: 2,
+        title: 'Chute e Elevação da Perna Guia',
+        description: 'Chute a perna de trás com força controlada e empurre o chão com a perna de base elevando os quadris.'
+      },
+      {
+        step: 3,
+        title: 'Pouso Suave dos Calcanhares',
+        description: 'Encoste os calcanhares suavemente na parede com braços travados e ombros ativos em elevação.'
+      }
+    ],
+    commonMistakes: [
+      {
+        mistake: 'Chutar com força excessiva batendo os pés ruidosamente na parede',
+        correction: 'Dose a força do chute para subir com fluidez apenas até a verticalidade.'
+      },
+      {
+        mistake: 'Dobrar os cotovelos ao tocar as mãos no chão',
+        correction: 'Trave os cotovelos antes de chutar mantendo os braços como pilares rígidos.'
+      }
     ]
   }
 ];

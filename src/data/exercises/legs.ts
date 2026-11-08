@@ -488,7 +488,7 @@ export const LEGS_EXERCISES: Exercise[] = [
     estatico: false,
     cadencia: '2-1-2',
     regressoes: ['squat'],
-    progressoes: ['panturrilha-unilateral'],
+    progressoes: ['panturrilha-unilateral', 'panturrilha-degrau-pausa', 'saltos-pogo'],
     variacoes: ['panturrilha-unilateral'],
     adaptacoes: {
       tornozelo: ['panturrilha-dupla']
@@ -697,6 +697,751 @@ export const LEGS_EXERCISES: Exercise[] = [
     commonMistakes: [
       { mistake: 'Bater o joelho traseiro no chão ou empurrar com os dedos do pé traseiro', correction: 'Toque como uma pena usando uma almofada acolchoada.' }
     ]
+  },
+  {
+    id: 'ponte-gluteo-pes-elevados',
+    name: 'Ponte de Glúteo com Pés Elevados',
+    category: 'Legs',
+    difficulty: 'Intermediário',
+    type: 'reps',
+    primaryMuscles: [
+      'gluteos'
+    ],
+    secondaryMuscles: [
+      'posteriores',
+      'lombar',
+      'abdomen'
+    ],
+    defaultSets: 3,
+    defaultReps: 12,
+    defaultRestSeconds: 60,
+    description: 'Ponte de glúteos realizada com os calcanhares apoiados em um banco ou cadeira, aumentando a amplitude articular e o recrutamento dos isquiotibiais e glúteos.',
+    breathingTip: 'Inspire ao descer; expire contraindo os glúteos com força máxima no topo.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Pare se houver dor aguda.',
+      'Não hiperestenda a lombar no topo; empurre com a força dos quadris e glúteos.'
+    ],
+    padrao: 'costas-baixa',
+    equipamento: [
+      'banco'
+    ],
+    tipoExercicio: 'principal',
+    estatico: false,
+    cadencia: '2-1-2',
+    regressoes: [
+      'ponte-gluteo'
+    ],
+    progressoes: [
+      'ponte-gluteo-unilateral',
+      'hip-thrust-banco'
+    ],
+    variacoes: [
+      'ponte-gluteo'
+    ],
+    adaptacoes: {
+      lombar: [
+        'ponte-gluteo'
+      ],
+      semEquipamento: [
+        'ponte-gluteo'
+      ]
+    },
+    criterioAvanco: 'Executar 3 séries de 15 repetições com pausa de 2 segundos no topo em alinhamento perfeito',
+    sinonimos: [
+      'elevated glute bridge',
+      'ponte de glúteo elevada',
+      'ponte com pés no banco'
+    ],
+    animationType: 'squat',
+    executionSteps: [
+      {
+        step: 1,
+        title: 'Decúbito Dorsal com Apoio nos Calcanhares',
+        description: 'Deite de costas no chão e apoie os calcanhares na borda de um banco com joelhos a ~90°.'
+      },
+      {
+        step: 2,
+        title: 'Elevação Pélvica',
+        description: 'Empurre os calcanhares contra o banco elevando o quadril até formar uma linha reta entre ombros e joelhos.'
+      },
+      {
+        step: 3,
+        title: 'Contração de Pico e Descida',
+        description: 'Aperte os glúteos por 1 segundo no topo e desça controladamente até quase encostar no solo.'
+      }
+    ],
+    commonMistakes: [
+      {
+        mistake: 'Arquear excessivamente a lombar no topo',
+        correction: 'Trave o abdômen e foque a contração estritamente nos glúteos e posteriores.'
+      },
+      {
+        mistake: 'Empurrar com a ponta dos pés em vez dos calcanhares',
+        correction: 'Mantenha os tornozelos flexionados e pressione a força pela base dos calcanhares.'
+      }
+    ]
+  },
+  {
+    id: 'hip-thrust-unilateral-banco',
+    name: 'Hip Thrust Unilateral Apoiado no Banco',
+    category: 'Legs',
+    difficulty: 'Intermediário',
+    type: 'reps',
+    primaryMuscles: [
+      'gluteos'
+    ],
+    secondaryMuscles: [
+      'posteriores',
+      'quadriceps',
+      'lombar'
+    ],
+    defaultSets: 3,
+    defaultReps: 10,
+    defaultRestSeconds: 60,
+    description: 'Extensão de quadril unilateral com a parte superior das costas apoiada em um banco, desafiando a estabilidade anti-rotacional da pelve e sobrecarregando o glúteo de apoio.',
+    breathingTip: 'Inspire na descida; expire estendendo o quadril e apertando o glúteo no topo.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Pare se houver dor aguda.',
+      'Mantenha o queixo apontando para o peito para proteger a coluna cervical.'
+    ],
+    padrao: 'costas-baixa',
+    equipamento: [
+      'banco'
+    ],
+    tipoExercicio: 'principal',
+    estatico: false,
+    cadencia: '2-1-2',
+    regressoes: [
+      'hip-thrust-banco',
+      'ponte-gluteo-unilateral'
+    ],
+    progressoes: [],
+    variacoes: [
+      'hip-thrust-banco'
+    ],
+    adaptacoes: {
+      lombar: [
+        'ponte-gluteo-unilateral'
+      ],
+      semEquipamento: [
+        'ponte-gluteo-unilateral'
+      ]
+    },
+    criterioAvanco: 'Completar 3 séries de 12 repetições cada perna com alinhamento horizontal impecável',
+    sinonimos: [
+      'single leg hip thrust',
+      'hip thrust uma perna',
+      'elevação pélvica unilateral banco'
+    ],
+    animationType: 'squat',
+    executionSteps: [
+      {
+        step: 1,
+        title: 'Apoio das Escápulas no Banco',
+        description: 'Apoie a linha média das costas no banco, firme um pé no chão e erga a outra perna dobrada.'
+      },
+      {
+        step: 2,
+        title: 'Empuxo com Calcanhar',
+        description: 'Pressione o chão pelo calcanhar de apoio elevando o quadril até a linha horizontal com o solo.'
+      },
+      {
+        step: 3,
+        title: 'Pico Isométrico e Descida',
+        description: 'Aperte o glúteo no topo por 1 segundo e desça flexionando o quadril com controle.'
+      }
+    ],
+    commonMistakes: [
+      {
+        mistake: 'Deixar o quadril da perna suspensa cair para o lado',
+        correction: 'Mantenha os dois lados da bacia nivelados durante todo o movimento.'
+      },
+      {
+        mistake: 'Jogar a cabeça para trás hiperestendendo o pescoço',
+        correction: 'Mantenha o olhar fixo para a frente e o queixo recolhido.'
+      }
+    ]
+  },
+  {
+    id: 'slider-leg-curl',
+    name: 'Slider Leg Curl (Flexão Deslizando com Toalha)',
+    category: 'Legs',
+    difficulty: 'Intermediário',
+    type: 'reps',
+    primaryMuscles: [
+      'posteriores'
+    ],
+    secondaryMuscles: [
+      'gluteos',
+      'lombar',
+      'panturrilhas'
+    ],
+    defaultSets: 3,
+    defaultReps: 8,
+    defaultRestSeconds: 60,
+    description: 'Exercício de cadeia posterior em solo onde os calcanhares deslizam sobre uma toalha em piso liso a partir da ponte de glúteo, trabalhando flexão de joelho concêntrica e excêntrica.',
+    breathingTip: 'Inspire ao deslizar as pernas para a frente estendendo os joelhos; expire puxando os calcanhares de volta.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Pare se houver dor aguda.',
+      'Se sentir cãibra nos isquiotibiais, reduza a amplitude do deslizamento.'
+    ],
+    padrao: 'costas-baixa',
+    equipamento: [
+      'toalha'
+    ],
+    tipoExercicio: 'principal',
+    estatico: false,
+    cadencia: '2-1-2',
+    regressoes: [
+      'ponte-gluteo',
+      'ponte-gluteo-pes-elevados'
+    ],
+    progressoes: [
+      'nordic-curl-negativa'
+    ],
+    variacoes: [
+      'nordic-curl-negativa'
+    ],
+    adaptacoes: {
+      joelho: [
+        'ponte-gluteo'
+      ],
+      semEquipamento: [
+        'slider-leg-curl'
+      ]
+    },
+    criterioAvanco: 'Executar 3 séries de 10 repetições mantendo o quadril elevado durante toda a extensão e flexão',
+    sinonimos: [
+      'towel hamstring curl',
+      'slider leg curl',
+      'flexão de pernas com toalha'
+    ],
+    animationType: 'squat',
+    executionSteps: [
+      {
+        step: 1,
+        title: 'Ponte Inicial com Toalha',
+        description: 'Deite de costas com os calcanhares apoiados sobre uma toalha em piso liso e eleve o quadril em ponte.'
+      },
+      {
+        step: 2,
+        title: 'Deslizamento Excêntrico',
+        description: 'Deslize os calcanhares para a frente estendendo os joelhos enquanto sustenta os quadris do solo.'
+      },
+      {
+        step: 3,
+        title: 'Puxada Concêntrica dos Calcanhares',
+        description: 'Flexione os joelhos puxando os calcanhares com força de isquiotibiais de volta aos glúteos.'
+      }
+    ],
+    commonMistakes: [
+      {
+        mistake: 'Deixar a bunda bater no chão enquanto estende as pernas',
+        correction: 'Mantenha os glúteos ativamente contraídos sustentando o quadril no ar.'
+      },
+      {
+        mistake: 'Puxar com as costas e arquear a lombar',
+        correction: 'Foque a força na dobra dos joelhos através dos músculos posteriores da coxa.'
+      }
+    ]
+  },
+  {
+    id: 'stiff-unilateral-peso-corpo',
+    name: 'Stiff Unilateral com Peso Corporal (Single-Leg RDL)',
+    category: 'Legs',
+    difficulty: 'Intermediário',
+    type: 'reps',
+    primaryMuscles: [
+      'posteriores',
+      'gluteos'
+    ],
+    secondaryMuscles: [
+      'lombar',
+      'panturrilhas',
+      'abdomen'
+    ],
+    defaultSets: 3,
+    defaultReps: 10,
+    defaultRestSeconds: 60,
+    description: 'Dobradiça de quadril unilateral em pé que desenvolve equilíbrio, força excêntrica dos isquiotibiais e estabilidade pélvica sem nenhuma sobrecarga externa.',
+    breathingTip: 'Inspire ao projetar o tronco para a frente e a perna para trás; expire retornando à postura ereta.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Pare se houver dor aguda.',
+      'Mantenha a coluna neutra e uma leve flexão destravada no joelho de apoio.'
+    ],
+    padrao: 'costas-baixa',
+    equipamento: [
+      'nenhum'
+    ],
+    tipoExercicio: 'principal',
+    estatico: false,
+    cadencia: '2-1-2',
+    regressoes: [
+      'good-morning-peso-corpo',
+      'ponte-gluteo'
+    ],
+    progressoes: [],
+    variacoes: [
+      'good-morning-peso-corpo'
+    ],
+    adaptacoes: {
+      lombar: [
+        'good-morning-peso-corpo'
+      ],
+      semEquipamento: [
+        'stiff-unilateral-peso-corpo'
+      ]
+    },
+    criterioAvanco: '3 séries de 12 repetições cada perna com tronco paralelo ao solo e quadril sem rotação',
+    sinonimos: [
+      'single leg rdl',
+      'stiff unilateral',
+      'peso morto romeno uma perna'
+    ],
+    animationType: 'squat',
+    executionSteps: [
+      {
+        step: 1,
+        title: 'Equilíbrio Unipodal',
+        description: 'Fique em pé em uma perna com o joelho ligeiramente destravado e braços soltos à frente.'
+      },
+      {
+        step: 2,
+        title: 'Dobradiça de Quadril',
+        description: 'Flexione o quadril inclinando o tronco para a frente enquanto estende a perna livre reta para trás.'
+      },
+      {
+        step: 3,
+        title: 'Retorno por Extensão de Glúteo',
+        description: 'Empurre o solo com o pé de apoio voltando à posição ereta apertando o glúteo.'
+      }
+    ],
+    commonMistakes: [
+      {
+        mistake: 'Girar a bacia para fora abrindo a perna suspensa',
+        correction: 'Mantenha os dois ossos do quadril apontados rigorosamente para o chão.'
+      },
+      {
+        mistake: 'Curvar a coluna lombar para tentar tocar o chão',
+        correction: 'Mantenha a coluna ereta e pare o movimento no limite da flexibilidade dos isquiotibiais.'
+      }
+    ]
+  },
+  {
+    id: 'extensao-quadril-quatro-apoios',
+    name: 'Extensão de Quadril em Quatro Apoios (Donkey Kick)',
+    category: 'Legs',
+    difficulty: 'Iniciante',
+    type: 'reps',
+    primaryMuscles: [
+      'gluteos'
+    ],
+    secondaryMuscles: [
+      'lombar',
+      'posteriores'
+    ],
+    defaultSets: 3,
+    defaultReps: 15,
+    defaultRestSeconds: 45,
+    description: 'Exercício acessível em solo para isolamento do glúteo máximo sem compressão axial na coluna vertebral, ideal para reabilitação, iniciantes e hipertrofia com peso corporal.',
+    breathingTip: 'Expire ao elevar a sola do pé em direção ao teto; inspire retornando ao alinhamento inicial.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Pare se houver dor aguda.',
+      'Não hiperestenda a coluna lombar ao elevar a coxa.'
+    ],
+    padrao: 'costas-baixa',
+    equipamento: [
+      'nenhum'
+    ],
+    tipoExercicio: 'principal',
+    estatico: false,
+    cadencia: '2-1-2',
+    regressoes: [],
+    progressoes: [
+      'ponte-gluteo'
+    ],
+    variacoes: [
+      'ponte-gluteo'
+    ],
+    adaptacoes: {
+      punho: [
+        'extensao-quadril-quatro-apoios'
+      ],
+      joelho: [
+        'ponte-gluteo'
+      ],
+      semEquipamento: [
+        'extensao-quadril-quatro-apoios'
+      ]
+    },
+    criterioAvanco: 'Executar 3 séries de 18 repetições com pausa de 1 segundo no topo sem arquear a lombar',
+    sinonimos: [
+      'donkey kick',
+      'coice de glúteo',
+      'extensão de glúteo 4 apoios'
+    ],
+    animationType: 'squat',
+    executionSteps: [
+      {
+        step: 1,
+        title: 'Posição de Quatro Apoios',
+        description: 'Apoie as mãos sob os ombros e os joelhos sob o quadril mantendo a coluna em posição neutra.'
+      },
+      {
+        step: 2,
+        title: 'Elevação com Joelho em 90°',
+        description: 'Eleve uma das pernas mantendo o joelho dobrado em 90° até que a coxa fique paralela ao solo.'
+      },
+      {
+        step: 3,
+        title: 'Pico e Retorno',
+        description: 'Aperte o glúteo no topo e desça a perna com controle sem encostar o joelho no chão.'
+      }
+    ],
+    commonMistakes: [
+      {
+        mistake: 'Arquear a lombar para subir o pé mais alto',
+        correction: 'Mantenha o abdômen contraído e suba apenas até o limite de extensão do quadril.'
+      },
+      {
+        mistake: 'Transferir todo o peso para o lado oposto',
+        correction: 'Mantenha os dois ombros e os ossos da bacia alinhados paralelamente ao piso.'
+      }
+    ]
+  },
+  {
+    id: 'hidrante-quatro-apoios',
+    name: 'Hidrante (Fire Hydrant)',
+    category: 'Legs',
+    difficulty: 'Iniciante',
+    type: 'reps',
+    primaryMuscles: [
+      'gluteos'
+    ],
+    secondaryMuscles: [
+      'abdomen',
+      'lombar'
+    ],
+    defaultSets: 3,
+    defaultReps: 15,
+    defaultRestSeconds: 45,
+    description: 'Abdução de quadril em quatro apoios que isola o glúteo médio e mínimo, músculos vitais para estabilização pélvica no agachamento e prevenção do valgo dinâmico de joelho.',
+    breathingTip: 'Expire ao abduzir a perna para a lateral; inspire ao retornar ao centro.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Pare se houver dor aguda.',
+      'Não incline o tronco excessivamente para o lado oposto ao abrir a perna.'
+    ],
+    padrao: 'costas-baixa',
+    equipamento: [
+      'nenhum'
+    ],
+    tipoExercicio: 'principal',
+    estatico: false,
+    cadencia: '2-1-2',
+    regressoes: [],
+    progressoes: [
+      'extensao-quadril-quatro-apoios'
+    ],
+    variacoes: [
+      'extensao-quadril-quatro-apoios'
+    ],
+    adaptacoes: {
+      punho: [
+        'hidrante-quatro-apoios'
+      ],
+      joelho: [
+        'ponte-gluteo'
+      ],
+      semEquipamento: [
+        'hidrante-quatro-apoios'
+      ]
+    },
+    criterioAvanco: '3 séries de 16 repetições cada perna mantendo o tronco estável sem rotação torácica',
+    sinonimos: [
+      'fire hydrant',
+      'abdução 4 apoios',
+      'hidrante de glúteo'
+    ],
+    animationType: 'squat',
+    executionSteps: [
+      {
+        step: 1,
+        title: 'Quatro Apoios com Abdômen Firme',
+        description: 'Posicione mãos sob os ombros e joelhos sob o quadril com coluna alinhada.'
+      },
+      {
+        step: 2,
+        title: 'Abertura Lateral da Perna',
+        description: 'Abra o joelho para o lado mantendo-o dobrado em 90° até a altura do quadril sem girar o tronco.'
+      },
+      {
+        step: 3,
+        title: 'Contração de Pico e Descida',
+        description: 'Segure um instante no topo contraindo o glúteo médio e retorne suavemente.'
+      }
+    ],
+    commonMistakes: [
+      {
+        mistake: 'Girar os ombros e coluna para conseguir abrir mais a perna',
+        correction: 'Mantenha os braços com peso igual e mova apenas a articulação do quadril.'
+      },
+      {
+        mistake: 'Fazer o movimento rápido e descontrolado',
+        correction: 'Execute com cadência de 2 segundos para subir e 2 segundos para descer.'
+      }
+    ]
+  },
+  {
+    id: 'panturrilha-sentado-mochila',
+    name: 'Elevação de Panturrilha Sentado com Mochila',
+    category: 'Legs',
+    difficulty: 'Iniciante',
+    type: 'reps',
+    primaryMuscles: [
+      'panturrilhas'
+    ],
+    secondaryMuscles: [],
+    defaultSets: 3,
+    defaultReps: 15,
+    defaultRestSeconds: 45,
+    description: 'Elevação plantar realizada na posição sentada com joelhos a 90° e sobrecarga de uma mochila sobre as coxas, direcionando o estímulo ao músculo sóleo.',
+    breathingTip: 'Expire ao elevar os calcanhares na ponta dos pés; inspire na descida controlada.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Pare se houver dor aguda.',
+      'Desça os calcanhares sem impacto brusco na fáscia plantar.'
+    ],
+    padrao: 'agachamento-pernas',
+    equipamento: [
+      'cadeira'
+    ],
+    tipoExercicio: 'principal',
+    estatico: false,
+    cadencia: '2-1-2',
+    regressoes: [],
+    progressoes: [
+      'panturrilha-dupla'
+    ],
+    variacoes: [
+      'panturrilha-dupla'
+    ],
+    adaptacoes: {
+      tornozelo: [
+        'panturrilha-sentado-mochila'
+      ],
+      semEquipamento: [
+        'panturrilha-sentado-mochila'
+      ]
+    },
+    criterioAvanco: 'Executar 3 séries de 20 repetições com pausa de 1 segundo no topo com carga confortável',
+    sinonimos: [
+      'seated calf raise',
+      'panturrilha sentado',
+      'sóleo com carga'
+    ],
+    animationType: 'squat',
+    executionSteps: [
+      {
+        step: 1,
+        title: 'Posição Sentada com Carga',
+        description: 'Sente-se em uma cadeira firme com joelhos a 90° e apoie uma mochila com peso sobre os joelhos.'
+      },
+      {
+        step: 2,
+        title: 'Elevação Máxima dos Calcanhares',
+        description: 'Empurre o solo com a bola dos pés elevando os calcanhares ao ponto mais alto de flexão plantar.'
+      },
+      {
+        step: 3,
+        title: 'Descida Alongada',
+        description: 'Abaixe os calcanhares de forma lenta até encostar no chão sentindo o alongamento do sóleo.'
+      }
+    ],
+    commonMistakes: [
+      {
+        mistake: 'Quicar os calcanhares no chão usando a mola do tendão',
+        correction: 'Interrompa o movimento na descida e suba pela contração pura do músculo.'
+      },
+      {
+        mistake: 'Apoiar o peso muito para trás nas coxas',
+        correction: 'Posicione a mochila perto dos joelhos para criar a sobrecarga ideal sobre os calcanhares.'
+      }
+    ]
+  },
+  {
+    id: 'panturrilha-degrau-pausa',
+    name: 'Elevação de Panturrilha com Pausa de 3 s no Topo',
+    category: 'Legs',
+    difficulty: 'Intermediário',
+    type: 'reps',
+    primaryMuscles: [
+      'panturrilhas'
+    ],
+    secondaryMuscles: [],
+    defaultSets: 3,
+    defaultReps: 12,
+    defaultRestSeconds: 60,
+    description: 'Elevação bilateral em degrau com amplitude completa e pausa isométrica estrita de 3 segundos no pico de contração, dissipando a energia elástica do tendão de Aquiles.',
+    breathingTip: 'Inspire no alongamento profundo; expire ao subir; segure o ar na contração máxima de 3 s.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Pare se houver dor aguda.',
+      'Segure em uma parede ou corrimão para garantir o equilíbrio e não perder o foco.'
+    ],
+    padrao: 'agachamento-pernas',
+    equipamento: [
+      'nenhum'
+    ],
+    tipoExercicio: 'principal',
+    estatico: false,
+    cadencia: '2-3-2',
+    regressoes: [
+      'panturrilha-dupla'
+    ],
+    progressoes: [
+      'panturrilha-unilateral'
+    ],
+    variacoes: [
+      'panturrilha-dupla'
+    ],
+    adaptacoes: {
+      tornozelo: [
+        'panturrilha-dupla'
+      ],
+      semEquipamento: [
+        'panturrilha-degrau-pausa'
+      ]
+    },
+    criterioAvanco: 'Completar 3 séries de 15 repetições com pausa estrita de 3 segundos sem tremer os tornozelos',
+    sinonimos: [
+      'pause calf raise',
+      'panturrilha com pausa',
+      'elevação plantar isométrica'
+    ],
+    animationType: 'squat',
+    executionSteps: [
+      {
+        step: 1,
+        title: 'Apoio no Degrau',
+        description: 'Apoie a metade dianteira dos pés na borda de um degrau com os calcanhares suspensos no ar.'
+      },
+      {
+        step: 2,
+        title: 'Elevação Total e Pausa',
+        description: 'Suba até o topo máximo sobre as pontas dos dedos e segure imóvel por 3 segundos cronometrados.'
+      },
+      {
+        step: 3,
+        title: 'Descida Abaixo da Linha do Degrau',
+        description: 'Desça suavemente até os calcanhares ficarem abaixo do degrau alongando a panturrilha.'
+      }
+    ],
+    commonMistakes: [
+      {
+        mistake: 'Encurtar a pausa antes de completar 3 segundos',
+        correction: 'Conte 3 segundos inteiros mantendo os gastrocnêmios espremidos.'
+      },
+      {
+        mistake: 'Jogar os tornozelos para fora no topo',
+        correction: 'Mantenha a pressão principal sob a base do dedão e segundo dedo do pé.'
+      }
+    ]
+  },
+  {
+    id: 'saltos-pogo',
+    name: 'Saltos Pogo (Pogo Hops)',
+    category: 'Legs',
+    difficulty: 'Intermediário',
+    type: 'reps',
+    primaryMuscles: [
+      'panturrilhas'
+    ],
+    secondaryMuscles: [
+      'quadriceps'
+    ],
+    defaultSets: 3,
+    defaultReps: 20,
+    defaultRestSeconds: 60,
+    description: 'Pliometria rápida de tornozelos com joelhos quase retos, trabalhando a reatividade elástica do complexo gastrocnêmio-sóleo e a rigidez do tendão de Aquiles.',
+    breathingTip: 'Respire de maneira curta e constante no ritmo compassado dos saltos.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Pare se houver dor aguda.',
+      'Em caso de histórico de tendinopatia patelar ou de Aquiles, adapte para elevações sem impacto.'
+    ],
+    padrao: 'agachamento-pernas',
+    equipamento: [
+      'nenhum'
+    ],
+    tipoExercicio: 'principal',
+    estatico: false,
+    cadencia: 'explosiva',
+    regressoes: [
+      'panturrilha-dupla'
+    ],
+    progressoes: [],
+    variacoes: [
+      'agachamento-salto'
+    ],
+    adaptacoes: {
+      tornozelo: [
+        'panturrilha-dupla'
+      ],
+      joelho: [
+        'panturrilha-dupla'
+      ],
+      semEquipamento: [
+        'saltos-pogo'
+      ]
+    },
+    criterioAvanco: 'Executar 3 séries de 25 saltos rápidos e elásticos mantendo contato mínimo com o chão',
+    sinonimos: [
+      'pogo hops',
+      'saltos de tornozelo',
+      'salto mola calistenia'
+    ],
+    animationType: 'squat',
+    executionSteps: [
+      {
+        step: 1,
+        title: 'Postura Ereta com Joelhos Destravados',
+        description: 'Em pé com pés na largura do quadril e pernas quase estendidas sem travar os joelhos.'
+      },
+      {
+        step: 2,
+        title: 'Impulso pelos Tornozelos',
+        description: 'Salte repetidamente para cima usando quase exclusivamente a ação elástica dos tornozelos e panturrilhas.'
+      },
+      {
+        step: 3,
+        title: 'Contato Rápido no Solo',
+        description: 'Toque o solo apenas com a ponta dos pés e decole imediatamente como uma mola rígida.'
+      }
+    ],
+    commonMistakes: [
+      {
+        mistake: 'Dobrar excessivamente os joelhos transformando em agachamento',
+        correction: 'Mantenha os joelhos firmes e gere a força pela mola dos pés e tornozelos.'
+      },
+      {
+        mistake: 'Aterrissar com os calcanhares no chão',
+        correction: 'Mantenha os calcanhares sempre suspensos durante toda a série de saltos.'
+      }
+    ]
   }
 ];
-

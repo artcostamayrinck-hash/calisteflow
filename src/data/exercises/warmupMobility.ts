@@ -459,5 +459,481 @@ export const WARMUP_MOBILITY_EXERCISES: Exercise[] = [
     commonMistakes: [
       { mistake: 'Pular bruscamente da barra no final do exercício', correction: 'Desça com os pés tocando uma caixa ou o chão suavemente.' }
     ]
+  },
+  {
+    id: 'wall-angels',
+    name: 'Wall Angels (Anjo na Parede)',
+    category: 'Full Body',
+    difficulty: 'Iniciante',
+    type: 'reps',
+    primaryMuscles: [
+      'ombros',
+      'costas'
+    ],
+    secondaryMuscles: [],
+    defaultSets: 2,
+    defaultReps: 12,
+    defaultRestSeconds: 30,
+    description: 'Exercício corretivo e de mobilidade postural onde costas, cabeça, cotovelos e punhos deslizam contra a parede, ativando retratores escapulares e trapézio inferior.',
+    breathingTip: 'Inspire ao elevar os braços deslizando na parede; expire ao puxar os cotovelos para baixo.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Pare se houver dor aguda.',
+      'Mantenha a lombar encostada na parede sem hiperestender a coluna.'
+    ],
+    padrao: 'aquecimento',
+    equipamento: [
+      'parede'
+    ],
+    tipoExercicio: 'aquecimento',
+    estatico: false,
+    cadencia: '2-1-2',
+    regressoes: [],
+    progressoes: [
+      'elevacao-y-deitado'
+    ],
+    variacoes: [
+      'passagem-ombro-toalha'
+    ],
+    adaptacoes: {
+      ombro: [
+        'circulos-ombro'
+      ],
+      semEquipamento: [
+        'wall-angels'
+      ]
+    },
+    criterioAvanco: 'Completar 2 séries de 15 repetições mantendo contato dos punhos e cotovelos com a parede durante toda a amplitude',
+    sinonimos: [
+      'wall angels',
+      'anjo na parede',
+      'mobilidade escapular parede'
+    ],
+    animationType: 'pushup',
+    executionSteps: [
+      {
+        step: 1,
+        title: 'Apoio Total na Parede',
+        description: 'Encoste as costas, cabeça, cotovelos e dorso das mãos contra a parede com joelhos levemente flexionados.'
+      },
+      {
+        step: 2,
+        title: 'Deslizamento Ascendente',
+        description: 'Deslize os braços para cima em formato de V mantendo punhos e cotovelos colados à parede.'
+      },
+      {
+        step: 3,
+        title: 'Retorno com Depressão Escapular',
+        description: 'Puxe os cotovelos de volta em direção às costelas contraindo o meio das costas.'
+      }
+    ],
+    commonMistakes: [
+      {
+        mistake: 'Arquear a lombar e descolar a coluna da parede',
+        correction: 'Pressione o umbigo contra a parede para manter a coluna lombar totalmente neutra.'
+      },
+      {
+        mistake: 'Descolar os punhos e cotovelos da parede ao subir',
+        correction: 'Suba apenas até o ponto em que o contato com a parede seja preservado.'
+      }
+    ]
+  },
+  {
+    id: 'elevacao-y-deitado',
+    name: 'Elevação em Y Deitado (Prone Y Raise)',
+    category: 'Full Body',
+    difficulty: 'Iniciante',
+    type: 'reps',
+    primaryMuscles: [
+      'ombros',
+      'costas'
+    ],
+    secondaryMuscles: [],
+    defaultSets: 2,
+    defaultReps: 12,
+    defaultRestSeconds: 30,
+    description: 'Elevação dos braços em decúbito ventral formando a letra Y com polegares apontando para o teto, fortalecendo seletivamente o trapézio inferior e estabilizadores escapulares.',
+    breathingTip: 'Inspire no solo; expire ao elevar os braços apertando as escápulas.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Pare se houver dor aguda.',
+      'Mantenha a testa apoiada ou próxima ao solo sem forçar o pescoço.'
+    ],
+    padrao: 'aquecimento',
+    equipamento: [
+      'nenhum'
+    ],
+    tipoExercicio: 'aquecimento',
+    estatico: false,
+    cadencia: '2-1-2',
+    regressoes: [
+      'wall-angels'
+    ],
+    progressoes: [
+      'pikepushup'
+    ],
+    variacoes: [
+      'wall-angels'
+    ],
+    adaptacoes: {
+      ombro: [
+        'wall-angels'
+      ],
+      semEquipamento: [
+        'elevacao-y-deitado'
+      ]
+    },
+    criterioAvanco: 'Executar 2 séries de 15 repetições com pausa de 1 segundo no topo sem arquear a lombar',
+    sinonimos: [
+      'prone y raise',
+      'elevação y no solo',
+      'y raise calistenia'
+    ],
+    animationType: 'pushup',
+    executionSteps: [
+      {
+        step: 1,
+        title: 'Posição em Decúbito Ventral',
+        description: 'Deite de bruços com as pernas unidas e braços estendidos em diagonal a 45° formando a letra Y.'
+      },
+      {
+        step: 2,
+        title: 'Elevação com Polegares para Cima',
+        description: 'Com os polegares apontando para o teto, erga os braços do solo usando a musculatura superior das costas.'
+      },
+      {
+        step: 3,
+        title: 'Pausa e Retorno Suave',
+        description: 'Segure 1 segundo no topo contraindo as escápulas e desça sem impacto no piso.'
+      }
+    ],
+    commonMistakes: [
+      {
+        mistake: 'Hiperestender o pescoço olhando para a frente',
+        correction: 'Mantenha o olhar para o colchonete com a cervical neutra.'
+      },
+      {
+        mistake: 'Arquear a lombar para subir os braços',
+        correction: 'Trave os glúteos e abdômen; o movimento deve vir exclusivamente dos ombros e escápulas.'
+      }
+    ]
+  },
+  {
+    id: 'mobilidade-tornozelo-parede',
+    name: 'Mobilidade de Tornozelo (Joelho à Parede)',
+    category: 'Full Body',
+    difficulty: 'Iniciante',
+    type: 'reps',
+    primaryMuscles: [
+      'panturrilhas'
+    ],
+    secondaryMuscles: [],
+    defaultSets: 2,
+    defaultReps: 12,
+    defaultRestSeconds: 30,
+    description: 'Mobilização ativa em cadeia fechada para ganho de dorsiflexão do tornozelo, requisito chave para profundidade correta no agachamento e no pistol squat.',
+    breathingTip: 'Expire ao projetar o joelho para a frente; inspire ao retornar.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Pare se houver dor aguda.',
+      'Não permita que o calcanhar descole do chão durante o avanço do joelho.'
+    ],
+    padrao: 'aquecimento',
+    equipamento: [
+      'parede'
+    ],
+    tipoExercicio: 'aquecimento',
+    estatico: false,
+    cadencia: '2-1-2',
+    regressoes: [],
+    progressoes: [],
+    variacoes: [
+      'agachamento-profundo-assistido'
+    ],
+    adaptacoes: {
+      tornozelo: [
+        'alongamento-panturrilha'
+      ],
+      semEquipamento: [
+        'mobilidade-tornozelo-parede'
+      ]
+    },
+    criterioAvanco: 'Tocar o joelho na parede com o dedão a 10 cm de distância sem descolar o calcanhar',
+    sinonimos: [
+      'ankle mobility wall',
+      'joelho na parede',
+      'dorsiflexão de tornozelo'
+    ],
+    animationType: 'squat',
+    executionSteps: [
+      {
+        step: 1,
+        title: 'Posicionamento em Meio-Ajoelhado',
+        description: 'Fique em meio-ajoelhado de frente para a parede com o pé dianteiro a alguns centímetros da base.'
+      },
+      {
+        step: 2,
+        title: 'Projeção Anterior do Joelho',
+        description: 'Avance o joelho em linha reta sobre o segundo dedo do pé até encostar suavemente na parede.'
+      },
+      {
+        step: 3,
+        title: 'Sustentação do Calcanhar no Solo',
+        description: 'Retorne mantendo o calcanhar 100% colado ao solo durante toda a oscilação.'
+      }
+    ],
+    commonMistakes: [
+      {
+        mistake: 'Deixar o calcanhar descolar do chão ao avançar',
+        correction: 'Afaste menos o pé da parede até conseguir encostar mantendo o calcanhar apoiado.'
+      },
+      {
+        mistake: 'Desviar o joelho para dentro em valgo',
+        correction: 'Direcione o joelho ligeiramente para fora, sobre o 2º ou 3º dedo do pé.'
+      }
+    ]
+  },
+  {
+    id: 'balanco-pernas-dinamico',
+    name: 'Balanço de Pernas Frontal e Lateral (Leg Swings)',
+    category: 'Full Body',
+    difficulty: 'Iniciante',
+    type: 'reps',
+    primaryMuscles: [
+      'quadriceps',
+      'gluteos'
+    ],
+    secondaryMuscles: [
+      'posteriores'
+    ],
+    defaultSets: 2,
+    defaultReps: 15,
+    defaultRestSeconds: 30,
+    description: 'Aquecimento balístico dinâmico de membros inferiores que lubrifica a articulação do quadril e prepara isquiotibiais, adutores e flexores para esforços calistênicos.',
+    breathingTip: 'Respire de maneira ritmada acompanhando o balanço natural da perna.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Pare se houver dor aguda.',
+      'Inicie com amplitude reduzida e aumente gradualmente sem forçar o fim do curso.'
+    ],
+    padrao: 'aquecimento',
+    equipamento: [
+      'parede'
+    ],
+    tipoExercicio: 'aquecimento',
+    estatico: false,
+    cadencia: 'dinamica',
+    regressoes: [],
+    progressoes: [],
+    variacoes: [
+      'greatest-stretch'
+    ],
+    adaptacoes: {
+      quadril: [
+        'rotacao-quadril-9090'
+      ],
+      semEquipamento: [
+        'balanco-pernas-dinamico'
+      ]
+    },
+    criterioAvanco: 'Executar 2 séries de 15 oscilações fluidas de cada lado com tronco estável',
+    sinonimos: [
+      'leg swings',
+      'balanço de pernas',
+      'aquecimento dinâmico de pernas'
+    ],
+    animationType: 'squat',
+    executionSteps: [
+      {
+        step: 1,
+        title: 'Apoio em Parede ou Suporte',
+        description: 'Fique em pé ao lado de uma parede e apoie uma mão para manter o equilíbrio do tronco.'
+      },
+      {
+        step: 2,
+        title: 'Balanço Frontal (Frente e Trás)',
+        description: 'Balance uma perna para a frente e para trás com movimento pendular livre e joelho destravado.'
+      },
+      {
+        step: 3,
+        title: 'Balanço Lateral (Adutor e Abdutor)',
+        description: 'Vire-se de frente para a parede e balance a perna de um lado para o outro cruzando a linha média.'
+      }
+    ],
+    commonMistakes: [
+      {
+        mistake: 'Arquear a lombar bruscamente ao chutar para trás',
+        correction: 'Mantenha o abdômen firme e isole a oscilação na articulação do quadril.'
+      },
+      {
+        mistake: 'Tensionar excessivamente os músculos travando o balanço',
+        correction: 'Deixe a perna oscilar como um pêndulo relaxado impulsionado pelo quadril.'
+      }
+    ]
+  },
+  {
+    id: 'rotacao-externa-ombro-toalha',
+    name: 'Rotação Externa de Ombro com Toalha',
+    category: 'Full Body',
+    difficulty: 'Iniciante',
+    type: 'reps',
+    primaryMuscles: [
+      'ombros'
+    ],
+    secondaryMuscles: [
+      'costas'
+    ],
+    defaultSets: 2,
+    defaultReps: 12,
+    defaultRestSeconds: 30,
+    description: 'Ativação específica do manguito rotador (infraespinhal e redondo menor) com cotovelo apoiado contra uma toalha dobrada junto às costelas, prevenindo lesões de ombro.',
+    breathingTip: 'Inspire na posição inicial; expire na rotação externa afastando a mão para fora.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Pare se houver dor aguda.',
+      'Mantenha o cotovelo pressionado contra a toalha sem desgrudar da lateral do corpo.'
+    ],
+    padrao: 'aquecimento',
+    equipamento: [
+      'toalha'
+    ],
+    tipoExercicio: 'aquecimento',
+    estatico: false,
+    cadencia: '2-1-2',
+    regressoes: [],
+    progressoes: [],
+    variacoes: [
+      'passagem-ombro-toalha'
+    ],
+    adaptacoes: {
+      ombro: [
+        'circulos-ombro'
+      ],
+      semEquipamento: [
+        'rotacao-externa-ombro-toalha'
+      ]
+    },
+    criterioAvanco: 'Completar 2 séries de 15 repetições com controle e sem rotação compensatória do tronco',
+    sinonimos: [
+      'shoulder external rotation',
+      'rotação de manguito com toalha',
+      'manguito rotador toalha'
+    ],
+    animationType: 'pushup',
+    executionSteps: [
+      {
+        step: 1,
+        title: 'Posicionamento da Toalha',
+        description: 'Em pé, posicione uma toalha enrolada entre o cotovelo e a lateral das costelas, cotovelo a 90°.'
+      },
+      {
+        step: 2,
+        title: 'Rotação Externa do Antebraço',
+        description: 'Gire o antebraço para fora afastando a mão do abdômen sem deixar a toalha cair.'
+      },
+      {
+        step: 3,
+        title: 'Retorno com Tensão Contínua',
+        description: 'Retorne suavemente à frente do umbigo mantendo a escápula retraída.'
+      }
+    ],
+    commonMistakes: [
+      {
+        mistake: 'Girar o tronco para o lado para aumentar a amplitude aparente',
+        correction: 'Mantenha o peito voltado para a frente e gire estritamente o ombro.'
+      },
+      {
+        mistake: 'Deixar o cotovelo se afastar do corpo derrubando a toalha',
+        correction: 'Pressione levemente a toalha contra o tórax durante todo o arco de movimento.'
+      }
+    ]
+  },
+  {
+    id: 'aquecimento-cardio-leve',
+    name: 'Aquecimento Cardiovascular Leve (Polichinelo e Joelho Alto)',
+    category: 'Full Body',
+    difficulty: 'Iniciante',
+    type: 'reps',
+    primaryMuscles: [
+      'quadriceps',
+      'panturrilhas'
+    ],
+    secondaryMuscles: [
+      'gluteos',
+      'ombros'
+    ],
+    defaultSets: 2,
+    defaultReps: 30,
+    defaultRestSeconds: 30,
+    description: 'Sequência dinâmica de elevação da frequência cardíaca e aquecimento térmico geral combinando saltos leves de polichinelo com passadas de joelhos altos no lugar.',
+    breathingTip: 'Respire continuamente pelo nariz e boca em ritmo constante.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Pare se houver dor aguda.',
+      'Em caso de sobrepeso ou dores articulares nos joelhos, execute a versão sem impacto (passo lateral).'
+    ],
+    padrao: 'aquecimento',
+    equipamento: [
+      'nenhum'
+    ],
+    tipoExercicio: 'aquecimento',
+    estatico: false,
+    cadencia: 'dinamica',
+    regressoes: [],
+    progressoes: [],
+    variacoes: [
+      'greatest-stretch'
+    ],
+    adaptacoes: {
+      joelho: [
+        'balanco-pernas-dinamico'
+      ],
+      sobrepeso: [
+        'balanco-pernas-dinamico'
+      ],
+      semEquipamento: [
+        'aquecimento-cardio-leve'
+      ]
+    },
+    criterioAvanco: 'Completar 2 blocos de 45 segundos mantendo ritmo contínuo com aterrissagem elástica',
+    sinonimos: [
+      'jumping jacks high knees',
+      'cardio leve aquecimento',
+      'polichinelo e joelhos altos'
+    ],
+    animationType: 'squat',
+    executionSteps: [
+      {
+        step: 1,
+        title: 'Início com Polichinelos',
+        description: 'Inicie com 15 a 20 polichinelos leves abrindo braços e pernas de forma coordenada.'
+      },
+      {
+        step: 2,
+        title: 'Transição para Joelho Alto',
+        description: 'Emende com corrida estacionária elevando os joelhos alternadamente até a linha do quadril.'
+      },
+      {
+        step: 3,
+        title: 'Aterrissagem Macia',
+        description: 'Amorteça cada toque no solo com a ponta dos pés mantendo postura ereta.'
+      }
+    ],
+    commonMistakes: [
+      {
+        mistake: 'Bater os calcanhares no solo com força',
+        correction: 'Aterrisse de forma suave e silenciosa absorvendo o impacto nas pontas dos pés.'
+      },
+      {
+        mistake: 'Curvar o tronco para a frente ao levantar os joelhos',
+        correction: 'Mantenha o tórax aberto e a coluna alinhada.'
+      }
+    ]
   }
 ];

@@ -147,7 +147,7 @@ export const PUSH_VERTICAL_EXERCISES: Exercise[] = [
     estatico: true,
     cadencia: 'isometria',
     regressoes: ['pike-pushup-elevado'],
-    progressoes: ['handstand'],
+    progressoes: ['handstand', 'chute-parada-maos'],
     variacoes: ['handstand'],
     adaptacoes: {
       punho: ['prancha-peito-parede'],
@@ -553,7 +553,7 @@ export const PUSH_VERTICAL_EXERCISES: Exercise[] = [
     estatico: false,
     cadencia: '3-1-1',
     regressoes: ['dip-paralela-negativa', 'dip-banco-elevado'],
-    progressoes: ['dip-argolas', 'dip-com-carga'],
+    progressoes: ['dip-argolas', 'dip-com-carga', 'dip-com-pausa'],
     variacoes: ['dip-inclinado'],
     adaptacoes: {
       ombro: ['diamondpushup', 'flexao-fechada'],
@@ -690,6 +690,183 @@ export const PUSH_VERTICAL_EXERCISES: Exercise[] = [
     ],
     commonMistakes: [
       { mistake: 'Balançar as pernas para ganhar impulso', correction: 'Mantenha as pernas juntas e o peso imóvel como um pêndulo vertical.' }
+    ]
+  },
+  {
+    id: 'extensao-triceps-barra-baixa',
+    name: 'Extensão de Tríceps na Barra Baixa ou Mesa',
+    category: 'Push',
+    difficulty: 'Intermediário',
+    type: 'reps',
+    primaryMuscles: [
+      'triceps'
+    ],
+    secondaryMuscles: [
+      'ombros',
+      'peito',
+      'abdomen'
+    ],
+    defaultSets: 3,
+    defaultReps: 10,
+    defaultRestSeconds: 60,
+    description: 'Variação calistênica de isolamento para tríceps (bodyweight skull crusher) onde a cabeça se projeta por baixo de uma barra baixa ou mesa com flexão pura dos cotovelos.',
+    breathingTip: 'Inspire ao flexionar os cotovelos levando a testa em direção à barra; expire ao estender os braços.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Pare se houver dor aguda.',
+      'Mantenha os cotovelos paralelos para evitar pinçamento articular.'
+    ],
+    padrao: 'empurrar-vertical',
+    equipamento: [
+      'barra'
+    ],
+    tipoExercicio: 'principal',
+    estatico: false,
+    cadencia: '2-1-2',
+    regressoes: [
+      'flexao-inclinada',
+      'pushup'
+    ],
+    progressoes: [
+      'diamondpushup',
+      'dip'
+    ],
+    variacoes: [
+      'diamondpushup'
+    ],
+    adaptacoes: {
+      cotovelo: [
+        'flexao-inclinada'
+      ],
+      punho: [
+        'extensao-triceps-barra-baixa'
+      ],
+      semEquipamento: [
+        'flexao-fechada'
+      ]
+    },
+    criterioAvanco: '3 séries de 12 repetições com corpo reto e amplitude máxima de extensão',
+    sinonimos: [
+      'bodyweight tricep extension',
+      'tríceps testa calistênico',
+      'skull crusher barra baixa'
+    ],
+    animationType: 'pushup',
+    executionSteps: [
+      {
+        step: 1,
+        title: 'Pegada na Barra Baixa',
+        description: 'Segure a barra com pegada pronada na largura dos ombros, inclinando o corpo em prancha diagonal.'
+      },
+      {
+        step: 2,
+        title: 'Flexão dos Cotovelos',
+        description: 'Dobre apenas os cotovelos projetando a cabeça por baixo da barra, mantendo o quadril alinhado.'
+      },
+      {
+        step: 3,
+        title: 'Extensão e Contração',
+        description: 'Empurre a barra estendendo os cotovelos e contraindo o tríceps no pico da subida.'
+      }
+    ],
+    commonMistakes: [
+      {
+        mistake: 'Abrir os cotovelos para as laterais',
+        correction: 'Mantenha os cotovelos apontando estritamente para a frente durante todo o arco.'
+      },
+      {
+        mistake: 'Mover o quadril em vez de dobrar os cotovelos',
+        correction: 'Trave a pelve em prancha estática e mova apenas a articulação do cotovelo.'
+      }
+    ]
+  },
+  {
+    id: 'dip-com-pausa',
+    name: 'Mergulho em Paralelas com Pausa no Fundo',
+    category: 'Push',
+    difficulty: 'Avançado',
+    type: 'reps',
+    primaryMuscles: [
+      'triceps',
+      'peito'
+    ],
+    secondaryMuscles: [
+      'ombros',
+      'abdomen'
+    ],
+    defaultSets: 3,
+    defaultReps: 6,
+    defaultRestSeconds: 90,
+    description: 'Mergulho estrito com pausa isométrica de 2 a 3 segundos no ponto de maior profundidade articular, anulando o reflexo miotático e desenvolvendo força pura de saída.',
+    breathingTip: 'Inspire na descida; congele a respiração com abdômen rígido durante a pausa; expire forte ao subir.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Pare se houver dor aguda.',
+      'Não ultrapasse a profundidade confortável caso sinta desconforto no deltoide anterior.'
+    ],
+    padrao: 'mergulhos',
+    equipamento: [
+      'paralelas'
+    ],
+    tipoExercicio: 'principal',
+    estatico: false,
+    cadencia: '2-2-1',
+    regressoes: [
+      'dip'
+    ],
+    progressoes: [
+      'dip-com-carga',
+      'dip-argolas'
+    ],
+    variacoes: [
+      'dip'
+    ],
+    adaptacoes: {
+      ombro: [
+        'dip-banco-elevado'
+      ],
+      punho: [
+        'dip-banco-chao'
+      ],
+      semEquipamento: [
+        'dip-banco-chao'
+      ]
+    },
+    criterioAvanco: 'Executar 3 séries de 8 repetições com pausa sólida de 2 segundos a 90° de cotovelo sem oscilação',
+    sinonimos: [
+      'pause dips',
+      'mergulho com pausa',
+      'isometric pause dip'
+    ],
+    animationType: 'dip',
+    executionSteps: [
+      {
+        step: 1,
+        title: 'Descida Controlada',
+        description: 'Inicie no topo das barras paralelas e desça suavemente até os ombros atingirem o nível dos cotovelos.'
+      },
+      {
+        step: 2,
+        title: 'Pausa Isométrica no Fundo',
+        description: 'Congele imóvel por 2 a 3 segundos mantendo peito aberto e escápulas deprimidas.'
+      },
+      {
+        step: 3,
+        title: 'Subida Explosiva e Bloqueio',
+        description: 'Empurre com força máxima estendendo os braços de volta ao topo sem embalo.'
+      }
+    ],
+    commonMistakes: [
+      {
+        mistake: 'Relaxar a musculatura escapular no fundo deixando os ombros subirem nas orelhas',
+        correction: 'Mantenha ativa a depressão escapular durante toda a pausa isométrica.'
+      },
+      {
+        mistake: 'Balançar as pernas para iniciar a subida',
+        correction: 'Mantenha as pernas juntas e o core firme eliminando qualquer kipping.'
+      }
     ]
   }
 ];

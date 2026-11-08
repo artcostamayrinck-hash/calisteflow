@@ -66,7 +66,7 @@ export const PULL_HORIZONTAL_EXERCISES: Exercise[] = [
     estatico: false,
     cadencia: '2-1-2',
     regressoes: ['remada-invertida-joelhos', 'remada-porta-toalha'],
-    progressoes: ['remada-invertida-pes-elevados', 'remada-argolas'],
+    progressoes: ['remada-invertida-pes-elevados', 'remada-argolas', 'remada-invertida-pausa'],
     variacoes: ['remada-invertida-supinada'],
     adaptacoes: {
       ombro: ['remada-invertida-joelhos'],
@@ -363,6 +363,337 @@ export const PULL_HORIZONTAL_EXERCISES: Exercise[] = [
     ],
     commonMistakes: [
       { mistake: 'Deixar o quadril cair em ângulo vertical', correction: 'Mantenha as costas rigorosamente horizontais durante a remada.' }
+    ]
+  },
+  {
+    id: 'remada-invertida-pausa',
+    name: 'Remada Invertida com Pausa de 2 s no Topo',
+    category: 'Pull',
+    difficulty: 'Intermediário',
+    type: 'reps',
+    primaryMuscles: [
+      'costas',
+      'biceps'
+    ],
+    secondaryMuscles: [
+      'antebraco',
+      'ombros',
+      'abdomen'
+    ],
+    defaultSets: 3,
+    defaultReps: 8,
+    defaultRestSeconds: 60,
+    description: 'Remada horizontal em barra baixa ou argolas com sustentação isométrica de 2 segundos no ponto de maior contração escapular, desenvolvendo densidade dorsal.',
+    breathingTip: 'Inspire na posição inicial; expire na puxada; segure o ar na pausa de 2 s; inspire na descida.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Pare se houver dor aguda.',
+      'Mantenha o corpo reto em prancha sem deixar o quadril afundar.'
+    ],
+    padrao: 'puxar-horizontal',
+    equipamento: [
+      'barra'
+    ],
+    tipoExercicio: 'principal',
+    estatico: false,
+    cadencia: '2-2-2',
+    regressoes: [
+      'australianpullup',
+      'remada-invertida-joelhos'
+    ],
+    progressoes: [
+      'remada-invertida-pes-elevados'
+    ],
+    variacoes: [
+      'australianpullup'
+    ],
+    adaptacoes: {
+      ombro: [
+        'remada-invertida-joelhos'
+      ],
+      semEquipamento: [
+        'remada-porta-toalha'
+      ]
+    },
+    criterioAvanco: '3 séries de 10 repetições tocando o peito na barra com pausa estrita de 2 segundos sem perder a postura',
+    sinonimos: [
+      'pause inverted row',
+      'remada australiana com pausa',
+      'remada invertida isométrica'
+    ],
+    animationType: 'australianpullup',
+    executionSteps: [
+      {
+        step: 1,
+        title: 'Posição em Prancha Diagonal',
+        description: 'Segure a barra baixa com pegada pronada na largura dos ombros e corpo em linha reta.'
+      },
+      {
+        step: 2,
+        title: 'Tração com Retração Máxima',
+        description: 'Puxe o peito em direção à barra até tocá-la, aduzindo as escápulas intensamente.'
+      },
+      {
+        step: 3,
+        title: 'Pausa de 2 Segundos e Retorno',
+        description: 'Congele por 2 segundos apertando as costas e desça com controle completo.'
+      }
+    ],
+    commonMistakes: [
+      {
+        mistake: 'Arquear o quadril para cima ou afundar a bacia',
+        correction: 'Mantenha os glúteos e abdômen rígidos em uma única linha reta.'
+      },
+      {
+        mistake: 'Soltar a pausa rapidamente antes de 2 segundos',
+        correction: 'Conte 2 segundos completos encostando o tórax na barra.'
+      }
+    ]
+  },
+  {
+    id: 'rosca-biceps-barra-baixa',
+    name: 'Rosca de Bíceps na Barra Baixa (Bodyweight Curl)',
+    category: 'Pull',
+    difficulty: 'Intermediário',
+    type: 'reps',
+    primaryMuscles: [
+      'biceps'
+    ],
+    secondaryMuscles: [
+      'antebraco',
+      'costas',
+      'abdomen'
+    ],
+    defaultSets: 3,
+    defaultReps: 10,
+    defaultRestSeconds: 60,
+    description: 'Exercício calistênico de isolamento para bíceps na barra baixa com pegada supinada, onde os cotovelos permanecem fixos no espaço e a testa se aproxima da barra.',
+    breathingTip: 'Inspire na descida; expire puxando a barra em direção à testa flexionando os bíceps.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Pare se houver dor aguda.',
+      'Se sentir estresse no punho, ajuste a inclinação dos pés ou use argolas.'
+    ],
+    padrao: 'puxar-horizontal',
+    equipamento: [
+      'barra'
+    ],
+    tipoExercicio: 'principal',
+    estatico: false,
+    cadencia: '2-1-2',
+    regressoes: [
+      'rosca-biceps-toalha-porta'
+    ],
+    progressoes: [
+      'remada-invertida-supinada'
+    ],
+    variacoes: [
+      'remada-invertida-supinada'
+    ],
+    adaptacoes: {
+      cotovelo: [
+        'rosca-biceps-toalha-porta'
+      ],
+      semEquipamento: [
+        'rosca-biceps-toalha-porta'
+      ]
+    },
+    criterioAvanco: 'Completar 3 séries de 12 repetições com cotovelos estáveis e contração máxima de pico',
+    sinonimos: [
+      'bodyweight bicep curl',
+      'rosca calistênica barra baixa',
+      'flexão de bíceps na barra'
+    ],
+    animationType: 'australianpullup',
+    executionSteps: [
+      {
+        step: 1,
+        title: 'Posicionamento em Pegada Supinada',
+        description: 'Segure a barra baixa com as palmas voltadas para você e corpo inclinado diagonalmente.'
+      },
+      {
+        step: 2,
+        title: 'Flexão Pura dos Cotovelos',
+        description: 'Puxe o corpo levando a testa em direção à barra mantendo os cotovelos altos e fixos.'
+      },
+      {
+        step: 3,
+        title: 'Extensão Excêntrica',
+        description: 'Retorne estendendo os braços de forma lenta sentindo o alongamento do bíceps.'
+      }
+    ],
+    commonMistakes: [
+      {
+        mistake: 'Puxar os cotovelos para trás transformando em remada',
+        correction: 'Mantenha os cotovelos apontados para cima e à frente, flexionando apenas os braços.'
+      },
+      {
+        mistake: 'Usar balanço do quadril para impulsionar a subida',
+        correction: 'Trave os glúteos e abdômen como uma prancha rígida.'
+      }
+    ]
+  },
+  {
+    id: 'rosca-biceps-toalha-porta',
+    name: 'Rosca de Bíceps com Toalha na Porta',
+    category: 'Pull',
+    difficulty: 'Iniciante',
+    type: 'reps',
+    primaryMuscles: [
+      'biceps'
+    ],
+    secondaryMuscles: [
+      'antebraco',
+      'abdomen'
+    ],
+    defaultSets: 3,
+    defaultReps: 12,
+    defaultRestSeconds: 45,
+    description: 'Adaptação caseira de rosca calistênica utilizando uma toalha presa no batente ou maçaneta de uma porta firme, ideal para construir força nos braços sem nenhum equipamento.',
+    breathingTip: 'Inspire afastando o corpo; expire puxando o rosto em direção às mãos.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Pare se houver dor aguda.',
+      'Certifique-se de que a porta esteja totalmente travada e apoie os pés com segurança.'
+    ],
+    padrao: 'puxar-horizontal',
+    equipamento: [
+      'toalha'
+    ],
+    tipoExercicio: 'principal',
+    estatico: false,
+    cadencia: '2-1-2',
+    regressoes: [],
+    progressoes: [
+      'rosca-biceps-barra-baixa'
+    ],
+    variacoes: [
+      'remada-porta-toalha'
+    ],
+    adaptacoes: {
+      cotovelo: [
+        'remada-porta-toalha'
+      ],
+      semEquipamento: [
+        'rosca-biceps-toalha-porta'
+      ]
+    },
+    criterioAvanco: 'Executar 3 séries de 15 repetições controladas com inclinação de 45°',
+    sinonimos: [
+      'door towel bicep curl',
+      'rosca na porta com toalha',
+      'bíceps caseiro'
+    ],
+    animationType: 'australianpullup',
+    executionSteps: [
+      {
+        step: 1,
+        title: 'Fixação e Empunhadura',
+        description: 'Passe uma toalha firme pela maçaneta ou nó no batente e segure as duas pontas com pegada neutra ou supinada.'
+      },
+      {
+        step: 2,
+        title: 'Inclinação e Puxada',
+        description: 'Incline o tronco para trás e flexione os cotovelos puxando o tronco em direção às mãos com força de bíceps.'
+      },
+      {
+        step: 3,
+        title: 'Descida Controlada',
+        description: 'Estenda os braços devagar resistindo ao peso do corpo sem arredondar as costas.'
+      }
+    ],
+    commonMistakes: [
+      {
+        mistake: 'Puxar com as costas em vez dos braços',
+        correction: 'Mantenha os cotovelos fixados no plano e concentre a flexão nos bíceps.'
+      },
+      {
+        mistake: 'Pisar em superfície escorregadia',
+        correction: 'Apoie os calçados firmemente em piso antiaderente ou descalço com tração.'
+      }
+    ]
+  },
+  {
+    id: 'rosca-biceps-mochila',
+    name: 'Rosca com Mochila (Carga Improvisada)',
+    category: 'Pull',
+    difficulty: 'Iniciante',
+    type: 'reps',
+    primaryMuscles: [
+      'biceps'
+    ],
+    secondaryMuscles: [
+      'antebraco'
+    ],
+    defaultSets: 3,
+    defaultReps: 12,
+    defaultRestSeconds: 45,
+    description: 'Exercício de isolamento de bíceps com implemento caseiro progressivo (mochila com livros ou garrafas), permitindo ajustar o peso conforme o nível do atleta.',
+    breathingTip: 'Inspire ao descer a carga; expire ao flexionar os braços elevando a mochila.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Pare se houver dor aguda.',
+      'Distribua os livros ou garrafas de maneira uniforme dentro da mochila para não oscilar o centro de massa.'
+    ],
+    padrao: 'puxar-horizontal',
+    equipamento: [
+      'nenhum'
+    ],
+    tipoExercicio: 'principal',
+    estatico: false,
+    cadencia: '2-1-2',
+    regressoes: [],
+    progressoes: [
+      'rosca-biceps-barra-baixa'
+    ],
+    variacoes: [
+      'rosca-biceps-toalha-porta'
+    ],
+    adaptacoes: {
+      cotovelo: [
+        'rosca-biceps-toalha-porta'
+      ],
+      semEquipamento: [
+        'rosca-biceps-mochila'
+      ]
+    },
+    criterioAvanco: 'Completar 3 séries de 15 repetições com cadência controlada e peso ajustado',
+    sinonimos: [
+      'backpack bicep curl',
+      'rosca com mochila',
+      'bíceps com peso de casa'
+    ],
+    animationType: 'australianpullup',
+    executionSteps: [
+      {
+        step: 1,
+        title: 'Posição em Pé e Empunhadura',
+        description: 'Em pé com postura ereta, segure a alça superior da mochila com as palmas voltadas para a frente.'
+      },
+      {
+        step: 2,
+        title: 'Flexão do Bíceps',
+        description: 'Eleve a mochila até o peito flexionando os cotovelos sem mexer os ombros nem balançar o tronco.'
+      },
+      {
+        step: 3,
+        title: 'Descida Resistida',
+        description: 'Desça a mochila até a extensão quase completa dos braços sentindo o músculo sob tensão.'
+      }
+    ],
+    commonMistakes: [
+      {
+        mistake: 'Balançar o corpo para trás usando impulso lombar',
+        correction: 'Mantenha os joelhos destravados, glúteos contraídos e tronco perfeitamente estático.'
+      },
+      {
+        mistake: 'Jogar os cotovelos para a frente na subida',
+        correction: 'Fixe os cotovelos colados às costelas durante toda a repetição.'
+      }
     ]
   }
 ];

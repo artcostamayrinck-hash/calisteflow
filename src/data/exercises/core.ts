@@ -1094,7 +1094,7 @@ export const CORE_EXERCISES: Exercise[] = [
     estatico: false,
     cadencia: '2-1-2',
     regressoes: ['bird-dog'],
-    progressoes: ['ponte-gluteo-unilateral', 'hip-thrust-banco'],
+    progressoes: ['ponte-gluteo-unilateral', 'hip-thrust-banco', 'ponte-gluteo-pes-elevados', 'slider-leg-curl'],
     variacoes: ['ponte-gluteo-unilateral'],
     adaptacoes: {
       lombar: ['ponte-gluteo'],
@@ -1172,7 +1172,7 @@ export const CORE_EXERCISES: Exercise[] = [
     estatico: false,
     cadencia: '2-1-2',
     regressoes: ['ponte-gluteo'],
-    progressoes: ['nordic-curl-negativa'],
+    progressoes: ['nordic-curl-negativa', 'hip-thrust-unilateral-banco'],
     variacoes: ['ponte-gluteo-unilateral'],
     adaptacoes: {
       lombar: ['ponte-gluteo'],
@@ -1211,7 +1211,7 @@ export const CORE_EXERCISES: Exercise[] = [
     estatico: false,
     cadencia: '2-1-2',
     regressoes: ['bird-dog'],
-    progressoes: ['nordic-curl-negativa'],
+    progressoes: ['nordic-curl-negativa', 'stiff-unilateral-peso-corpo'],
     variacoes: ['bird-dog'],
     adaptacoes: {
       lombar: ['bird-dog', 'ponte-gluteo'],

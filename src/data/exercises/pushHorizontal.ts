@@ -64,7 +64,7 @@ export const PUSH_HORIZONTAL_EXERCISES: Exercise[] = [
     estatico: false,
     cadencia: '2-1-1',
     regressoes: ['flexao-parede'],
-    progressoes: ['flexao-joelhos', 'pushup', 'pushup'],
+    progressoes: ['flexao-joelhos', 'pushup', 'extensao-triceps-barra-baixa'],
     variacoes: ['flexao-inclinada-fechada'],
     adaptacoes: {
       punho: ['flexao-inclinada'],
@@ -149,7 +149,7 @@ export const PUSH_HORIZONTAL_EXERCISES: Exercise[] = [
     estatico: false,
     cadencia: '3-1-1',
     regressoes: ['flexao-joelhos', 'flexao-inclinada'],
-    progressoes: ['flexao-declinada', 'diamondpushup', 'diamondpushup'],
+    progressoes: ['flexao-declinada', 'diamondpushup', 'flexao-dedos'],
     variacoes: ['flexao-aberta', 'flexao-hindu'],
     adaptacoes: {
       punho: ['dip-banco-chao', 'pushup'],
@@ -233,7 +233,7 @@ export const PUSH_HORIZONTAL_EXERCISES: Exercise[] = [
     estatico: false,
     cadencia: '3-1-1',
     regressoes: ['flexao-fechada', 'pushup'],
-    progressoes: ['flexao-arqueiro', 'dip'],
+    progressoes: ['flexao-arqueiro', 'dip', 'flexao-diamante-pes-elevados'],
     variacoes: ['flexao-fechada'],
     adaptacoes: {
       punho: ['flexao-fechada'],
@@ -273,7 +273,7 @@ export const PUSH_HORIZONTAL_EXERCISES: Exercise[] = [
     estatico: false,
     cadencia: '3-1-1',
     regressoes: ['pushup'],
-    progressoes: ['pikepushup', 'flexao-pseudo-planche'],
+    progressoes: ['pikepushup', 'flexao-pseudo-planche', 'flexao-com-palmas'],
     variacoes: ['flexao-declinada-fechada'],
     adaptacoes: {
       punho: ['flexao-declinada'],
@@ -569,6 +569,265 @@ export const PUSH_HORIZONTAL_EXERCISES: Exercise[] = [
     ],
     commonMistakes: [
       { mistake: 'Girar o quadril em 90 graus', correction: 'Mantenha o quadril o mais paralelo possível ao solo.' }
+    ]
+  },
+  {
+    id: 'flexao-com-palmas',
+    name: 'Flexão com Palmas (Clap Push-up)',
+    category: 'Push',
+    difficulty: 'Avançado',
+    type: 'reps',
+    primaryMuscles: [
+      'peito',
+      'triceps'
+    ],
+    secondaryMuscles: [
+      'ombros',
+      'abdomen'
+    ],
+    defaultSets: 3,
+    defaultReps: 6,
+    defaultRestSeconds: 90,
+    description: 'Variação pliométrica explosiva onde o atleta empurra o solo com máxima aceleração, batendo as palmas no ar antes de aterrissar suavemente absorvendo o impacto.',
+    breathingTip: 'Inspire controladamente na descida; expire com força máxima explosiva no momento do empurrão.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Pare se houver dor aguda.',
+      'Aterrisse com os cotovelos levemente flexionados para absorver o impacto nos punhos e ombros.'
+    ],
+    padrao: 'empurrar-horizontal',
+    equipamento: [
+      'nenhum'
+    ],
+    tipoExercicio: 'principal',
+    estatico: false,
+    cadencia: 'explosiva',
+    regressoes: [
+      'flexao-declinada',
+      'pushup'
+    ],
+    progressoes: [],
+    variacoes: [
+      'flexao-arqueiro'
+    ],
+    adaptacoes: {
+      punho: [
+        'pushup'
+      ],
+      ombro: [
+        'flexao-inclinada'
+      ],
+      semEquipamento: [
+        'flexao-com-palmas'
+      ]
+    },
+    criterioAvanco: 'Executar 3 séries de 8 repetições perfeitas com altura suficiente e aterrissagem amortecida',
+    sinonimos: [
+      'clap pushup',
+      'flexão pliométrica',
+      'flexão explosiva com palma'
+    ],
+    animationType: 'pushup',
+    executionSteps: [
+      {
+        step: 1,
+        title: 'Descida Controlada',
+        description: 'Assuma a posição de flexão tradicional e desça o tórax até quase tocar o solo.'
+      },
+      {
+        step: 2,
+        title: 'Impulso Explosivo',
+        description: 'Empurre o solo com velocidade máxima de modo que as mãos decolem do chão com tempo para bater palmas.'
+      },
+      {
+        step: 3,
+        title: 'Recepção Amortecida',
+        description: 'Reponha as mãos no chão imediatamente flexionando os cotovelos para dissipar a energia da descida.'
+      }
+    ],
+    commonMistakes: [
+      {
+        mistake: 'Aterrissar com os braços completamente estendidos (travados)',
+        correction: 'Dobre os cotovelos instantaneamente ao tocar o solo para proteger os punhos e articulações.'
+      },
+      {
+        mistake: 'Arquear a coluna lombar durante a explosão',
+        correction: 'Mantenha glúteos e abdômen contraídos em retroversão pélvica rígida.'
+      }
+    ]
+  },
+  {
+    id: 'flexao-diamante-pes-elevados',
+    name: 'Flexão Diamante com Pés Elevados',
+    category: 'Push',
+    difficulty: 'Avançado',
+    type: 'reps',
+    primaryMuscles: [
+      'triceps',
+      'peito'
+    ],
+    secondaryMuscles: [
+      'ombros',
+      'abdomen'
+    ],
+    defaultSets: 3,
+    defaultReps: 8,
+    defaultRestSeconds: 75,
+    description: 'Combinação da pegada diamante com a elevação dos pés em um banco, deslocando o centro de massa para a porção superior do tórax e sobrecarregando o tríceps.',
+    breathingTip: 'Inspire na flexão dos cotovelos; expire ao empurrar o solo na subida.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Pare se houver dor aguda.',
+      'Se sentir estresse no punho, afaste levemente os polegares reduzindo a rotação interna.'
+    ],
+    padrao: 'empurrar-horizontal',
+    equipamento: [
+      'banco'
+    ],
+    tipoExercicio: 'principal',
+    estatico: false,
+    cadencia: '2-1-2',
+    regressoes: [
+      'diamondpushup',
+      'flexao-declinada'
+    ],
+    progressoes: [
+      'flexao-arqueiro'
+    ],
+    variacoes: [
+      'diamondpushup'
+    ],
+    adaptacoes: {
+      punho: [
+        'flexao-fechada'
+      ],
+      ombro: [
+        'flexao-inclinada'
+      ],
+      semEquipamento: [
+        'diamondpushup'
+      ]
+    },
+    criterioAvanco: 'Completar 3 séries de 10 repetições descendo o esterno até tocar o topo das mãos',
+    sinonimos: [
+      'decline diamond pushup',
+      'flexão diamante declinada',
+      'diamante pés elevados'
+    ],
+    animationType: 'pushup',
+    executionSteps: [
+      {
+        step: 1,
+        title: 'Posição Declinada em Diamante',
+        description: 'Apoie os pés em um banco e una polegares e indicadores no chão sob o centro do peito.'
+      },
+      {
+        step: 2,
+        title: 'Descida Profunda',
+        description: 'Desça o peito em direção ao triângulo formado pelas mãos mantendo o corpo em prancha alinhada.'
+      },
+      {
+        step: 3,
+        title: 'Extensão Concêntrica',
+        description: 'Empurre o chão estendendo completamente os cotovelos sem travar bruscamente a articulação.'
+      }
+    ],
+    commonMistakes: [
+      {
+        mistake: 'Deixar o quadril ceder formando arco na lombar',
+        correction: 'Trave os glúteos e contraia os músculos da parede abdominal.'
+      },
+      {
+        mistake: 'Abrir os cotovelos perpendicularmente em 90°',
+        correction: 'Mantenha os cotovelos apontando na diagonal para trás em cerca de 45°.'
+      }
+    ]
+  },
+  {
+    id: 'flexao-dedos',
+    name: 'Flexão com Apoio nos Dedos (Finger Push-up)',
+    category: 'Push',
+    difficulty: 'Avançado',
+    type: 'reps',
+    primaryMuscles: [
+      'peito',
+      'triceps'
+    ],
+    secondaryMuscles: [
+      'antebraco',
+      'ombros',
+      'abdomen'
+    ],
+    defaultSets: 3,
+    defaultReps: 8,
+    defaultRestSeconds: 90,
+    description: 'Flexão tradicional realizada com sustentação apenas na polpa dos dez dedos em formato de cúpula garra, fortalecendo a musculatura intrínseca da mão e antebraço.',
+    breathingTip: 'Inspire ao descer mantendo pressão uniforme nos dedos; expire ao empurrar o chão.',
+    reviewedBy: null,
+    revisadoPor: null,
+    safetyCautions: [
+      'Pare se houver dor aguda.',
+      'Progredir com extremo cuidado; se sentir dor nas falanges, apoie os joelhos no chão antes da versão completa.'
+    ],
+    padrao: 'empurrar-horizontal',
+    equipamento: [
+      'nenhum'
+    ],
+    tipoExercicio: 'principal',
+    estatico: false,
+    cadencia: '2-1-2',
+    regressoes: [
+      'pushup',
+      'flexao-joelhos'
+    ],
+    progressoes: [],
+    variacoes: [
+      'pushup'
+    ],
+    adaptacoes: {
+      punho: [
+        'flexao-parede',
+        'pushup'
+      ],
+      semEquipamento: [
+        'flexao-dedos'
+      ]
+    },
+    criterioAvanco: 'Executar 3 séries de 10 repetições mantendo os arcos dos dedos firmes sem colapsar as falanges',
+    sinonimos: [
+      'fingertip pushup',
+      'flexão ponta dos dedos',
+      'finger push up'
+    ],
+    animationType: 'pushup',
+    executionSteps: [
+      {
+        step: 1,
+        title: 'Apoio em Cúpula',
+        description: 'Posicione a ponta dos dez dedos no solo afastados na largura dos ombros, formando uma abóbada rígida.'
+      },
+      {
+        step: 2,
+        title: 'Descida Estável',
+        description: 'Desça o peito com cadência lenta garantindo que as falanges não cedam nem hiperextendam.'
+      },
+      {
+        step: 3,
+        title: 'Empurrão com Garra',
+        description: 'Pressione o chão com a força dos dedos e palmas estendendo os braços de volta ao topo.'
+      }
+    ],
+    commonMistakes: [
+      {
+        mistake: 'Deixar as articulações dos dedos dobrarem para trás (colapso)',
+        correction: 'Mantenha os dedos ligeiramente flexionados em garra com tônus ativo.'
+      },
+      {
+        mistake: 'Concentrar o peso apenas nos polegares e indicadores',
+        correction: 'Distribua a carga uniformemente por todos os dedos das duas mãos.'
+      }
     ]
   }
 ];
