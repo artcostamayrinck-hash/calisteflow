@@ -1,29 +1,38 @@
 /**
  * CalisteFlow Service Worker
- * Versão do Cache: calisteflow-v2.0.0
+ * Versão do Cache: calisteflow-v3.0.0
  * Escopo: /calisteflow/
  *
  * Estratégia de Cache:
  * - HTML / Navegação: Network-First com fallback para cache offline (/calisteflow/index.html)
  * - Assets estáticos (/calisteflow/assets/*): Cache-First com fallback para rede
- * - Recursos estáticos raiz (manifest, ícones, favicons, og-image): Stale-While-Revalidate
+ * - Recursos estáticos raiz e ícones (manifest, ícones com ?v=2, favicons, og-image): Stale-While-Revalidate
  * - Não recarrega o app no meio de um treino ativo (skipWaiting só sob comando do usuário)
  */
 
-const CACHE_NAME = 'calisteflow-v2.0.0';
+const CACHE_NAME = 'calisteflow-v3.0.0';
 
 // Lista de arquivos fundamentais para inicialização offline no escopo /calisteflow/
 const PRECACHE_ASSETS = [
   '/calisteflow/',
   '/calisteflow/index.html',
   '/calisteflow/manifest.json',
-  '/calisteflow/favicon.ico',
-  '/calisteflow/favicon-32x32.png',
-  '/calisteflow/favicon-16x16.png',
-  '/calisteflow/apple-touch-icon.png',
-  '/calisteflow/pwa-192x192.png',
-  '/calisteflow/pwa-512x512.png',
-  '/calisteflow/maskable-icon-512x512.png',
+  '/calisteflow/assets/img/favicon.ico?v=2',
+  '/calisteflow/assets/img/favicon-32x32.png?v=2',
+  '/calisteflow/assets/img/favicon-16x16.png?v=2',
+  '/calisteflow/assets/img/apple-touch-icon.png?v=2',
+  '/calisteflow/assets/img/icon-192.png?v=2',
+  '/calisteflow/assets/img/icon-512.png?v=2',
+  '/calisteflow/assets/img/logo-512.png?v=2',
+  '/calisteflow/assets/img/logo-header-256.png',
+  '/calisteflow/assets/img/logo-transparente.png',
+  '/calisteflow/assets/img/og-image.png',
+  '/calisteflow/favicon.ico?v=2',
+  '/calisteflow/favicon-32x32.png?v=2',
+  '/calisteflow/favicon-16x16.png?v=2',
+  '/calisteflow/apple-touch-icon.png?v=2',
+  '/calisteflow/icon-192.png?v=2',
+  '/calisteflow/icon-512.png?v=2',
   '/calisteflow/og-image.png',
   '/calisteflow/robots.txt',
   '/calisteflow/sitemap.xml',
@@ -33,7 +42,6 @@ const PRECACHE_ASSETS = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(async (cache) => {
-      // Caching com resiliência: tenta pre-cachear cada recurso individualmente
       const results = await Promise.allSettled(
         PRECACHE_ASSETS.map(async (url) => {
           try {
@@ -134,10 +142,7 @@ self.addEventListener('fetch', (event) => {
           }
           return networkRes;
         })
-        .catch(() => {
-          // Falha silenciosa de rede no background
-          return null;
-        });
+        .catch(() => null);
 
       return cached || fetchPromise;
     })

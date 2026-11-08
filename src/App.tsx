@@ -35,7 +35,7 @@ import { BottomNav, type NavTab } from './components/layout/BottomNav';
 import { soundManager } from './utils/audio';
 import { requestPersistentStorage } from './utils/platform';
 import { Flame, ShieldCheck } from 'lucide-react';
-import logoImg from './assets/img/logo-512x512.png';
+import logoHeaderImg from './assets/img/logo-header-256.png';
 
 export function App() {
   // App Navigation — default to 'home'
@@ -243,11 +243,11 @@ export function App() {
             aria-label="CalisteFlow"
           >
             <img
-              src={logoImg}
+              src={logoHeaderImg}
               alt="CalisteFlow"
-              width="44"
-              height="44"
-              className="h-9 w-9 sm:h-11 sm:w-11 rounded-xl object-contain shadow-md shadow-cyan-500/15 group-hover:scale-105 transition-transform duration-200"
+              width="40"
+              height="40"
+              className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl object-contain shadow-md shadow-cyan-500/15 group-hover:scale-105 transition-transform duration-200"
               loading="eager"
             />
             <div>

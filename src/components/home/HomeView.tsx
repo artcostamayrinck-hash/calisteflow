@@ -166,18 +166,27 @@ export const HomeView: React.FC<HomeViewProps> = ({
         <div className="relative z-10">
           {/* Greeting + Settings toggle */}
           <div className={`flex items-start justify-between mb-4 ${lhm ? 'flex-row-reverse' : ''}`}>
-            <div>
-              <p className={`${lt ? 'text-sm' : 'text-xs'} text-slate-400 font-medium`}>
-                {getDayGreeting()} 👋
-              </p>
-              <h1
-                className={`${lt ? 'text-3xl' : 'text-2xl sm:text-3xl'} font-black text-slate-100 tracking-tight leading-none mt-0.5`}
-              >
-                Vamos{' '}
-                <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent">
-                  treinar?
-                </span>
-              </h1>
+            <div className="flex items-center gap-3 sm:gap-3.5">
+              <img
+                src="./assets/img/logo-512.png"
+                alt="CalisteFlow"
+                width="48"
+                height="48"
+                className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl object-contain shadow-lg shadow-cyan-500/15 border border-white/10 shrink-0"
+              />
+              <div>
+                <p className={`${lt ? 'text-sm' : 'text-xs'} text-slate-400 font-medium`}>
+                  {getDayGreeting()} 👋
+                </p>
+                <h1
+                  className={`${lt ? 'text-3xl' : 'text-2xl sm:text-3xl'} font-black text-slate-100 tracking-tight leading-none mt-0.5`}
+                >
+                  Vamos{' '}
+                  <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent">
+                    treinar?
+                  </span>
+                </h1>
+              </div>
             </div>
 
             <button
