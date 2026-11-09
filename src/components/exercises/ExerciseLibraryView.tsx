@@ -5,6 +5,14 @@ import { MuscleMap } from '../visuals/MuscleMap';
 import { ExerciseVideoPlayer } from '../workout/ExerciseVideoPlayer';
 import { soundManager } from '../../utils/audio';
 import { useBodyScrollLock } from '../../utils/useBodyScrollLock';
+import { isFuzzyMatch } from '../../utils/fuzzySearch';
+import {
+  getFavoriteExerciseIds,
+  toggleFavoriteExercise,
+  getRecentExerciseIds,
+  addRecentExercise,
+} from '../../utils/storage';
+import { SkillTreeModal } from '../skills/SkillTreeModal';
 import {
   Search,
   Filter,
@@ -20,7 +28,9 @@ import {
   ShieldCheck,
   Timer,
   Activity,
-  Layers
+  Layers,
+  Star,
+  Clock,
 } from 'lucide-react';
 
 interface ExerciseLibraryViewProps {
@@ -93,6 +103,14 @@ export const ExerciseLibraryView = ({
   const [selectedMuscles, setSelectedMuscles] = useState<MuscleGroup[]>([]);
   const [visibleCount, setVisibleCount] = useState<number>(24);
 
+  // D2: Estado de Favoritos e Recentes
+  const [quickFilter, setQuickFilter] = useState<'todos' | 'favoritos' | 'recentes'>('todos');
+  const [favoriteIds, setFavoriteIds] = useState<string[]>(getFavoriteExerciseIds);
+  const [recentIds, setRecentIds] = useState<string[]>(getRecentExerciseIds);
+
+  // D14: Modal da Árvore de Habilidades
+  const [showSkillTree, setShowSkillTree] = useState<boolean>(false);
+
   const listTopRef = useRef<HTMLDivElement>(null);
   const prevFilterKeyRef = useRef<string>('');
 
@@ -109,9 +127,12 @@ export const ExerciseLibraryView = ({
   const [showInteractiveMap, setShowInteractiveMap] = useState<boolean>(false);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState<boolean>(false);
 
-  // Normalização de texto para busca com acentos
-  const normalize = (str: string) =>
-    str.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  const handleToggleFavorite = (e: React.MouseEvent, exerciseId: string) => {
+    e.stopPropagation();
+    soundManager.triggerHaptic([35]);
+    const updated = toggleFavoriteExercise(exerciseId);
+    setFavoriteIds(updated);
+  };
 
   const handleSelectMuscle = (m: MuscleGroup) => {
     soundManager.triggerHaptic([20]);
@@ -126,22 +147,30 @@ export const ExerciseLibraryView = ({
     });
   };
 
-  // Filtragem e particionamento ordenado: Alvo (Grupo 1) e Secundário (Grupo 2)
+  // Filtragem e particionamento ordenado: Alvo (Grupo 1) e Secundário (Grupo 2) com D1 Fuzzy Match
   const { primaryExercises, secondaryExercises, hiddenByPatternCount } = useMemo(() => {
-    const query = normalize(searchQuery.trim());
+    const query = searchQuery.trim();
 
     const matchesGeneralFilters = (ex: Exercise, checkPattern = true) => {
+      // D2: Filtro rápido de Favoritos ou Recentes
+      if (quickFilter === 'favoritos' && !favoriteIds.includes(ex.id)) {
+        return false;
+      }
+      if (quickFilter === 'recentes' && !recentIds.includes(ex.id)) {
+        return false;
+      }
+
       if (query) {
-        const nameMatch = normalize(ex.name).includes(query);
-        const descMatch = normalize(ex.description).includes(query);
-        const synonymMatch = ex.sinonimos?.some(s => normalize(s).includes(query));
+        const nameMatch = isFuzzyMatch(ex.name, query);
+        const descMatch = isFuzzyMatch(ex.description, query);
+        const synonymMatch = ex.sinonimos?.some(s => isFuzzyMatch(s, query));
         const muscleMatch = ex.primaryMuscles.some(m => {
           const def = MUSCLE_DEFINITIONS[m];
-          const labelMatch = normalize(def?.name || MUSCLE_LABELS[m] || m).includes(query);
-          const synMatch = def?.synonyms?.some(syn => normalize(syn).includes(query));
+          const labelMatch = isFuzzyMatch(def?.name || MUSCLE_LABELS[m] || m, query);
+          const synMatch = def?.synonyms?.some(syn => isFuzzyMatch(syn, query));
           return labelMatch || synMatch;
         });
-        const patternMatch = ex.padrao ? normalize(MOVEMENT_PATTERN_LABELS[ex.padrao] || ex.padrao).includes(query) : false;
+        const patternMatch = ex.padrao ? isFuzzyMatch(MOVEMENT_PATTERN_LABELS[ex.padrao] || ex.padrao, query) : false;
 
         if (!nameMatch && !descMatch && !synonymMatch && !muscleMatch && !patternMatch) {
           return false;
@@ -220,18 +249,21 @@ export const ExerciseLibraryView = ({
     selectedDifficulty,
     selectedEquipment,
     selectedJointSafety,
-    selectedMuscles
+    selectedMuscles,
+    quickFilter,
+    favoriteIds,
+    recentIds
   ]);
 
   // Efeito para rolar suavemente ao topo da lista ao alterar filtros
   useEffect(() => {
-    const currentKey = `${[...selectedMuscles].sort().join(',')}|${selectedPattern}|${selectedDifficulty}|${selectedEquipment}|${selectedJointSafety}|${searchQuery}`;
+    const currentKey = `${[...selectedMuscles].sort().join(',')}|${selectedPattern}|${selectedDifficulty}|${selectedEquipment}|${selectedJointSafety}|${searchQuery}|${quickFilter}`;
     if (prevFilterKeyRef.current && prevFilterKeyRef.current !== currentKey) {
       listTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       setVisibleCount(24);
     }
     prevFilterKeyRef.current = currentKey;
-  }, [selectedMuscles, selectedPattern, selectedDifficulty, selectedEquipment, selectedJointSafety, searchQuery]);
+  }, [selectedMuscles, selectedPattern, selectedDifficulty, selectedEquipment, selectedJointSafety, searchQuery, quickFilter]);
 
   const patterns: Array<MovementPattern | 'Todos'> = [
     'Todos',
@@ -251,6 +283,8 @@ export const ExerciseLibraryView = ({
 
   const handleOpenExerciseModal = (ex: Exercise, defaultTab: ModalTab = 'como_fazer') => {
     soundManager.triggerHaptic([20]);
+    const updated = addRecentExercise(ex.id);
+    setRecentIds(updated);
     setSelectedExercise(ex);
     setActiveTab(defaultTab);
   };
@@ -259,6 +293,8 @@ export const ExerciseLibraryView = ({
     const target = getExerciseById(id);
     if (target) {
       soundManager.triggerHaptic([25]);
+      const updated = addRecentExercise(target.id);
+      setRecentIds(updated);
       setSelectedExercise(target);
       setActiveTab(defaultTab);
     }
@@ -270,9 +306,9 @@ export const ExerciseLibraryView = ({
       className="glass-card rounded-3xl p-5 shadow-xl hover:border-white/15 transition-all duration-300 flex flex-col justify-between space-y-4"
     >
       <div>
-        {/* Chips de Metadados */}
+        {/* Chips de Metadados e Botão de Favoritar */}
         <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 flex-wrap">
             <span className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
               {ex.padrao ? MOVEMENT_PATTERN_LABELS[ex.padrao] || ex.category : ex.category}
             </span>
@@ -282,12 +318,26 @@ export const ExerciseLibraryView = ({
             <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-slate-800 text-slate-400">
               {ex.type === 'isometric' ? 'Isometria' : 'Repetições'}
             </span>
+            {ex.cadencia && (
+              <span className="text-[10px] font-mono text-slate-400 flex items-center gap-1">
+                <Timer className="w-3 h-3 text-cyan-400" /> {ex.cadencia}
+              </span>
+            )}
           </div>
-          {ex.cadencia && (
-            <span className="text-[10px] font-mono text-slate-400 flex items-center gap-1">
-              <Timer className="w-3 h-3 text-cyan-400" /> {ex.cadencia}
-            </span>
-          )}
+          
+          {/* Botão Favorito D2 */}
+          <button
+            type="button"
+            onClick={e => handleToggleFavorite(e, ex.id)}
+            aria-label={favoriteIds.includes(ex.id) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+            className={`p-2 rounded-xl transition active:scale-90 ${
+              favoriteIds.includes(ex.id)
+                ? 'bg-amber-400/20 text-amber-300 border border-amber-400/40 glow-amber'
+                : 'text-slate-400 hover:text-white bg-white/5 border border-white/5'
+            }`}
+          >
+            <Star className={`w-3.5 h-3.5 ${favoriteIds.includes(ex.id) ? 'fill-amber-300 text-amber-300' : ''}`} />
+          </button>
         </div>
 
         {/* Título & Descrição */}
@@ -409,6 +459,68 @@ export const ExerciseLibraryView = ({
               <X className="w-4 h-4" />
             </button>
           )}
+        </div>
+
+        {/* D2: Filtros Rápidos (Todos / Favoritos / Recentes) e D14: Atalho da Árvore de Skills */}
+        <div className="flex items-center justify-between gap-2 overflow-x-auto pb-0.5 no-scrollbar">
+          <div className="flex items-center gap-1.5 shrink-0">
+            <button
+              type="button"
+              onClick={() => {
+                soundManager.triggerHaptic([20]);
+                setQuickFilter('todos');
+              }}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition active:scale-95 ${
+                quickFilter === 'todos'
+                  ? 'bg-white/15 text-white border border-white/20'
+                  : 'text-slate-400 hover:text-white bg-white/5 border border-white/5'
+              }`}
+            >
+              Todos ({EXERCISES_DATABASE.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                soundManager.triggerHaptic([20]);
+                setQuickFilter('favoritos');
+              }}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1 active:scale-95 ${
+                quickFilter === 'favoritos'
+                  ? 'bg-amber-400/20 text-amber-300 border border-amber-400/40 glow-amber'
+                  : 'text-slate-400 hover:text-amber-300 bg-white/5 border border-white/5'
+              }`}
+            >
+              <Star className="w-3.5 h-3.5 fill-current" />
+              <span>Favoritos ({favoriteIds.length})</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                soundManager.triggerHaptic([20]);
+                setQuickFilter('recentes');
+              }}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1 active:scale-95 ${
+                quickFilter === 'recentes'
+                  ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 glow-cyan'
+                  : 'text-slate-400 hover:text-cyan-300 bg-white/5 border border-white/5'
+              }`}
+            >
+              <Clock className="w-3.5 h-3.5" />
+              <span>Recentes ({recentIds.length})</span>
+            </button>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              soundManager.triggerHaptic([30]);
+              setShowSkillTree(true);
+            }}
+            className="px-3 py-1.5 rounded-xl text-xs font-bold bg-gradient-to-r from-purple-500/20 to-indigo-500/20 text-purple-300 border border-purple-500/30 hover:brightness-110 flex items-center gap-1.5 shrink-0 active:scale-95 transition"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+            <span>Árvore de Skills</span>
+          </button>
         </div>
 
         {/* Padrões de Movimento em Carrossel com Indicador de Rolagem */}
@@ -1172,6 +1284,13 @@ export const ExerciseLibraryView = ({
             </div>
           </div>
         </div>
+      )}
+      {/* Modal Árvore de Habilidades Calistênicas (D14) */}
+      {showSkillTree && (
+        <SkillTreeModal
+          onClose={() => setShowSkillTree(false)}
+          onOpenExerciseDetails={handleNavigateToExerciseId}
+        />
       )}
     </div>
   );

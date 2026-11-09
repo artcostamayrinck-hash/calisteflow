@@ -8,6 +8,9 @@ import type {
   UserOnboardingProfile,
   ActiveWorkoutBackup,
   UserJourneyProgress,
+  PersonalRecord,
+  StrengthAssessment,
+  SkillStatus,
 } from '../types';
 import { DEFAULT_ROUTINES } from '../data/routinesData';
 import { createPresetWeeklyPlan } from './workoutGenerator';
@@ -25,6 +28,11 @@ const STORAGE_KEYS = {
   AUTO_BACKUPS: 'calistheflow_auto_backups_v1',
   LAST_BACKUP_EXPORT: 'calistheflow_last_backup_export_date_v1',
   SAFARI_BANNER_DISMISSED: 'calistheflow_safari_banner_dismissed_v1',
+  FAVORITES: 'calistheflow_favorites_v1',
+  RECENTS: 'calistheflow_recents_v1',
+  PERSONAL_RECORDS: 'calistheflow_prs_v1',
+  STRENGTH_ASSESSMENTS: 'calistheflow_strength_assessments_v1',
+  SKILL_TREE_PROGRESS: 'calistheflow_skill_tree_progress_v1',
 };
 
 export const getStoredRoutines = (): Routine[] => {
@@ -548,6 +556,169 @@ export const downloadFullBackupFile = (): boolean => {
     return false;
   }
 };
+
+// ================= D2: FAVORITES & RECENTS =================
+export const getFavoriteExerciseIds = (): string[] => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.FAVORITES);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+};
+
+export const toggleFavoriteExercise = (exerciseId: string): string[] => {
+  try {
+    const current = getFavoriteExerciseIds();
+    const exists = current.includes(exerciseId);
+    const updated = exists ? current.filter(id => id !== exerciseId) : [...current, exerciseId];
+    localStorage.setItem(STORAGE_KEYS.FAVORITES, JSON.stringify(updated));
+    return updated;
+  } catch {
+    return [];
+  }
+};
+
+export const isFavoriteExercise = (exerciseId: string): boolean => {
+  const current = getFavoriteExerciseIds();
+  return current.includes(exerciseId);
+};
+
+export const getRecentExerciseIds = (): string[] => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.RECENTS);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+};
+
+export const addRecentExercise = (exerciseId: string): string[] => {
+  try {
+    const current = getRecentExerciseIds().filter(id => id !== exerciseId);
+    // Manter no máximo 20 exercícios recentes
+    const updated = [exerciseId, ...current].slice(0, 20);
+    localStorage.setItem(STORAGE_KEYS.RECENTS, JSON.stringify(updated));
+    return updated;
+  } catch {
+    return [];
+  }
+};
+
+// ================= D11: PERSONAL RECORDS (PRs) =================
+export const getPersonalRecords = (): Record<string, PersonalRecord> => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.PERSONAL_RECORDS);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch {
+    return {};
+  }
+};
+
+export const checkAndRecordPR = (
+  exerciseId: string,
+  exerciseName: string,
+  value: number,
+  type: 'reps' | 'isometric_seconds',
+  sessionId?: string
+): { isNewPR: boolean; record: PersonalRecord } => {
+  try {
+    const prs = getPersonalRecords();
+    const existing = prs[exerciseId];
+    const isNew = !existing || value > existing.value;
+
+    if (isNew && value > 0) {
+      const record: PersonalRecord = {
+        exerciseId,
+        exerciseName,
+        type,
+        value,
+        previousValue: existing?.value,
+        achievedAt: new Date().toISOString(),
+        sessionId,
+      };
+      prs[exerciseId] = record;
+      localStorage.setItem(STORAGE_KEYS.PERSONAL_RECORDS, JSON.stringify(prs));
+      return { isNewPR: true, record };
+    }
+
+    return {
+      isNewPR: false,
+      record: existing || {
+        exerciseId,
+        exerciseName,
+        type,
+        value,
+        achievedAt: new Date().toISOString(),
+      },
+    };
+  } catch (err) {
+    console.error('Failed to update personal record:', err);
+    return {
+      isNewPR: false,
+      record: {
+        exerciseId,
+        exerciseName,
+        type,
+        value,
+        achievedAt: new Date().toISOString(),
+      },
+    };
+  }
+};
+
+// ================= D13: STRENGTH ASSESSMENTS =================
+export const getStrengthAssessments = (): StrengthAssessment[] => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.STRENGTH_ASSESSMENTS);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+};
+
+export const saveStrengthAssessment = (assessment: StrengthAssessment): StrengthAssessment[] => {
+  try {
+    const current = getStrengthAssessments();
+    const updated = [assessment, ...current];
+    localStorage.setItem(STORAGE_KEYS.STRENGTH_ASSESSMENTS, JSON.stringify(updated));
+    return updated;
+  } catch {
+    return [];
+  }
+};
+
+// ================= D14: SKILL TREE PROGRESS =================
+export const getSkillTreeProgress = (): Record<string, SkillStatus> => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.SKILL_TREE_PROGRESS);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch {
+    return {};
+  }
+};
+
+export const saveSkillNodeStatus = (skillNodeId: string, status: SkillStatus): Record<string, SkillStatus> => {
+  try {
+    const current = getSkillTreeProgress();
+    current[skillNodeId] = status;
+    localStorage.setItem(STORAGE_KEYS.SKILL_TREE_PROGRESS, JSON.stringify(current));
+    return current;
+  } catch {
+    return {};
+  }
+};
+
 
 
 

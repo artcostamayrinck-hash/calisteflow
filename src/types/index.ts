@@ -188,6 +188,50 @@ export interface WorkoutSession {
   perceivedEffort?: number; // 1 to 10
   userNotes?: string;
   musclesWorked: MuscleGroup[];
+  jointPainFeedback?: ('nenhum' | 'punho' | 'ombro' | 'joelho' | 'lombar' | 'cotovelo')[];
+  newPRs?: PersonalRecord[];
+}
+
+export interface PersonalRecord {
+  exerciseId: string;
+  exerciseName: string;
+  type: 'reps' | 'isometric_seconds';
+  value: number;
+  previousValue?: number;
+  achievedAt: string;
+  sessionId?: string;
+}
+
+export interface StrengthAssessment {
+  id: string;
+  date: string;
+  scores: {
+    push: number; // 0 a 100
+    pull: number;
+    core: number;
+    legs: number;
+    dip: number;
+  };
+  rawValues: {
+    pushups: number;
+    pullups: number;
+    plankSeconds: number;
+    squats: number;
+    dips: number;
+  };
+  overallScore: number;
+  level: ExerciseDifficulty | 'Iniciante';
+}
+
+export type SkillStatus = 'locked' | 'in_progress' | 'mastered';
+
+export interface SkillNode {
+  id: string;
+  title: string;
+  level: string;
+  description: string;
+  exerciseId?: string;
+  prerequisites: string[];
 }
 
 export interface WorkoutStats {

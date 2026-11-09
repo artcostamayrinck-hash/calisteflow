@@ -20,8 +20,16 @@ import {
   ShieldCheck,
   MessageSquare,
   HelpCircle,
+  Activity,
+  Download,
+  RotateCcw,
+  ShieldAlert,
+  X,
 } from 'lucide-react';
 import { GuidedJourneyCard } from '../retention/GuidedJourneyCard';
+import { StrengthRadarModal } from '../assessment/StrengthRadarModal';
+import { SkillTreeModal } from '../skills/SkillTreeModal';
+import { InstallGuideModal } from '../pwa/InstallGuideModal';
 import type { WorkoutSession } from '../../types';
 
 interface HomeViewProps {
@@ -73,10 +81,50 @@ export const HomeView: React.FC<HomeViewProps> = ({
   const [showSettings, setShowSettings] = useState(false);
   const [recordPulse, setRecordPulse] = useState(false);
 
+  // D13, D14, D18: Modais de Avaliação, Skills e Instalação PWA
+  const [showStrengthRadar, setShowStrengthRadar] = useState(false);
+  const [showSkillTree, setShowSkillTree] = useState(false);
+  const [showInstallGuide, setShowInstallGuide] = useState(false);
+
+  // D10: Detecção de Treino Perdido de Ontem
+  const [dismissedReschedule, setDismissedReschedule] = useState(false);
+  // D15: Detecção de Semana de Deload
+  const [dismissedDeload, setDismissedDeload] = useState(false);
+
   const noMotion = prefersReducedMotion();
   const todayDayNum = new Date().getDay();
   const todayPlan = weeklyPlan.days.find(d => d.dayOfWeek === todayDayNum);
   const hasTodayWorkout = todayPlan?.isActive && todayPlan.blocks.length > 0;
+
+  // D10: Análise de ontem
+  const yesterdayDayNum = (todayDayNum + 6) % 7;
+  const yesterdayPlan = weeklyPlan.days.find(d => d.dayOfWeek === yesterdayDayNum);
+  const wasYesterdayActive = Boolean(yesterdayPlan?.isActive && yesterdayPlan.blocks.length > 0);
+
+  const yesterdayDateStr = (() => {
+    const d = new Date(Date.now() - 86400000);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  })();
+
+  const hasTrainedYesterday = history.some(s => {
+    const d = new Date(s.endTime || s.startTime);
+    const str = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    return str === yesterdayDateStr;
+  });
+
+  const showRescheduleNotice = wasYesterdayActive && !hasTrainedYesterday && !dismissedReschedule && Boolean(yesterdayPlan);
+
+  // D15: Sugestão de Deload após 4 semanas intensas seguidas
+  const isDeloadRecommended = (() => {
+    if (history.length < 12) return false;
+    const now = Date.now();
+    const fourWeeksMs = 28 * 86400000;
+    const recentWorkouts = history.filter(s => {
+      const time = new Date(s.endTime || s.startTime).getTime();
+      return now - time <= fourWeeksMs;
+    });
+    return recentWorkouts.length >= 12;
+  })();
 
   // Find next scheduled training day (starting from tomorrow)
   const nextActiveDay = (() => {
@@ -217,6 +265,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   { key: 'reducedMotion', label: 'Reduzir Animações', desc: 'Desativa microinterações' },
                   { key: 'wakeLockEnabled', label: 'Tela Sempre Ligada (Wake Lock)', desc: 'Evita bloqueio automático de tela no treino' },
                   { key: 'soundEnabled', label: 'Efeitos Sonoros & Beeps', desc: 'Alarmes de descanso e início' },
+                  { key: 'voiceEnabled', label: 'Narração de Treino por Voz', desc: 'Anuncia exercícios e descanso em português (Web Speech)' },
                 ] as { key: keyof AppSettings; label: string; desc: string }[]
               ).map(({ key, label, desc }) => (
                 <button
@@ -319,11 +368,125 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 </div>
               </div>
 
+              {/* D18: Guia de Instalação PWA */}
+              <button
+                type="button"
+                onClick={() => {
+                  soundManager.triggerHaptic([25]);
+                  setShowInstallGuide(true);
+                }}
+                className="w-full p-2.5 rounded-xl bg-white/[0.03] border border-white/5 hover:border-emerald-500/30 flex items-center justify-between text-left transition"
+              >
+                <div className="flex items-center gap-2">
+                  <Download className="w-4 h-4 text-emerald-400" />
+                  <div>
+                    <span className="text-xs font-bold text-slate-200 block">Como Instalar no Celular</span>
+                    <span className="text-[10px] text-slate-400">Guia passo a passo para iPhone e Android</span>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-slate-400" />
+              </button>
+
               <div className="pt-2.5 border-t border-white/10 flex items-center justify-between text-[11px] text-slate-400 px-1">
                 <span>Versão do CalisteFlow</span>
                 <span className="font-mono font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20">
                   v{typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '4.2.0'}
                 </span>
+              </div>
+            </div>
+          )}
+
+          {/* D10: Card de Reagendamento de Treino Perdido de Ontem */}
+          {showRescheduleNotice && yesterdayPlan && (
+            <div className="p-4 rounded-3xl bg-amber-500/10 border border-amber-500/30 space-y-3 animate-in fade-in">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center shrink-0">
+                    <RotateCcw className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 block">
+                      Treino Pendente de Ontem
+                    </span>
+                    <h3 className="text-xs font-bold text-slate-100">
+                      Você não registrou: {yesterdayPlan.name}
+                    </h3>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setDismissedReschedule(true)}
+                  aria-label="Dispensar aviso de reagendamento"
+                  className="text-slate-400 hover:text-white p-1"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              <p className="text-[11px] text-slate-300 leading-relaxed">
+                Deseja reagendar e realizar a rotina de ontem hoje para não quebrar seu ritmo?
+              </p>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    soundManager.triggerHaptic([35]);
+                    onStartRoutine(convertDayPlanToRoutine(yesterdayPlan));
+                  }}
+                  className="flex-1 py-2.5 px-3 rounded-xl bg-amber-500 text-slate-950 font-black text-xs shadow-md glow-amber active:scale-95 transition"
+                >
+                  Fazer Treino de Ontem Agora
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDismissedReschedule(true)}
+                  className="py-2.5 px-3 rounded-xl bg-white/5 text-slate-400 hover:text-white font-bold text-xs active:scale-95 transition"
+                >
+                  Dispensar
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* D15: Alerta Inteligente de Semana de Deload */}
+          {isDeloadRecommended && !dismissedDeload && (
+            <div className="p-4 rounded-3xl bg-teal-500/10 border border-teal-500/30 space-y-2.5 animate-in fade-in">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-xl bg-teal-500/20 text-teal-300 flex items-center justify-center shrink-0">
+                    <ShieldAlert className="w-4 h-4 text-teal-300" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-black uppercase tracking-wider text-teal-300 block">
+                      Recuperação & Supercompensação
+                    </span>
+                    <h3 className="text-xs font-bold text-slate-100">
+                      Sugestão de Semana de Deload
+                    </h3>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setDismissedDeload(true)}
+                  aria-label="Dispensar sugestão de deload"
+                  className="text-slate-400 hover:text-white p-1"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              <p className="text-[11px] text-slate-300 leading-relaxed font-medium">
+                Você acumulou 4 semanas consecutivas de treinos regulares! Uma <strong>Semana de Deload</strong> (reduzir 30-40% do volume de séries mantendo o plano) previne inflamação nos tendões e acelera ganhos de força.
+              </p>
+              <div className="flex items-center justify-between pt-1">
+                <span className="text-[10px] text-teal-400 italic font-semibold">
+                  Pare se houver dor aguda articular.
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setDismissedDeload(true)}
+                  className="text-xs text-teal-300 hover:underline font-bold"
+                >
+                  Entendido
+                </button>
               </div>
             </div>
           )}
@@ -537,6 +700,57 @@ export const HomeView: React.FC<HomeViewProps> = ({
         </div>
       )}
 
+      {/* ── D13 & D14: PILARES & PROGRESSÃO TÉCNICA ── */}
+      <div className="grid grid-cols-2 gap-3" style={{ direction: 'ltr' }}>
+        <button
+          type="button"
+          onClick={() => {
+            soundManager.triggerHaptic([30]);
+            setShowStrengthRadar(true);
+          }}
+          className="p-4 rounded-3xl glass-card border border-cyan-500/20 hover:border-cyan-500/40 bg-cyan-500/5 text-left flex flex-col justify-between space-y-3 transition active:scale-98"
+        >
+          <div className="w-10 h-10 rounded-2xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shrink-0">
+            <Activity className="w-5 h-5 stroke-[2.5]" />
+          </div>
+          <div>
+            <span className="text-[10px] uppercase font-bold tracking-wider text-cyan-400 block">
+              Radar Pentagonal
+            </span>
+            <p className="font-bold text-xs sm:text-sm text-slate-100 mt-0.5">
+              Avaliação de Força
+            </p>
+            <p className="text-[10px] text-slate-400 mt-1">
+              5 testes e gráfico SVG dos pilares
+            </p>
+          </div>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            soundManager.triggerHaptic([30]);
+            setShowSkillTree(true);
+          }}
+          className="p-4 rounded-3xl glass-card border border-purple-500/20 hover:border-purple-500/40 bg-purple-500/5 text-left flex flex-col justify-between space-y-3 transition active:scale-98"
+        >
+          <div className="w-10 h-10 rounded-2xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-400 shrink-0">
+            <Sparkles className="w-5 h-5 stroke-[2.5]" />
+          </div>
+          <div>
+            <span className="text-[10px] uppercase font-bold tracking-wider text-purple-400 block">
+              Trilhas Lendárias
+            </span>
+            <p className="font-bold text-xs sm:text-sm text-slate-100 mt-0.5">
+              Árvore de Skills
+            </p>
+            <p className="text-[10px] text-slate-400 mt-1">
+              Barra, Muscle-up, Planche e mais
+            </p>
+          </div>
+        </button>
+      </div>
+
       {/* ── SAFETY & CREF BIOMECHANICS BANNER ── */}
       {onOpenSafeExecution && (
         <button
@@ -678,6 +892,15 @@ export const HomeView: React.FC<HomeViewProps> = ({
           </button>
         )}
       </div>
+      {/* D13, D14, D18: Modais Interativos */}
+      {showStrengthRadar && <StrengthRadarModal onClose={() => setShowStrengthRadar(false)} />}
+      {showSkillTree && (
+        <SkillTreeModal
+          onClose={() => setShowSkillTree(false)}
+          onOpenExerciseDetails={() => onNavigateTo('exercises')}
+        />
+      )}
+      {showInstallGuide && <InstallGuideModal onClose={() => setShowInstallGuide(false)} />}
     </div>
   );
 };

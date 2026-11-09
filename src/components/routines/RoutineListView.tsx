@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { Routine, ExerciseCategory } from '../../types';
 import { RoutineCard } from './RoutineCard';
+import { RoutineShareModal } from './RoutineShareModal';
 import { soundManager } from '../../utils/audio';
 import { Plus, Search, Dumbbell, RotateCcw, X, Sparkles } from 'lucide-react';
 
@@ -27,6 +28,7 @@ export const RoutineListView = ({
 }: RoutineListViewProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<ExerciseCategory | 'Todos'>('Todos');
+  const [sharingRoutine, setSharingRoutine] = useState<Routine | null>(null);
 
   const categories: Array<ExerciseCategory | 'Todos'> = [
     'Todos',
@@ -136,6 +138,7 @@ export const RoutineListView = ({
             onDuplicate={onDuplicateRoutine}
             onDelete={onDeleteRoutine}
             onViewDetails={onViewDetails}
+            onShare={setSharingRoutine}
           />
         ))}
       </div>
@@ -173,6 +176,13 @@ export const RoutineListView = ({
           <RotateCcw className="w-3 h-3" /> Restaurar Rotinas Padrão de Calistenia
         </button>
       </div>
+      {/* D21: Modal de Compartilhamento & Exportação de Ficha de Treino */}
+      {sharingRoutine && (
+        <RoutineShareModal
+          routine={sharingRoutine}
+          onClose={() => setSharingRoutine(null)}
+        />
+      )}
     </div>
   );
 };

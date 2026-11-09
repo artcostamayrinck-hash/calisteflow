@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import type { Routine, WorkoutSession, WorkoutExerciseRecord, MuscleGroup, ActiveWorkoutBackup, Exercise } from '../../types';
+import type { Routine, WorkoutSession, WorkoutExerciseRecord, MuscleGroup, ActiveWorkoutBackup, Exercise, PersonalRecord } from '../../types';
 import { EXERCISES_DATABASE, getExerciseById } from '../../data/exercisesData';
 import { soundManager } from '../../utils/audio';
 import { getAppSettings } from '../../utils/appSettings';
-import { saveActiveWorkoutBackup, clearActiveWorkoutBackup } from '../../utils/storage';
+import { saveActiveWorkoutBackup, clearActiveWorkoutBackup, checkAndRecordPR } from '../../utils/storage';
+import { speechVoice } from '../../utils/speechVoice';
 import { ExercisePostureVisual } from '../visuals/ExercisePostureVisual';
 import { MuscleMap } from '../visuals/MuscleMap';
 import { CadenceMetronome } from './CadenceMetronome';
@@ -29,6 +30,8 @@ import {
   ShieldCheck,
   Sparkles,
   Sun,
+  Maximize2,
+  Minimize2,
 } from 'lucide-react';
 
 interface WorkoutPlayerProps {
@@ -77,6 +80,15 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
   const [isometricTargetTimestamp, setIsometricTargetTimestamp] = useState<number | null>(null);
   const [isometricSecondsLeft, setIsometricSecondsLeft] = useState<number>(initialBackup?.isometricSecondsLeft || 30);
   const [isometricInitialSeconds, setIsometricInitialSeconds] = useState<number>(initialBackup?.isometricSecondsLeft || 30);
+
+  // D3: Contagem preparatória de 5 segundos para isometria
+  const [countdown5s, setCountdown5s] = useState<number | null>(null);
+
+  // D5: Modo Foco (distraction-free & alto contraste)
+  const [isFocusMode, setIsFocusMode] = useState<boolean>(false);
+
+  // D11: Lista de novos Recordes Pessoais (PRs) batidos durante a sessão
+  const [sessionPRs, setSessionPRs] = useState<PersonalRecord[]>([]);
 
   // Current set reps & load adjustment
   const [currentReps, setCurrentReps] = useState<number>(10);
@@ -213,6 +225,22 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
   const handleCompleteRepsSet = () => {
     recordCurrentSet(currentReps, undefined, currentWeightKg);
 
+    // D11: Registro de Recorde Pessoal (PR) de Repetições
+    if (currentReps > 0 && currentExerciseData) {
+      const { isNewPR, record } = checkAndRecordPR(
+        currentExerciseData.id,
+        currentExerciseData.name,
+        currentReps,
+        'reps'
+      );
+      if (isNewPR) {
+        soundManager.playSuccessChime();
+        setSessionPRs(prev => [...prev.filter(p => p.exerciseId !== currentExerciseData.id), record]);
+        setQuickNotice(`🔥 NOVO RECORDE PESSOAL: ${record.value} reps em ${currentExerciseData.name}!`);
+        setTimeout(() => setQuickNotice(null), 5000);
+      }
+    }
+
     const isLastSet = setIndex >= currentRoutineExercise.sets - 1;
     const isLastExercise = exerciseIndex >= activeRoutine.exercises.length - 1;
 
@@ -245,14 +273,33 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
     setRestTargetTimestamp(Date.now() + restTime * 1000);
     setPhase('rest');
     soundManager.playCountdownBeep();
+    speechVoice.speak(`Descanse ${restTime} segundos.`);
   };
 
   // Complete Isometric Set
   const handleCompleteIsometricSet = () => {
     setIsometricTimerRunning(false);
     setIsometricTargetTimestamp(null);
+    setCountdown5s(null);
     const elapsedOrCompleted = isometricInitialSeconds - Math.max(0, isometricSecondsLeft);
-    recordCurrentSet(undefined, elapsedOrCompleted || isometricInitialSeconds, currentWeightKg);
+    const completedSec = elapsedOrCompleted || isometricInitialSeconds;
+    recordCurrentSet(undefined, completedSec, currentWeightKg);
+
+    // D3 & D11: Registro de Recorde Pessoal (PR) de Isometria
+    if (currentExerciseData && completedSec > 0) {
+      const { isNewPR, record } = checkAndRecordPR(
+        currentExerciseData.id,
+        currentExerciseData.name,
+        completedSec,
+        'isometric_seconds'
+      );
+      if (isNewPR) {
+        soundManager.playSuccessChime();
+        setSessionPRs(prev => [...prev.filter(p => p.exerciseId !== currentExerciseData.id), record]);
+        setQuickNotice(`🔥 NOVO RECORDE DE ISOMETRIA: ${record.value}s em ${currentExerciseData.name}!`);
+        setTimeout(() => setQuickNotice(null), 5000);
+      }
+    }
 
     const isLastSet = setIndex >= currentRoutineExercise.sets - 1;
     const isLastExercise = exerciseIndex >= activeRoutine.exercises.length - 1;
@@ -260,7 +307,7 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
     // Check advancement criterion for isometric
     if (isLastSet && currentExerciseData?.progressoes && currentExerciseData.progressoes.length > 0) {
       const targetSec = currentRoutineExercise.targetHoldSeconds || currentExerciseData.defaultHoldSeconds || 20;
-      if (elapsedOrCompleted >= targetSec) {
+      if (completedSec >= targetSec) {
         const nextProgId = currentExerciseData.progressoes[0];
         const nextProgEx = getExerciseById(nextProgId);
         if (nextProgEx) {
@@ -286,6 +333,7 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
     setRestTargetTimestamp(Date.now() + restTime * 1000);
     setPhase('rest');
     soundManager.playCountdownBeep();
+    speechVoice.speak(`Descanse ${restTime} segundos.`);
   };
 
   // Workout pause toggle with pause-duration accumulation
@@ -317,13 +365,20 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
     }
   };
 
-  // Isometric timer controls
+  // D3: Isometric timer controls com contagem preparatória de 5 segundos
   const toggleIsometricTimer = () => {
     soundManager.triggerHaptic([30]);
+    if (countdown5s !== null) {
+      // Cancelar contagem preparatória se tocar novamente
+      setCountdown5s(null);
+      return;
+    }
+
     if (!isometricTimerRunning) {
-      soundManager.playStartBeep();
-      setIsometricTargetTimestamp(Date.now() + isometricSecondsLeft * 1000);
-      setIsometricTimerRunning(true);
+      // Disparar contagem preparatória de 5s para posicionamento
+      setCountdown5s(5);
+      soundManager.playCountdownBeep();
+      speechVoice.speak('Prepare-se: 5');
     } else {
       if (isometricTargetTimestamp) {
         setIsometricSecondsLeft(Math.max(0, Math.ceil((isometricTargetTimestamp - Date.now()) / 1000)));
@@ -335,10 +390,35 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
 
   const resetIsometricTimer = () => {
     soundManager.triggerHaptic([20]);
+    setCountdown5s(null);
     setIsometricTimerRunning(false);
     setIsometricTargetTimestamp(null);
     setIsometricSecondsLeft(isometricInitialSeconds);
   };
+
+  // D3: Efeito do contador preparatório de 5s
+  useEffect(() => {
+    if (countdown5s === null) return;
+
+    if (countdown5s <= 1) {
+      const timer = setTimeout(() => {
+        soundManager.playStartBeep();
+        speechVoice.speak('Segure!');
+        setCountdown5s(null);
+        setIsometricTargetTimestamp(Date.now() + isometricSecondsLeft * 1000);
+        setIsometricTimerRunning(true);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+
+    const timer = setTimeout(() => {
+      soundManager.playCountdownBeep();
+      const next = countdown5s - 1;
+      setCountdown5s(next);
+      speechVoice.speak(String(next));
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [countdown5s, isometricSecondsLeft]);
 
   // Request Screen Wake Lock with re-acquisition on visibilitychange & lock-screen catchup
   useEffect(() => {
@@ -618,6 +698,7 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
       totalIsometricSeconds: totalIsoSecDone,
       musclesWorked,
       userNotes: progressionSummary,
+      newPRs: sessionPRs.length > 0 ? sessionPRs : undefined,
     };
 
     clearActiveWorkoutBackup();
@@ -741,6 +822,24 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
             {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
           </button>
 
+          {/* D5: Botão Toggle Modo Foco */}
+          <button
+            type="button"
+            onClick={() => {
+              soundManager.triggerHaptic([25]);
+              setIsFocusMode(prev => !prev);
+            }}
+            className={`w-10 h-10 rounded-2xl border transition active:scale-95 flex items-center justify-center shrink-0 ${
+              isFocusMode
+                ? 'bg-purple-500/20 text-purple-300 border-purple-500/40 glow-purple'
+                : 'glass-card text-slate-400 hover:text-white border-white/10'
+            }`}
+            title={isFocusMode ? 'Sair do Modo Foco' : 'Ativar Modo Foco (Tela Limpa)'}
+            aria-label={isFocusMode ? 'Sair do Modo Foco' : 'Ativar Modo Foco'}
+          >
+            {isFocusMode ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+          </button>
+
           <button
             type="button"
             onClick={() => setShowExitConfirm(true)}
@@ -761,9 +860,156 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
         />
       </div>
 
+      {/* D3: Overlay de Contagem Preparatória de 5 Segundos para Isometria */}
+      {countdown5s !== null && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/92 backdrop-blur-md animate-in fade-in duration-200 p-6 text-center">
+          <p className="text-xs sm:text-sm font-bold uppercase tracking-widest text-amber-300 mb-2">
+            Prepare a postura...
+          </p>
+          <div className="w-32 h-32 rounded-full border-4 border-amber-400/40 flex items-center justify-center bg-amber-500/15 shadow-2xl glow-amber animate-pulse mb-6">
+            <span className="font-mono text-6xl font-black text-amber-300">
+              {countdown5s}
+            </span>
+          </div>
+          <p className="text-xs text-slate-300 max-w-xs mb-6 font-medium">
+            Posicione-se em <strong>{currentExerciseData?.name}</strong>. A contagem da isometria iniciará automaticamente ao final dos 5s.
+          </p>
+          <button
+            type="button"
+            onClick={() => setCountdown5s(null)}
+            className="px-6 py-2.5 rounded-2xl glass-card text-slate-400 hover:text-white text-xs font-bold border border-white/10 active:scale-95"
+          >
+            Cancelar Início
+          </button>
+        </div>
+      )}
+
       {/* Main Active Training Stage */}
       <main className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-3 sm:p-4 flex flex-col items-center justify-start max-w-md sm:max-w-xl mx-auto w-full box-border pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))]">
-        {phase === 'exercise' ? (
+        {isFocusMode ? (
+          /* ================= D5: MODO FOCO (DISTRACTION-FREE) ================= */
+          <div className="w-full flex-1 flex flex-col justify-between py-4 space-y-6 animate-in fade-in duration-200">
+            {/* Header Foco */}
+            <div className="text-center space-y-1">
+              <span className="text-[10px] font-black uppercase tracking-widest text-purple-400 bg-purple-500/15 border border-purple-500/30 px-3 py-1 rounded-full inline-block">
+                Modo Foco • Série {setIndex + 1} de {currentRoutineExercise.sets}
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight mt-2">
+                {currentExerciseData?.name}
+              </h2>
+            </div>
+
+            {/* Display Gigante */}
+            <div className="flex-1 flex flex-col items-center justify-center py-6">
+              {phase === 'rest' ? (
+                <div className="text-center space-y-3">
+                  <span className="text-xs font-bold uppercase tracking-widest text-cyan-300">
+                    Tempo de Descanso
+                  </span>
+                  <div className="font-mono text-7xl sm:text-8xl font-black text-cyan-400 tracking-wider">
+                    {restSecondsLeft}s
+                  </div>
+                  <div className="flex items-center gap-2 justify-center pt-2">
+                    <button
+                      type="button"
+                      onClick={() => handleAdjustRest(15)}
+                      className="px-4 py-2 rounded-2xl glass-card border border-white/10 text-xs font-bold text-slate-200 active:scale-95"
+                    >
+                      +15s
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleSkipRest}
+                      className="px-5 py-2.5 rounded-2xl bg-cyan-500 text-slate-950 font-black text-xs active:scale-95"
+                    >
+                      Pular Descanso
+                    </button>
+                  </div>
+                </div>
+              ) : isIsometric ? (
+                <div className="text-center space-y-3">
+                  <span className="text-xs font-bold uppercase tracking-widest text-emerald-300">
+                    Isometria Contínua
+                  </span>
+                  <div className="font-mono text-7xl sm:text-8xl font-black text-emerald-400 tracking-wider">
+                    {isometricSecondsLeft}s
+                  </div>
+                  <div className="flex items-center gap-3 justify-center pt-2">
+                    <button
+                      type="button"
+                      onClick={toggleIsometricTimer}
+                      className={`min-h-[56px] px-6 rounded-2xl font-black text-sm flex items-center justify-center gap-2 active:scale-95 ${
+                        isometricTimerRunning
+                          ? 'bg-amber-500 text-slate-950'
+                          : 'bg-emerald-500 text-slate-950'
+                      }`}
+                    >
+                      {isometricTimerRunning ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current" />}
+                      <span>{isometricTimerRunning ? 'Pausar' : 'Iniciar'}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleCompleteIsometricSet}
+                      className="min-h-[56px] px-6 rounded-2xl bg-white/15 border border-white/20 text-white font-black text-sm active:scale-95"
+                    >
+                      Concluir Série
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center space-y-4">
+                  <span className="text-xs font-bold uppercase tracking-widest text-emerald-300">
+                    Meta de Repetições
+                  </span>
+                  <div className="flex items-center justify-center gap-6">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        soundManager.triggerHaptic([20]);
+                        setCurrentReps(prev => Math.max(1, prev - 1));
+                      }}
+                      className="w-16 h-16 rounded-3xl glass-card border border-white/10 text-white flex items-center justify-center active:scale-90 text-2xl font-black"
+                    >
+                      <Minus className="w-8 h-8" />
+                    </button>
+                    <span className="font-mono text-7xl sm:text-8xl font-black text-emerald-400 tracking-wider">
+                      {currentReps}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        soundManager.triggerHaptic([20]);
+                        setCurrentReps(prev => prev + 1);
+                      }}
+                      className="w-16 h-16 rounded-3xl glass-card border border-white/10 text-white flex items-center justify-center active:scale-90 text-2xl font-black"
+                    >
+                      <Plus className="w-8 h-8" />
+                    </button>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleCompleteRepsSet}
+                    className="w-full min-h-[64px] py-4 px-6 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 font-black text-base flex items-center justify-center gap-2 shadow-2xl active:scale-98 glow-emerald"
+                  >
+                    <CheckCircle2 className="w-6 h-6 stroke-[3]" />
+                    <span>Concluir Série ({currentReps} reps)</span>
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Sair do Modo Foco */}
+            <div className="text-center pt-2">
+              <button
+                type="button"
+                onClick={() => setIsFocusMode(false)}
+                className="text-xs text-slate-400 hover:text-white underline"
+              >
+                Voltar à visualização detalhada
+              </button>
+            </div>
+          </div>
+        ) : phase === 'exercise' ? (
           /* ================= PHASE 1: EXECUTING SET ================= */
           <div className="w-full flex flex-col items-center space-y-4 animate-in fade-in zoom-in-95 duration-200">
             {/* Exercise Header & Posture/Adaptation Triggers */}

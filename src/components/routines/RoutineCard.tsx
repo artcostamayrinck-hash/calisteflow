@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { Routine, MuscleGroup } from '../../types';
 import { EXERCISES_DATABASE, MUSCLE_LABELS } from '../../data/exercisesData';
 import { soundManager } from '../../utils/audio';
-import { Play, Clock, Dumbbell, MoreVertical, Edit2, Copy, Trash2, Zap } from 'lucide-react';
+import { Play, Clock, Dumbbell, MoreVertical, Edit2, Copy, Trash2, Zap, Share2 } from 'lucide-react';
 
 interface RoutineCardProps {
   routine: Routine;
@@ -11,6 +11,7 @@ interface RoutineCardProps {
   onDuplicate: (routine: Routine) => void;
   onDelete: (id: string) => void;
   onViewDetails: (routine: Routine) => void;
+  onShare?: (routine: Routine) => void;
 }
 
 export const RoutineCard = ({
@@ -20,6 +21,7 @@ export const RoutineCard = ({
   onDuplicate,
   onDelete,
   onViewDetails,
+  onShare,
 }: RoutineCardProps) => {
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -157,6 +159,17 @@ export const RoutineCard = ({
                   >
                     <Copy className="w-3.5 h-3.5 text-amber-400" /> Duplicar Rotina
                   </button>
+                  {onShare && (
+                    <button
+                      onClick={() => {
+                        setMenuOpen(false);
+                        onShare(routine);
+                      }}
+                      className="w-full px-3 py-2 text-left text-slate-300 hover:bg-white/[0.06] flex items-center gap-2"
+                    >
+                      <Share2 className="w-3.5 h-3.5 text-emerald-400" /> Exportar / PDF
+                    </button>
+                  )}
                   {routine.isCustom && (
                     <button
                       onClick={() => {
@@ -244,15 +257,27 @@ export const RoutineCard = ({
           </span>
         </div>
 
-        <button
-          onClick={() => {
-            soundManager.triggerHaptic([40]);
-            onStart(routine);
-          }}
-          className="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-lg shadow-emerald-500/20 hover:brightness-110 active:scale-95 transition glow-emerald"
-        >
-          <Play className="w-3.5 h-3.5 fill-current" /> Treinar
-        </button>
+        <div className="flex items-center gap-2">
+          {onShare && (
+            <button
+              onClick={() => onShare(routine)}
+              className="p-2.5 rounded-2xl glass-card text-slate-400 hover:text-white border border-white/10 active:scale-95 transition"
+              title="Compartilhar ou exportar para PDF"
+              aria-label="Compartilhar ficha"
+            >
+              <Share2 className="w-3.5 h-3.5" />
+            </button>
+          )}
+          <button
+            onClick={() => {
+              soundManager.triggerHaptic([40]);
+              onStart(routine);
+            }}
+            className="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-lg shadow-emerald-500/20 hover:brightness-110 active:scale-95 transition glow-emerald"
+          >
+            <Play className="w-3.5 h-3.5 fill-current" /> Treinar
+          </button>
+        </div>
       </div>
     </div>
   );
