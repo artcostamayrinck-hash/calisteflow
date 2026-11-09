@@ -101,24 +101,28 @@ export const RoutineListView = ({
         )}
       </div>
 
-      {/* Category Filter Pills */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-        {categories.map(cat => (
-          <button
-            key={cat}
-            onClick={() => {
-              soundManager.triggerHaptic([20]);
-              setSelectedCategory(cat);
-            }}
-            className={`px-3.5 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition-all active:scale-95 ${
-              selectedCategory === cat
-                ? 'bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 shadow-lg shadow-emerald-500/20'
-                : 'glass-card text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            {cat}
-          </button>
-        ))}
+      {/* Category Filter Pills com Indicador de Rolagem */}
+      <div className="relative">
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none px-0.5">
+          {categories.map(cat => (
+            <button
+              key={cat}
+              onClick={() => {
+                soundManager.triggerHaptic([20]);
+                setSelectedCategory(cat);
+              }}
+              className={`px-3.5 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition-all active:scale-95 ${
+                selectedCategory === cat
+                  ? 'bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 shadow-lg shadow-emerald-500/20'
+                  : 'glass-card text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+        <div className="pointer-events-none absolute left-0 top-0 bottom-1 w-2.5 bg-gradient-to-r from-slate-950 to-transparent" />
+        <div className="pointer-events-none absolute right-0 top-0 bottom-1 w-5 bg-gradient-to-l from-slate-950 to-transparent" />
       </div>
 
       {/* Grid of Routine Cards */}

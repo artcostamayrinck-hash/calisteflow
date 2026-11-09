@@ -55,6 +55,25 @@ export const MuscleMap = ({
 
   const isInteractive = Boolean(onSelectMuscle);
 
+  const getInteractiveProps = (m: MuscleGroup) => {
+    if (!isInteractive) return {};
+    const selected = isMuscleSelected(m);
+    const label = MUSCLE_LABELS[m] || m;
+    return {
+      role: 'button',
+      tabIndex: 0,
+      'aria-label': `Filtrar por músculo ${label}. Status: ${selected ? 'selecionado' : 'não selecionado'}`,
+      'aria-pressed': selected,
+      onKeyDown: (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          handleMuscleClick(m);
+        }
+      },
+      className: 'cursor-pointer hover:brightness-125 transition focus:outline-none focus:ring-2 focus:ring-amber-400 rounded',
+    };
+  };
+
   const containerSizes = {
     sm: 'max-w-[240px]',
     md: 'max-w-[340px]',
@@ -88,7 +107,7 @@ export const MuscleMap = ({
             {/* Deltoids / Shoulders Front */}
             <g
               onClick={() => handleMuscleClick('ombros')}
-              className={isInteractive ? 'cursor-pointer hover:brightness-125 transition' : ''}
+              {...getInteractiveProps('ombros')}
             >
               <ellipse cx="28" cy="40" rx="7" ry="9" fill={getMuscleColor('ombros')} opacity={getMuscleOpacity('ombros')} />
               <ellipse cx="72" cy="40" rx="7" ry="9" fill={getMuscleColor('ombros')} opacity={getMuscleOpacity('ombros')} />
@@ -97,7 +116,7 @@ export const MuscleMap = ({
             {/* Chest / Peitoral */}
             <g
               onClick={() => handleMuscleClick('peito')}
-              className={isInteractive ? 'cursor-pointer hover:brightness-125 transition' : ''}
+              {...getInteractiveProps('peito')}
             >
               <path
                 d="M36 36 Q50 38 64 36 Q64 54 51 55 Q36 54 36 36 Z"
@@ -110,7 +129,7 @@ export const MuscleMap = ({
             {/* Biceps */}
             <g
               onClick={() => handleMuscleClick('biceps')}
-              className={isInteractive ? 'cursor-pointer hover:brightness-125 transition' : ''}
+              {...getInteractiveProps('biceps')}
             >
               <ellipse cx="24" cy="55" rx="5" ry="8" fill={getMuscleColor('biceps')} opacity={getMuscleOpacity('biceps')} />
               <ellipse cx="76" cy="55" rx="5" ry="8" fill={getMuscleColor('biceps')} opacity={getMuscleOpacity('biceps')} />
@@ -119,7 +138,7 @@ export const MuscleMap = ({
             {/* Forearms / Antebraco Front */}
             <g
               onClick={() => handleMuscleClick('antebraco')}
-              className={isInteractive ? 'cursor-pointer hover:brightness-125 transition' : ''}
+              {...getInteractiveProps('antebraco')}
             >
               <ellipse cx="20" cy="74" rx="4.5" ry="10" fill={getMuscleColor('antebraco')} opacity={getMuscleOpacity('antebraco')} />
               <ellipse cx="80" cy="74" rx="4.5" ry="10" fill={getMuscleColor('antebraco')} opacity={getMuscleOpacity('antebraco')} />
@@ -128,7 +147,7 @@ export const MuscleMap = ({
             {/* Abdominals / Core */}
             <g
               onClick={() => handleMuscleClick('abdomen')}
-              className={isInteractive ? 'cursor-pointer hover:brightness-125 transition' : ''}
+              {...getInteractiveProps('abdomen')}
             >
               <rect x="42" y="58" width="16" height="24" rx="3" fill={getMuscleColor('abdomen')} opacity={getMuscleOpacity('abdomen')} />
               {/* Six pack grid lines */}
@@ -143,7 +162,7 @@ export const MuscleMap = ({
             {/* Quadriceps (Front Thighs) */}
             <g
               onClick={() => handleMuscleClick('quadriceps')}
-              className={isInteractive ? 'cursor-pointer hover:brightness-125 transition' : ''}
+              {...getInteractiveProps('quadriceps')}
             >
               <path
                 d="M38 95 C38 95 34 116 37 132 C39 135 44 135 46 132 C47 116 48 95 48 95 Z"
@@ -164,7 +183,7 @@ export const MuscleMap = ({
             {/* Calves Front (Tibialis & Shin) */}
             <g
               onClick={() => handleMuscleClick('panturrilhas')}
-              className={isInteractive ? 'cursor-pointer hover:brightness-125 transition' : ''}
+              {...getInteractiveProps('panturrilhas')}
             >
               <path d="M38 140 Q35 155 39 174 Q43 174 44 155 Q43 140 38 140 Z" fill={getMuscleColor('panturrilhas')} opacity={getMuscleOpacity('panturrilhas')} />
               <path d="M62 140 Q65 155 61 174 Q57 174 56 155 Q57 140 62 140 Z" fill={getMuscleColor('panturrilhas')} opacity={getMuscleOpacity('panturrilhas')} />
@@ -196,7 +215,7 @@ export const MuscleMap = ({
             {/* Trapezius & Upper Back */}
             <g
               onClick={() => handleMuscleClick('costas')}
-              className={isInteractive ? 'cursor-pointer hover:brightness-125 transition' : ''}
+              {...getInteractiveProps('costas')}
             >
               {/* Trapezius / Dorsais */}
               <path
@@ -209,7 +228,7 @@ export const MuscleMap = ({
             {/* Shoulders Back */}
             <g
               onClick={() => handleMuscleClick('ombros')}
-              className={isInteractive ? 'cursor-pointer hover:brightness-125 transition' : ''}
+              {...getInteractiveProps('ombros')}
             >
               <ellipse cx="28" cy="40" rx="7" ry="8" fill={getMuscleColor('ombros')} opacity={getMuscleOpacity('ombros')} />
               <ellipse cx="72" cy="40" rx="7" ry="8" fill={getMuscleColor('ombros')} opacity={getMuscleOpacity('ombros')} />
@@ -218,7 +237,7 @@ export const MuscleMap = ({
             {/* Triceps */}
             <g
               onClick={() => handleMuscleClick('triceps')}
-              className={isInteractive ? 'cursor-pointer hover:brightness-125 transition' : ''}
+              {...getInteractiveProps('triceps')}
             >
               <ellipse cx="23" cy="55" rx="5" ry="9" fill={getMuscleColor('triceps')} opacity={getMuscleOpacity('triceps')} />
               <ellipse cx="77" cy="55" rx="5" ry="9" fill={getMuscleColor('triceps')} opacity={getMuscleOpacity('triceps')} />
@@ -227,7 +246,7 @@ export const MuscleMap = ({
             {/* Forearms Back */}
             <g
               onClick={() => handleMuscleClick('antebraco')}
-              className={isInteractive ? 'cursor-pointer hover:brightness-125 transition' : ''}
+              {...getInteractiveProps('antebraco')}
             >
               <ellipse cx="20" cy="74" rx="4.5" ry="10" fill={getMuscleColor('antebraco')} opacity={getMuscleOpacity('antebraco')} />
               <ellipse cx="80" cy="74" rx="4.5" ry="10" fill={getMuscleColor('antebraco')} opacity={getMuscleOpacity('antebraco')} />
@@ -236,7 +255,7 @@ export const MuscleMap = ({
             {/* Lower Back / Lombar */}
             <g
               onClick={() => handleMuscleClick('lombar')}
-              className={isInteractive ? 'cursor-pointer hover:brightness-125 transition' : ''}
+              {...getInteractiveProps('lombar')}
             >
               <path d="M42 66 L58 66 L56 80 L44 80 Z" fill={getMuscleColor('lombar')} opacity={getMuscleOpacity('lombar')} />
             </g>
@@ -244,7 +263,7 @@ export const MuscleMap = ({
             {/* Gluteus / Glúteos */}
             <g
               onClick={() => handleMuscleClick('gluteos')}
-              className={isInteractive ? 'cursor-pointer hover:brightness-125 transition' : ''}
+              {...getInteractiveProps('gluteos')}
             >
               <ellipse cx="44" cy="88" rx="7.5" ry="9" fill={getMuscleColor('gluteos')} opacity={getMuscleOpacity('gluteos')} />
               <ellipse cx="56" cy="88" rx="7.5" ry="9" fill={getMuscleColor('gluteos')} opacity={getMuscleOpacity('gluteos')} />
@@ -253,7 +272,7 @@ export const MuscleMap = ({
             {/* Hamstrings / Posteriores */}
             <g
               onClick={() => handleMuscleClick('posteriores')}
-              className={isInteractive ? 'cursor-pointer hover:brightness-125 transition' : ''}
+              {...getInteractiveProps('posteriores')}
             >
               <path
                 d="M37 99 C37 99 34 116 36 130 C38 133 44 133 46 130 C47 116 48 99 48 99 Z"
@@ -270,7 +289,7 @@ export const MuscleMap = ({
             {/* Calves / Panturrilhas Back */}
             <g
               onClick={() => handleMuscleClick('panturrilhas')}
-              className={isInteractive ? 'cursor-pointer hover:brightness-125 transition' : ''}
+              {...getInteractiveProps('panturrilhas')}
             >
               <ellipse cx="39" cy="154" rx="6" ry="13" fill={getMuscleColor('panturrilhas')} opacity={getMuscleOpacity('panturrilhas')} />
               <ellipse cx="61" cy="154" rx="6" ry="13" fill={getMuscleColor('panturrilhas')} opacity={getMuscleOpacity('panturrilhas')} />

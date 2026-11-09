@@ -91,6 +91,7 @@ export const ExerciseLibraryView = ({
   const [selectedEquipment, setSelectedEquipment] = useState<EquipmentType | 'Todos'>('Todos');
   const [selectedJointSafety, setSelectedJointSafety] = useState<'punho' | 'ombro' | 'joelho' | 'lombar' | 'sem-equipamento' | 'Todos'>('Todos');
   const [selectedMuscles, setSelectedMuscles] = useState<MuscleGroup[]>([]);
+  const [visibleCount, setVisibleCount] = useState<number>(24);
 
   const listTopRef = useRef<HTMLDivElement>(null);
   const prevFilterKeyRef = useRef<string>('');
@@ -227,6 +228,7 @@ export const ExerciseLibraryView = ({
     const currentKey = `${[...selectedMuscles].sort().join(',')}|${selectedPattern}|${selectedDifficulty}|${selectedEquipment}|${selectedJointSafety}|${searchQuery}`;
     if (prevFilterKeyRef.current && prevFilterKeyRef.current !== currentKey) {
       listTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setVisibleCount(24);
     }
     prevFilterKeyRef.current = currentKey;
   }, [selectedMuscles, selectedPattern, selectedDifficulty, selectedEquipment, selectedJointSafety, searchQuery]);
@@ -409,28 +411,32 @@ export const ExerciseLibraryView = ({
           )}
         </div>
 
-        {/* Padrões de Movimento em Carrossel */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-          {patterns.map(pat => {
-            const label = pat === 'Todos' ? 'Todos os Padrões' : MOVEMENT_PATTERN_LABELS[pat];
-            const isSelected = selectedPattern === pat;
-            return (
-              <button
-                key={pat}
-                onClick={() => {
-                  soundManager.triggerHaptic([20]);
-                  setSelectedPattern(pat);
-                }}
-                className={`px-3.5 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition-all active:scale-95 ${
-                  isSelected
-                    ? 'bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 shadow-lg shadow-emerald-500/20'
-                    : 'glass-card text-slate-400 hover:text-slate-200'
-                }`}
-              >
-                {label}
-              </button>
-            );
-          })}
+        {/* Padrões de Movimento em Carrossel com Indicador de Rolagem */}
+        <div className="relative">
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none px-0.5">
+            {patterns.map(pat => {
+              const label = pat === 'Todos' ? 'Todos os Padrões' : MOVEMENT_PATTERN_LABELS[pat];
+              const isSelected = selectedPattern === pat;
+              return (
+                <button
+                  key={pat}
+                  onClick={() => {
+                    soundManager.triggerHaptic([20]);
+                    setSelectedPattern(pat);
+                  }}
+                  className={`px-3.5 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition-all active:scale-95 ${
+                    isSelected
+                      ? 'bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 shadow-lg shadow-emerald-500/20'
+                      : 'glass-card text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+          <div className="pointer-events-none absolute left-0 top-0 bottom-1 w-2.5 bg-gradient-to-r from-slate-950 to-transparent" />
+          <div className="pointer-events-none absolute right-0 top-0 bottom-1 w-5 bg-gradient-to-l from-slate-950 to-transparent" />
         </div>
 
         {/* Barra de Controle de Filtros Avançados & Mapa */}
@@ -458,7 +464,7 @@ export const ExerciseLibraryView = ({
               className="px-3.5 py-2 rounded-2xl glass-card text-slate-300 text-xs font-bold flex items-center gap-2 hover:bg-white/[0.08] transition active:scale-95"
             >
               <Activity className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Mapa Muscular 3D</span>
+              <span>Mapa Muscular Anatômico 2D</span>
               {showInteractiveMap ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
             </button>
 
@@ -645,7 +651,7 @@ export const ExerciseLibraryView = ({
                   </span>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
-                  {primaryExercises.map(ex => renderExerciseCard(ex))}
+                  {primaryExercises.slice(0, visibleCount).map(ex => renderExerciseCard(ex))}
                 </div>
               </section>
             )}
@@ -665,9 +671,23 @@ export const ExerciseLibraryView = ({
                   </span>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
-                  {secondaryExercises.map(ex => renderExerciseCard(ex))}
+                  {secondaryExercises.slice(0, visibleCount).map(ex => renderExerciseCard(ex))}
                 </div>
               </section>
+            )}
+
+            {/* Botão de Paginação / Carregar Mais no modo muscular */}
+            {(primaryExercises.length > visibleCount || secondaryExercises.length > visibleCount) && (
+              <div className="pt-4 flex justify-center">
+                <button
+                  type="button"
+                  onClick={() => setVisibleCount(v => v + 24)}
+                  className="px-6 py-3 rounded-2xl glass-card text-emerald-300 font-bold text-xs border border-emerald-500/30 hover:bg-emerald-500/10 active:scale-95 transition min-h-[48px] flex items-center gap-2 shadow-lg glow-emerald"
+                >
+                  <Sparkles className="w-4 h-4 text-emerald-400" />
+                  Carregar Mais Exercícios ({Math.max(0, primaryExercises.length - visibleCount) + Math.max(0, secondaryExercises.length - visibleCount)} restantes)
+                </button>
+              </div>
             )}
 
             {/* Aviso quando ambos os grupos ficam vazios */}
@@ -708,8 +728,21 @@ export const ExerciseLibraryView = ({
         {selectedMuscles.length === 0 && (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
-              {primaryExercises.map(ex => renderExerciseCard(ex))}
+              {primaryExercises.slice(0, visibleCount).map(ex => renderExerciseCard(ex))}
             </div>
+
+            {primaryExercises.length > visibleCount && (
+              <div className="pt-4 flex justify-center">
+                <button
+                  type="button"
+                  onClick={() => setVisibleCount(v => v + 24)}
+                  className="px-6 py-3 rounded-2xl glass-card text-emerald-300 font-bold text-xs border border-emerald-500/30 hover:bg-emerald-500/10 active:scale-95 transition min-h-[48px] flex items-center gap-2 shadow-lg glow-emerald"
+                >
+                  <Sparkles className="w-4 h-4 text-emerald-400" />
+                  Carregar Mais Exercícios ({primaryExercises.length - visibleCount} restantes)
+                </button>
+              </div>
+            )}
 
             {primaryExercises.length === 0 && (
               <div className="p-12 text-center glass-card rounded-3xl border border-white/10 space-y-3">
