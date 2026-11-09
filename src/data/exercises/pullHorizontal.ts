@@ -18,6 +18,7 @@ export const PULL_HORIZONTAL_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Certifique-se de que a barra ou apoio suporte seu peso com total firmeza.'],
     padrao: 'puxar-horizontal',
+    fase: 'treino',
     equipamento: ['barra'],
     tipoExercicio: 'principal',
     estatico: false,
@@ -61,6 +62,7 @@ export const PULL_HORIZONTAL_EXERCISES: Exercise[] = [
       'Não deixe o quadril desabar; mantenha linha reta dos tornozelos à cabeça.'
     ],
     padrao: 'puxar-horizontal',
+    fase: 'treino',
     equipamento: ['barra'],
     tipoExercicio: 'principal',
     estatico: false,
@@ -104,6 +106,7 @@ export const PULL_HORIZONTAL_EXERCISES: Exercise[] = [
       'Verifique a firmeza das maçanetas antes de se inclinar.'
     ],
     padrao: 'puxar-horizontal',
+    fase: 'treino',
     equipamento: ['toalha'],
     tipoExercicio: 'principal',
     estatico: false,
@@ -143,6 +146,7 @@ export const PULL_HORIZONTAL_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Mantenha o core rígido para a coluna não arquear para baixo.'],
     padrao: 'puxar-horizontal',
+    fase: 'treino',
     equipamento: ['barra', 'banco'],
     tipoExercicio: 'principal',
     estatico: false,
@@ -183,6 +187,7 @@ export const PULL_HORIZONTAL_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Se sentir pinçamento no punho, passe para a pegada neutra em argolas.'],
     padrao: 'puxar-horizontal',
+    fase: 'treino',
     equipamento: ['barra'],
     tipoExercicio: 'principal',
     estatico: false,
@@ -222,6 +227,7 @@ export const PULL_HORIZONTAL_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Excelente para quem tem tendinite de cotovelo ou dor no ombro por permitir rotação livre.'],
     padrao: 'puxar-horizontal',
+    fase: 'treino',
     equipamento: ['argolas'],
     tipoExercicio: 'principal',
     estatico: false,
@@ -262,6 +268,7 @@ export const PULL_HORIZONTAL_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Gire a palma da mão que estende para não forçar a cápsula articular.'],
     padrao: 'puxar-horizontal',
+    fase: 'treino',
     equipamento: ['barra', 'argolas'],
     tipoExercicio: 'principal',
     estatico: false,
@@ -301,6 +308,7 @@ export const PULL_HORIZONTAL_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Ajuste o ângulo do corpo para menos inclinado caso perca o alinhamento das costas.'],
     padrao: 'puxar-horizontal',
+    fase: 'treino',
     equipamento: ['argolas', 'barra'],
     tipoExercicio: 'principal',
     estatico: false,
@@ -341,6 +349,7 @@ export const PULL_HORIZONTAL_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Requer domínio prévio do Tuck Front Lever estático por 20 segundos.'],
     padrao: 'skills',
+    fase: 'treino',
     equipamento: ['barra'],
     tipoExercicio: 'skill',
     estatico: false,
@@ -392,6 +401,7 @@ export const PULL_HORIZONTAL_EXERCISES: Exercise[] = [
       'Mantenha o corpo reto em prancha sem deixar o quadril afundar.'
     ],
     padrao: 'puxar-horizontal',
+    fase: 'treino',
     equipamento: [
       'barra'
     ],
@@ -477,6 +487,7 @@ export const PULL_HORIZONTAL_EXERCISES: Exercise[] = [
       'Se sentir estresse no punho, ajuste a inclinação dos pés ou use argolas.'
     ],
     padrao: 'puxar-horizontal',
+    fase: 'treino',
     equipamento: [
       'barra'
     ],
@@ -560,6 +571,7 @@ export const PULL_HORIZONTAL_EXERCISES: Exercise[] = [
       'Certifique-se de que a porta esteja totalmente travada e apoie os pés com segurança.'
     ],
     padrao: 'puxar-horizontal',
+    fase: 'treino',
     equipamento: [
       'toalha'
     ],
@@ -640,6 +652,7 @@ export const PULL_HORIZONTAL_EXERCISES: Exercise[] = [
       'Distribua os livros ou garrafas de maneira uniforme dentro da mochila para não oscilar o centro de massa.'
     ],
     padrao: 'puxar-horizontal',
+    fase: 'treino',
     equipamento: [
       'nenhum'
     ],

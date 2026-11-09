@@ -21,6 +21,7 @@ export const SKILL_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Empurre o solo com força para afastar os ombros das orelhas.'],
     padrao: 'skills',
+    fase: 'treino',
     equipamento: ['nenhum'],
     tipoExercicio: 'skill',
     estatico: true,
@@ -60,6 +61,7 @@ export const SKILL_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Trabalhe a flexibilidade de isquiotibiais para não curvar em excesso a lombar.'],
     padrao: 'skills',
+    fase: 'treino',
     equipamento: ['nenhum'],
     tipoExercicio: 'skill',
     estatico: true,
@@ -98,6 +100,7 @@ export const SKILL_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Não deixe os cotovelos dobrarem durante a sustentação.'],
     padrao: 'skills',
+    fase: 'treino',
     equipamento: ['nenhum'],
     tipoExercicio: 'skill',
     estatico: true,
@@ -136,6 +139,7 @@ export const SKILL_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Requer altíssima flexibilidade ativa de isquiotibiais.'],
     padrao: 'skills',
+    fase: 'treino',
     equipamento: ['nenhum'],
     tipoExercicio: 'skill',
     estatico: true,
@@ -178,6 +182,7 @@ export const SKILL_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Coloque uma almofada à frente do rosto caso perca o equilíbrio.'],
     padrao: 'skills',
+    fase: 'treino',
     equipamento: ['nenhum'],
     tipoExercicio: 'skill',
     estatico: true,
@@ -216,6 +221,7 @@ export const SKILL_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Aquecer muito bem os punhos antes de tentar braços retos.'],
     padrao: 'skills',
+    fase: 'treino',
     equipamento: ['nenhum'],
     tipoExercicio: 'skill',
     estatico: true,
@@ -258,6 +264,7 @@ export const SKILL_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Vire os dedos 45° para fora para proteger os punhos.'],
     padrao: 'skills',
+    fase: 'treino',
     equipamento: ['nenhum'],
     tipoExercicio: 'skill',
     estatico: true,
@@ -296,6 +303,7 @@ export const SKILL_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Se sentir desconforto agudo no tendão distal do bíceps, pare imediatamente.'],
     padrao: 'skills',
+    fase: 'treino',
     equipamento: ['nenhum'],
     tipoExercicio: 'skill',
     estatico: true,
@@ -334,6 +342,7 @@ export const SKILL_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Requer anos de preparação articular nos tendões dos punhos e cotovelos.'],
     padrao: 'skills',
+    fase: 'treino',
     equipamento: ['nenhum'],
     tipoExercicio: 'skill',
     estatico: true,
@@ -372,6 +381,7 @@ export const SKILL_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Habilidade de nível olímpico; execute apenas com autorização e base consolidada.'],
     padrao: 'skills',
+    fase: 'treino',
     equipamento: ['nenhum'],
     tipoExercicio: 'skill',
     estatico: true,
@@ -414,6 +424,7 @@ export const SKILL_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Mantenha os cotovelos travados; a puxada é pura retração e depressão dorsal.'],
     padrao: 'skills',
+    fase: 'treino',
     equipamento: ['barra'],
     tipoExercicio: 'skill',
     estatico: true,
@@ -453,6 +464,7 @@ export const SKILL_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Não deixe os quadris desabarem abaixo da linha dos ombros.'],
     padrao: 'skills',
+    fase: 'treino',
     equipamento: ['barra'],
     tipoExercicio: 'skill',
     estatico: true,
@@ -496,6 +508,7 @@ export const SKILL_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Pegada pronada é mais gentil para o tendão do bíceps nos estágios iniciais.'],
     padrao: 'skills',
+    fase: 'treino',
     equipamento: ['barra'],
     tipoExercicio: 'skill',
     estatico: true,
@@ -535,6 +548,7 @@ export const SKILL_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Cuidado com o tendão do bíceps: treine extensões e condicionamento prévio dos cotovelos.'],
     padrao: 'skills',
+    fase: 'treino',
     equipamento: ['barra'],
     tipoExercicio: 'skill',
     estatico: true,
@@ -578,6 +592,7 @@ export const SKILL_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Alterne os lados para evitar desequilíbrios na musculatura lateral do tronco.'],
     padrao: 'skills',
+    fase: 'treino',
     equipamento: ['barra'],
     tipoExercicio: 'skill',
     estatico: true,
@@ -617,6 +632,7 @@ export const SKILL_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Exige força absurda de deltóides, grande dorsal e oblíquos.'],
     padrao: 'skills',
+    fase: 'treino',
     equipamento: ['barra'],
     tipoExercicio: 'skill',
     estatico: true,
@@ -668,6 +684,7 @@ export const SKILL_EXERCISES: Exercise[] = [
       'Pare imediatamente se sentir queimação no tendão do bíceps braquial.'
     ],
     padrao: 'skills',
+    fase: 'treino',
     equipamento: [
       'nenhum'
     ],
@@ -758,6 +775,7 @@ export const SKILL_EXERCISES: Exercise[] = [
       'Mantenha aquecimento minucioso dos punhos e bíceps antes da execução.'
     ],
     padrao: 'skills',
+    fase: 'treino',
     equipamento: [
       'nenhum'
     ],
@@ -844,6 +862,7 @@ export const SKILL_EXERCISES: Exercise[] = [
       'Mantenha depressão escapular ativa para proteger os ombros.'
     ],
     padrao: 'skills',
+    fase: 'treino',
     equipamento: [
       'barra'
     ],
@@ -930,6 +949,7 @@ export const SKILL_EXERCISES: Exercise[] = [
       'Não realize balanços bruscos ao entrar na posição.'
     ],
     padrao: 'skills',
+    fase: 'treino',
     equipamento: [
       'barra'
     ],
@@ -1016,6 +1036,7 @@ export const SKILL_EXERCISES: Exercise[] = [
       'Aqueça bem os adutores e isquiotibiais para permitir maior abertura das pernas.'
     ],
     padrao: 'skills',
+    fase: 'treino',
     equipamento: [
       'barra'
     ],
@@ -1103,6 +1124,7 @@ export const SKILL_EXERCISES: Exercise[] = [
       'Aqueça a extensão de ombro e o tendão do bíceps distal antes da execução.'
     ],
     padrao: 'skills',
+    fase: 'treino',
     equipamento: [
       'barra'
     ],
@@ -1190,6 +1212,7 @@ export const SKILL_EXERCISES: Exercise[] = [
       'Não solte os ombros bruscamente no final da série.'
     ],
     padrao: 'skills',
+    fase: 'treino',
     equipamento: [
       'barra'
     ],
@@ -1276,6 +1299,7 @@ export const SKILL_EXERCISES: Exercise[] = [
       'Desça apenas até a amplitude de ombro confortável e controlável para retornar com força própria.'
     ],
     padrao: 'skills',
+    fase: 'treino',
     equipamento: [
       'barra'
     ],
@@ -1363,6 +1387,7 @@ export const SKILL_EXERCISES: Exercise[] = [
       'Alterne os lados para evitar desequilíbrios de força e sobrecarga assimétrica na coluna.'
     ],
     padrao: 'skills',
+    fase: 'treino',
     equipamento: [
       'barra'
     ],
@@ -1448,6 +1473,7 @@ export const SKILL_EXERCISES: Exercise[] = [
       'Pratique inicialmente com uma parede de segurança atrás para evitar quedas descontroladas.'
     ],
     padrao: 'skills',
+    fase: 'treino',
     equipamento: [
       'parede'
     ],

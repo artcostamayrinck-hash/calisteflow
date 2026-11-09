@@ -33,6 +33,7 @@ export const RoutineEditorModal = ({
     ]
   );
   const [showAddDrawer, setShowAddDrawer] = useState(false);
+  const [pickerPhaseFilter, setPickerPhaseFilter] = useState<'todos' | 'aquecimento' | 'treino' | 'alongamento'>('todos');
 
   const handleAddExercise = (exerciseId: string) => {
     const exData = EXERCISES_DATABASE.find(e => e.id === exerciseId);
@@ -47,7 +48,28 @@ export const RoutineEditorModal = ({
       notes: '',
     };
 
-    setExercises([...exercises, newExercise]);
+    // Sugerir o bloco correto pela fase do exercício: Aquecimento -> Treino -> Alongamento
+    let insertIndex = exercises.length;
+    if (exData.fase === 'aquecimento') {
+      let lastWarmupIdx = -1;
+      exercises.forEach((item, idx) => {
+        const itemEx = EXERCISES_DATABASE.find(e => e.id === item.exerciseId);
+        if (itemEx?.fase === 'aquecimento') lastWarmupIdx = idx;
+      });
+      insertIndex = lastWarmupIdx + 1;
+    } else if (exData.fase === 'treino') {
+      const firstStretchIdx = exercises.findIndex(item => {
+        const itemEx = EXERCISES_DATABASE.find(e => e.id === item.exerciseId);
+        return itemEx?.fase === 'alongamento';
+      });
+      if (firstStretchIdx > -1) {
+        insertIndex = firstStretchIdx;
+      }
+    }
+
+    const updated = [...exercises];
+    updated.splice(insertIndex, 0, newExercise);
+    setExercises(updated);
     setShowAddDrawer(false);
   };
 
@@ -358,7 +380,10 @@ export const RoutineEditorModal = ({
                 onClick={e => e.stopPropagation()}
               >
                 <div className="flex items-center justify-between pb-3.5 border-b border-white/10 shrink-0">
-                  <h3 className="font-black text-slate-100 text-sm">Biblioteca de Calistenia</h3>
+                  <div>
+                    <h3 className="font-black text-slate-100 text-sm">Biblioteca por Fases</h3>
+                    <p className="text-[10px] text-slate-400">O exercício será inserido no bloco correto automaticamente</p>
+                  </div>
                   <button
                     type="button"
                     onClick={() => setShowAddDrawer(false)}
@@ -367,8 +392,30 @@ export const RoutineEditorModal = ({
                     <X className="w-5 h-5" />
                   </button>
                 </div>
+
+                {/* Filtro de Fases dentro do Picker */}
+                <div className="flex items-center gap-1.5 pt-2 pb-1 overflow-x-auto no-scrollbar shrink-0">
+                  {(['todos', 'aquecimento', 'treino', 'alongamento'] as const).map(f => (
+                    <button
+                      key={f}
+                      type="button"
+                      onClick={() => setPickerPhaseFilter(f)}
+                      className={`px-3 py-1 rounded-xl text-[11px] font-bold capitalize transition ${
+                        pickerPhaseFilter === f
+                          ? 'bg-emerald-500 text-slate-950 font-black'
+                          : 'bg-white/5 text-slate-400 hover:text-white border border-white/5'
+                      }`}
+                    >
+                      {f === 'todos' ? 'Todos' : f}
+                    </button>
+                  ))}
+                </div>
+
                 <div className="flex-1 min-h-0 overflow-y-auto space-y-2 py-3 pr-1">
-                  {EXERCISES_DATABASE.map(ex => (
+                  {EXERCISES_DATABASE.filter(ex => {
+                    if (pickerPhaseFilter === 'todos') return true;
+                    return ex.fase === pickerPhaseFilter || ex.fasesSecundarias?.includes(pickerPhaseFilter);
+                  }).map(ex => (
                     <button
                       key={ex.id}
                       type="button"
@@ -376,12 +423,23 @@ export const RoutineEditorModal = ({
                       className="w-full text-left p-3.5 rounded-2xl glass-card hover:bg-white/[0.08] border border-white/5 transition flex items-center justify-between active:scale-98"
                     >
                       <div>
-                        <div className="font-extrabold text-xs text-slate-200">{ex.name}</div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-extrabold text-xs text-slate-200">{ex.name}</span>
+                          <span className={`text-[9px] font-black uppercase tracking-wider px-1.5 py-0.2 rounded border ${
+                            ex.fase === 'aquecimento'
+                              ? 'bg-amber-500/15 text-amber-300 border-amber-500/30'
+                              : ex.fase === 'alongamento'
+                              ? 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30'
+                              : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+                          }`}>
+                            {ex.fase === 'aquecimento' ? 'Aquec.' : ex.fase === 'alongamento' ? 'Along.' : 'Treino'}
+                          </span>
+                        </div>
                         <div className="text-[11px] text-slate-400 mt-0.5 font-medium">
                           {ex.category} • {ex.difficulty} • {ex.type === 'isometric' ? 'Isométrico' : 'Repetições'}
                         </div>
                       </div>
-                      <Plus className="w-4 h-4 text-emerald-400" />
+                      <Plus className="w-4 h-4 text-emerald-400 shrink-0 ml-2" />
                     </button>
                   ))}
                 </div>

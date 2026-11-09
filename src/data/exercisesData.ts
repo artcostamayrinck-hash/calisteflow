@@ -10,7 +10,7 @@ import { SKILL_EXERCISES } from './exercises/skills';
 import { WARMUP_MOBILITY_EXERCISES } from './exercises/warmupMobility';
 import { STRETCH_EXERCISES } from './exercises/stretches';
 
-export { CREF_REVIEWER_SPECIALIST };
+export { CREF_REVIEWER_SPECIALIST, BASE_EXERCISES, LEGACY_ALIASES };
 
 // Agrupamento de todas as cadeias por padrão motor
 const BASE_EXERCISES: Exercise[] = [

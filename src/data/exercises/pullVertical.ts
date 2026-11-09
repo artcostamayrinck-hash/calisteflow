@@ -18,6 +18,8 @@ export const PULL_VERTICAL_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Se sentir pinçamento no topo dos ombros, use uma pegada neutra ou afaste as mãos.'],
     padrao: 'puxar-vertical',
+    fase: 'treino',
+    fasesSecundarias: ['aquecimento'],
     equipamento: ['barra'],
     tipoExercicio: 'aquecimento',
     estatico: true,
@@ -58,6 +60,8 @@ export const PULL_VERTICAL_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Mantenha os cotovelos estendidos o tempo todo; não puxe com os braços.'],
     padrao: 'puxar-vertical',
+    fase: 'treino',
+    fasesSecundarias: ['aquecimento'],
     equipamento: ['barra'],
     tipoExercicio: 'principal',
     estatico: false,
@@ -98,6 +102,7 @@ export const PULL_VERTICAL_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Tenha um apoio ou banco seguro para subir; não despenteie a descida no final.'],
     padrao: 'puxar-vertical',
+    fase: 'treino',
     equipamento: ['barra'],
     tipoExercicio: 'principal',
     estatico: false,
@@ -138,6 +143,7 @@ export const PULL_VERTICAL_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Prenda o elástico com firmeza no centro da sola do pé para que não escape.'],
     padrao: 'puxar-vertical',
+    fase: 'treino',
     equipamento: ['barra', 'elastico'],
     tipoExercicio: 'principal',
     estatico: false,
@@ -177,6 +183,7 @@ export const PULL_VERTICAL_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Não balance as pernas nem dê "chute de peixe" para subir.'],
     padrao: 'puxar-vertical',
+    fase: 'treino',
     equipamento: ['barra'],
     tipoExercicio: 'principal',
     estatico: false,
@@ -220,6 +227,7 @@ export const PULL_VERTICAL_EXERCISES: Exercise[] = [
       'Não use o queixo para alcançar a barra esticando o pescoço; puxe o peitoral.'
     ],
     padrao: 'puxar-vertical',
+    fase: 'treino',
     equipamento: ['barra'],
     tipoExercicio: 'principal',
     estatico: false,
@@ -260,6 +268,7 @@ export const PULL_VERTICAL_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Excelente alternativa caso sinta desconforto na pegada pronada ou supinada.'],
     padrao: 'puxar-vertical',
+    fase: 'treino',
     equipamento: ['barra'],
     tipoExercicio: 'principal',
     estatico: false,
@@ -300,6 +309,7 @@ export const PULL_VERTICAL_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Não realize a puxada por trás da nuca (atrás da cabeça), pois sobrecarrega os ligamentos do ombro.'],
     padrao: 'puxar-vertical',
+    fase: 'treino',
     equipamento: ['barra'],
     tipoExercicio: 'principal',
     estatico: false,
@@ -340,6 +350,7 @@ export const PULL_VERTICAL_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Requer alta força em bíceps e ligamentos do antebraço.'],
     padrao: 'puxar-vertical',
+    fase: 'treino',
     equipamento: ['barra'],
     tipoExercicio: 'principal',
     estatico: false,
@@ -380,6 +391,7 @@ export const PULL_VERTICAL_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Mantenha os flexores do quadril e quadríceps ativos para não deixar as pernas caírem.'],
     padrao: 'puxar-vertical',
+    fase: 'treino',
     equipamento: ['barra'],
     tipoExercicio: 'principal',
     estatico: false,
@@ -419,6 +431,7 @@ export const PULL_VERTICAL_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Não bata o peito na barra de ferro; use protetores ou controle a aceleração.'],
     padrao: 'skills',
+    fase: 'treino',
     equipamento: ['barra'],
     tipoExercicio: 'skill',
     estatico: false,
@@ -462,6 +475,7 @@ export const PULL_VERTICAL_EXERCISES: Exercise[] = [
       'Exige base sólida prévia de pelo menos 10 barras fixas e 12 dips rigorosos.'
     ],
     padrao: 'skills',
+    fase: 'treino',
     equipamento: ['barra'],
     tipoExercicio: 'skill',
     estatico: false,
@@ -502,6 +516,7 @@ export const PULL_VERTICAL_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Carga enorme nos tendões do cotovelo; treine com descanso adequado de 48-72h.'],
     padrao: 'puxar-vertical',
+    fase: 'treino',
     equipamento: ['barra'],
     tipoExercicio: 'principal',
     estatico: false,
@@ -552,6 +567,7 @@ export const PULL_VERTICAL_EXERCISES: Exercise[] = [
       'Se sentir desconforto no túnel do carpo, reduza o tempo sob tensão.'
     ],
     padrao: 'puxar-vertical',
+    fase: 'treino',
     equipamento: [
       'barra',
       'argolas'
@@ -638,6 +654,7 @@ export const PULL_VERTICAL_EXERCISES: Exercise[] = [
       'Ao falhar, desça controladamente sem despencar de forma brusca.'
     ],
     padrao: 'puxar-vertical',
+    fase: 'treino',
     equipamento: [
       'barra'
     ],
@@ -725,6 +742,7 @@ export const PULL_VERTICAL_EXERCISES: Exercise[] = [
       'Controle a fase excêntrica para amortecer o impacto nos ombros no ponto zero.'
     ],
     padrao: 'puxar-vertical',
+    fase: 'treino',
     equipamento: [
       'barra'
     ],
@@ -813,6 +831,7 @@ export const PULL_VERTICAL_EXERCISES: Exercise[] = [
       'Não solte o corpo bruscamente no final da descida.'
     ],
     padrao: 'puxar-vertical',
+    fase: 'treino',
     equipamento: [
       'barra'
     ],
@@ -898,6 +917,7 @@ export const PULL_VERTICAL_EXERCISES: Exercise[] = [
       'Se sentir dor no tendão do bíceps, retorne à versão contínua.'
     ],
     padrao: 'puxar-vertical',
+    fase: 'treino',
     equipamento: [
       'barra'
     ],
@@ -981,6 +1001,7 @@ export const PULL_VERTICAL_EXERCISES: Exercise[] = [
       'Certifique-se de que a toalha é resistente e não deslize na barra.'
     ],
     padrao: 'puxar-vertical',
+    fase: 'treino',
     equipamento: [
       'barra',
       'toalha'
@@ -1066,6 +1087,7 @@ export const PULL_VERTICAL_EXERCISES: Exercise[] = [
       'Não deixe o ombro de apoio desengajar totalmente em suspensão passiva brusca.'
     ],
     padrao: 'puxar-vertical',
+    fase: 'treino',
     equipamento: [
       'barra'
     ],

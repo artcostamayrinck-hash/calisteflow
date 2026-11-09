@@ -225,8 +225,9 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
   const handleCompleteRepsSet = () => {
     recordCurrentSet(currentReps, undefined, currentWeightKg);
 
-    // D11: Registro de Recorde Pessoal (PR) de Repetições
-    if (currentReps > 0 && currentExerciseData) {
+    // D11: Registro de Recorde Pessoal (PR) de Repetições (apenas treino principal)
+    const isMainPhase = !currentExerciseData || (currentExerciseData.fase !== 'aquecimento' && currentExerciseData.fase !== 'alongamento');
+    if (isMainPhase && currentReps > 0 && currentExerciseData) {
       const { isNewPR, record } = checkAndRecordPR(
         currentExerciseData.id,
         currentExerciseData.name,
@@ -285,8 +286,9 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
     const completedSec = elapsedOrCompleted || isometricInitialSeconds;
     recordCurrentSet(undefined, completedSec, currentWeightKg);
 
-    // D3 & D11: Registro de Recorde Pessoal (PR) de Isometria
-    if (currentExerciseData && completedSec > 0) {
+    // D3 & D11: Registro de Recorde Pessoal (PR) de Isometria (apenas treino principal)
+    const isMainPhase = !currentExerciseData || (currentExerciseData.fase !== 'aquecimento' && currentExerciseData.fase !== 'alongamento');
+    if (isMainPhase && currentExerciseData && completedSec > 0) {
       const { isNewPR, record } = checkAndRecordPR(
         currentExerciseData.id,
         currentExerciseData.name,
@@ -656,17 +658,45 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
     });
   };
 
+  const handleSkipBlock = () => {
+    if (!currentExerciseData) return;
+    if (currentExerciseData.fase === 'aquecimento') {
+      const firstWorkoutIdx = activeRoutine.exercises.findIndex(re => {
+        const ex = getExerciseById(re.exerciseId) || EXERCISES_DATABASE.find(e => e.id === re.exerciseId);
+        return ex && ex.fase === 'treino';
+      });
+      if (firstWorkoutIdx > -1) {
+        if (window.confirm('Deseja pular o bloco de aquecimento e ir direto para o Treino Principal?')) {
+          soundManager.triggerHaptic([30]);
+          setExerciseIndex(firstWorkoutIdx);
+          setSetIndex(0);
+          setPhase('exercise');
+        }
+      }
+    } else if (currentExerciseData.fase === 'alongamento') {
+      if (window.confirm('Deseja finalizar o treino sem realizar os alongamentos finais?')) {
+        soundManager.triggerHaptic([30]);
+        handleTriggerFinish();
+      }
+    }
+  };
+
   const handleTriggerFinish = () => {
     let totalSetsDone = 0;
     let totalRepsDone = 0;
     let totalIsoSecDone = 0;
 
     completedRecords.forEach(ex => {
+      const exData = getExerciseById(ex.exerciseId) || EXERCISES_DATABASE.find(e => e.id === ex.exerciseId);
+      const isWarmupOrStretch = exData?.fase === 'aquecimento' || exData?.fase === 'alongamento';
       ex.sets.forEach(s => {
         if (s.completed) {
-          totalSetsDone++;
-          if (s.completedReps) totalRepsDone += s.completedReps;
-          if (s.completedSeconds) totalIsoSecDone += s.completedSeconds;
+          // Aquecimento e alongamento não contam no volume de séries ou repetições de sobrecarga
+          if (!isWarmupOrStretch) {
+            totalSetsDone++;
+            if (s.completedReps) totalRepsDone += s.completedReps;
+            if (s.completedSeconds) totalIsoSecDone += s.completedSeconds;
+          }
         }
       });
     });
@@ -1019,9 +1049,40 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
                   <span className="px-2 py-0.5 rounded-lg text-[10px] font-extrabold uppercase tracking-widest bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 tabular-nums">
                     Exercício {exerciseIndex + 1} de {routine.exercises.length}
                   </span>
+                  {currentExerciseData?.fase && (
+                    <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider flex items-center gap-1 ${
+                      currentExerciseData.fase === 'aquecimento'
+                        ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
+                        : currentExerciseData.fase === 'alongamento'
+                        ? 'bg-cyan-500/15 text-cyan-300 border border-cyan-500/30'
+                        : 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
+                    }`}>
+                      {currentExerciseData.fase === 'aquecimento' ? '🔥 Aquecimento' :
+                       currentExerciseData.fase === 'alongamento' ? '🧘 Alongamento' :
+                       '🎯 Treino Principal'}
+                    </span>
+                  )}
                   <span className="px-2 py-0.5 rounded-lg text-[10px] font-semibold bg-white/[0.06] text-slate-300 border border-white/[0.08]">
                     {currentExerciseData?.difficulty}
                   </span>
+                  {currentExerciseData?.fase === 'aquecimento' && (
+                    <button
+                      type="button"
+                      onClick={handleSkipBlock}
+                      className="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-amber-500/10 text-amber-300 hover:bg-amber-500/20 border border-amber-500/30 transition active:scale-95"
+                    >
+                      Pular Aquecimento ➔
+                    </button>
+                  )}
+                  {currentExerciseData?.fase === 'alongamento' && (
+                    <button
+                      type="button"
+                      onClick={handleSkipBlock}
+                      className="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-cyan-500/10 text-cyan-300 hover:bg-cyan-500/20 border border-cyan-500/30 transition active:scale-95"
+                    >
+                      Finalizar Treino ➔
+                    </button>
+                  )}
                 </div>
                 <h2 className="text-lg sm:text-xl font-black text-slate-100 tracking-tight truncate">
                   {currentExerciseData ? currentExerciseData.name : currentRoutineExercise.exerciseId}

@@ -232,7 +232,7 @@ export function generateDayWorkout(params: {
 
   // Filtrar candidatos para bloco principal (excluindo aquecimentos e alongamentos puros)
   const mainCandidatesPool = availableExercises.filter(
-    ex => ex.tipoExercicio !== 'aquecimento' && ex.tipoExercicio !== 'alongamento'
+    ex => (ex.fase === 'treino' || ex.fasesSecundarias?.includes('treino')) && ex.fase !== 'aquecimento' && ex.fase !== 'alongamento'
   );
 
   const matchingCandidates = mainCandidatesPool.filter(ex =>
@@ -250,7 +250,7 @@ export function generateDayWorkout(params: {
 
   // 1. BLOCO DE AQUECIMENTO & MOBILIDADE DINÂMICA
   const warmupPool = availableExercises.filter(
-    e => e.tipoExercicio === 'aquecimento' || e.padrao === 'aquecimento'
+    e => e.fase === 'aquecimento' || e.fasesSecundarias?.includes('aquecimento') || e.tipoExercicio === 'aquecimento' || e.padrao === 'aquecimento'
   );
   const selectedWarmupEx = warmupPool.length > 0
     ? warmupPool.slice(0, 2)
@@ -310,7 +310,7 @@ export function generateDayWorkout(params: {
 
   // 4. BLOCO DE ALONGAMENTO & VOLTA À CALMA
   const cooldownPool = availableExercises.filter(
-    e => e.tipoExercicio === 'alongamento' || e.padrao === 'alongamento'
+    e => e.fase === 'alongamento' || e.fasesSecundarias?.includes('alongamento') || e.tipoExercicio === 'alongamento' || e.padrao === 'alongamento'
   );
   const selectedCooldownEx = cooldownPool.length > 0
     ? cooldownPool.slice(0, 2)

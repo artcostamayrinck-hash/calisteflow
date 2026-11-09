@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
-import type { Exercise, MuscleGroup, MovementPattern, ExerciseDifficulty, EquipmentType } from '../../types';
-import { EXERCISES_DATABASE, MUSCLE_LABELS, MUSCLE_DEFINITIONS, getExerciseById, CREF_REVIEWER_SPECIALIST } from '../../data/exercisesData';
+import type { Exercise, MuscleGroup, MovementPattern, ExerciseDifficulty, EquipmentType, ExercisePhase } from '../../types';
+import { BASE_EXERCISES, MUSCLE_LABELS, MUSCLE_DEFINITIONS, getExerciseById, CREF_REVIEWER_SPECIALIST } from '../../data/exercisesData';
 import { MuscleMap } from '../visuals/MuscleMap';
 import { ExerciseVideoPlayer } from '../workout/ExerciseVideoPlayer';
 import { soundManager } from '../../utils/audio';
@@ -31,6 +31,8 @@ import {
   Layers,
   Star,
   Clock,
+  Flame,
+  Target,
 } from 'lucide-react';
 
 interface ExerciseLibraryViewProps {
@@ -53,6 +55,108 @@ const MOVEMENT_PATTERN_LABELS: Record<MovementPattern, string> = {
   'skills': 'Skills & Isometrias',
   'aquecimento': 'Aquecimento & Mobilidade',
   'alongamento': 'Alongamento & Relaxamento'
+};
+
+export const PHASE_LABELS: Record<ExercisePhase, { label: string; short: string; description: string }> = {
+  aquecimento: {
+    label: 'Aquecimento',
+    short: 'Aquec.',
+    description: 'Mobilidade articular e ativação neuromuscular'
+  },
+  treino: {
+    label: 'Treino',
+    short: 'Treino',
+    description: 'Força, hipertrofia e habilidades'
+  },
+  alongamento: {
+    label: 'Alongamento',
+    short: 'Along.',
+    description: 'Flexibilidade e relaxamento miofascial'
+  }
+};
+
+export type WarmupJointRegion = 'Todos' | 'punho' | 'ombro' | 'escapula' | 'coluna' | 'quadril' | 'tornozelo' | 'cardio';
+
+export const WARMUP_JOINT_LABELS: Record<WarmupJointRegion, string> = {
+  Todos: 'Todas as Articulações',
+  punho: 'Punhos & Mãos',
+  ombro: 'Ombros & Manguito',
+  escapula: 'Escápulas & Serrátil',
+  coluna: 'Coluna & Torácica',
+  quadril: 'Quadril & Pelve',
+  tornozelo: 'Tornozelos & Pés',
+  cardio: 'Cardio & Geral'
+};
+
+export const WARMUP_EXERCISE_JOINTS: Record<string, WarmupJointRegion[]> = {
+  'circulos-punho': ['punho'],
+  'flexao-extensao-punho-chao': ['punho'],
+  'circulos-ombro': ['ombro'],
+  'passagem-ombro-toalha': ['ombro'],
+  'wall-angels': ['ombro', 'escapula', 'coluna'],
+  'elevacao-y-deitado': ['ombro', 'escapula'],
+  'rotacao-externa-ombro-toalha': ['ombro'],
+  'retracao-protracao-escapular': ['escapula'],
+  'flexao-escapular': ['escapula'],
+  'retracao-escapular-barra': ['escapula', 'ombro'],
+  'dead-hang': ['escapula', 'ombro'],
+  'gato-vaca': ['coluna'],
+  'rotacao-toracica': ['coluna', 'escapula'],
+  'dead-hang-passivo': ['coluna', 'ombro'],
+  'alongamento-rotacao-coluna': ['coluna', 'quadril'],
+  'postura-crianca': ['coluna', 'quadril', 'ombro'],
+  'bird-dog': ['coluna', 'escapula'],
+  'superman': ['coluna', 'escapula'],
+  'greatest-stretch': ['quadril', 'coluna', 'tornozelo'],
+  'rotacao-quadril-9090': ['quadril'],
+  'agachamento-profundo-assistido': ['quadril', 'tornozelo'],
+  'ativacao-gluteo-ponte': ['quadril'],
+  'ponte-gluteo': ['quadril'],
+  'balanco-pernas-dinamico': ['quadril'],
+  'mobilidade-tornozelo-parede': ['tornozelo'],
+  'aquecimento-cardio-leve': ['cardio']
+};
+
+export type StretchTargetGroup =
+  | 'Todos'
+  | 'peitoral'
+  | 'dorsal'
+  | 'ombros'
+  | 'triceps'
+  | 'quadriceps'
+  | 'isquiotibiais'
+  | 'gluteos'
+  | 'panturrilha'
+  | 'coluna';
+
+export const STRETCH_TARGET_LABELS: Record<StretchTargetGroup, string> = {
+  Todos: 'Todos os Músculos',
+  peitoral: 'Peitoral',
+  dorsal: 'Dorsal & Costas',
+  ombros: 'Ombros',
+  triceps: 'Tríceps & Braços',
+  quadriceps: 'Quadríceps',
+  isquiotibiais: 'Isquiotibiais (Posterior)',
+  gluteos: 'Glúteos & Pelve',
+  panturrilha: 'Panturrilha',
+  coluna: 'Coluna & Lombar'
+};
+
+export const STRETCH_EXERCISE_TARGETS: Record<string, StretchTargetGroup[]> = {
+  'alongamento-peitoral-parede': ['peitoral', 'ombros'],
+  'alongamento-dorsal-barra': ['dorsal', 'ombros'],
+  'alongamento-triceps-acima': ['triceps', 'dorsal'],
+  'alongamento-ombro-posterior': ['ombros'],
+  'alongamento-flexores-quadril': ['quadriceps', 'gluteos'],
+  'alongamento-quadriceps': ['quadriceps'],
+  'alongamento-isquiotibiais': ['isquiotibiais', 'coluna'],
+  'alongamento-panturrilha': ['panturrilha'],
+  'alongamento-gluteo-pombo': ['gluteos'],
+  'alongamento-borboleta': ['gluteos'],
+  'alongamento-rotacao-coluna': ['coluna', 'gluteos'],
+  'postura-crianca': ['coluna', 'dorsal', 'gluteos'],
+  'dead-hang-passivo': ['dorsal', 'coluna', 'ombros'],
+  'greatest-stretch': ['isquiotibiais', 'quadriceps', 'coluna']
 };
 
 const DIFFICULTY_ORDER: Record<ExerciseDifficulty, number> = {
@@ -97,6 +201,32 @@ export const ExerciseLibraryView = ({
 }: ExerciseLibraryViewProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPattern, setSelectedPattern] = useState<MovementPattern | 'Todos'>('Todos');
+  const [selectedPhase, setSelectedPhase] = useState<ExercisePhase>(() => {
+    try {
+      const saved = localStorage.getItem('calisteflow_library_phase');
+      if (saved === 'aquecimento' || saved === 'treino' || saved === 'alongamento') {
+        return saved as ExercisePhase;
+      }
+    } catch (e) {}
+    return 'treino';
+  });
+  const [selectedWarmupJoint, setSelectedWarmupJoint] = useState<WarmupJointRegion>('Todos');
+  const [selectedStretchTarget, setSelectedStretchTarget] = useState<StretchTargetGroup>('Todos');
+
+  const handlePhaseChange = (phase: ExercisePhase) => {
+    soundManager.triggerHaptic([25]);
+    setSelectedPhase(phase);
+    try {
+      localStorage.setItem('calisteflow_library_phase', phase);
+    } catch (e) {}
+  };
+
+  const phaseCounts = useMemo(() => {
+    const aq = BASE_EXERCISES.filter(ex => ex.fase === 'aquecimento').length;
+    const tr = BASE_EXERCISES.filter(ex => ex.fase === 'treino').length;
+    const al = BASE_EXERCISES.filter(ex => ex.fase === 'alongamento').length;
+    return { aquecimento: aq, treino: tr, alongamento: al };
+  }, []);
   const [selectedDifficulty, setSelectedDifficulty] = useState<ExerciseDifficulty | 'Todos'>('Todos');
   const [selectedEquipment, setSelectedEquipment] = useState<EquipmentType | 'Todos'>('Todos');
   const [selectedJointSafety, setSelectedJointSafety] = useState<'punho' | 'ombro' | 'joelho' | 'lombar' | 'sem-equipamento' | 'Todos'>('Todos');
@@ -177,8 +307,31 @@ export const ExerciseLibraryView = ({
         }
       }
 
-      if (checkPattern && selectedPattern !== 'Todos' && ex.padrao !== selectedPattern) {
+      // Filtro de Fase Obrigatório: O exercício deve pertencer à fase ativa (primária ou secundária)
+      const belongsToPhase = ex.fase === selectedPhase || ex.fasesSecundarias?.includes(selectedPhase);
+      if (!belongsToPhase) {
         return false;
+      }
+
+      // Sub-filtro específico por fase
+      if (checkPattern) {
+        if (selectedPhase === 'treino' && selectedPattern !== 'Todos' && ex.padrao !== selectedPattern) {
+          return false;
+        }
+        if (selectedPhase === 'aquecimento' && selectedWarmupJoint !== 'Todos') {
+          const joints = WARMUP_EXERCISE_JOINTS[ex.id] || [];
+          if (!joints.includes(selectedWarmupJoint)) {
+            return false;
+          }
+        }
+        if (selectedPhase === 'alongamento' && selectedStretchTarget !== 'Todos') {
+          const targets = STRETCH_EXERCISE_TARGETS[ex.id] || [];
+          const matchesMuscle = ex.primaryMuscles.includes(selectedStretchTarget as MuscleGroup) ||
+                                ex.secondaryMuscles.includes(selectedStretchTarget as MuscleGroup);
+          if (!targets.includes(selectedStretchTarget) && !matchesMuscle) {
+            return false;
+          }
+        }
       }
 
       if (selectedDifficulty !== 'Todos' && ex.difficulty !== selectedDifficulty) {
@@ -202,7 +355,7 @@ export const ExerciseLibraryView = ({
     };
 
     if (selectedMuscles.length === 0) {
-      const allFiltered = EXERCISES_DATABASE.filter(ex => matchesGeneralFilters(ex, true));
+      const allFiltered = BASE_EXERCISES.filter(ex => matchesGeneralFilters(ex, true));
       return {
         primaryExercises: allFiltered,
         secondaryExercises: [] as Exercise[],
@@ -213,7 +366,7 @@ export const ExerciseLibraryView = ({
     const rawPrimary: Exercise[] = [];
     const rawSecondary: Exercise[] = [];
 
-    EXERCISES_DATABASE.forEach(ex => {
+    BASE_EXERCISES.forEach(ex => {
       if (!matchesGeneralFilters(ex, true)) return;
 
       const isPrim = selectedMuscles.some(m => ex.primaryMuscles.includes(m));
@@ -230,8 +383,8 @@ export const ExerciseLibraryView = ({
     const secondarySorted = sortExerciseGroup(rawSecondary, selectedMuscles, false);
 
     let hiddenCount = 0;
-    if (selectedPattern !== 'Todos') {
-      hiddenCount = EXERCISES_DATABASE.filter(ex => {
+    if (selectedPhase === 'treino' && selectedPattern !== 'Todos') {
+      hiddenCount = BASE_EXERCISES.filter(ex => {
         const matchesMuscle = selectedMuscles.some(m => ex.primaryMuscles.includes(m) || ex.secondaryMuscles.includes(m));
         const matchesOthers = matchesGeneralFilters(ex, false);
         return matchesMuscle && matchesOthers && ex.padrao !== selectedPattern;
@@ -245,7 +398,10 @@ export const ExerciseLibraryView = ({
     };
   }, [
     searchQuery,
+    selectedPhase,
     selectedPattern,
+    selectedWarmupJoint,
+    selectedStretchTarget,
     selectedDifficulty,
     selectedEquipment,
     selectedJointSafety,
@@ -255,17 +411,40 @@ export const ExerciseLibraryView = ({
     recentIds
   ]);
 
+  // Detecção de resultados da busca em outras fases
+  const otherPhaseMatches = useMemo(() => {
+    const q = searchQuery.trim();
+    if (!q || primaryExercises.length > 0 || secondaryExercises.length > 0) {
+      return null;
+    }
+    const checkMatch = (ex: Exercise) => {
+      return isFuzzyMatch(ex.name, q) ||
+        isFuzzyMatch(ex.description, q) ||
+        Boolean(ex.sinonimos?.some(s => isFuzzyMatch(s, q)));
+    };
+    const resultsByPhase: Partial<Record<ExercisePhase, number>> = {};
+    (['aquecimento', 'treino', 'alongamento'] as const).forEach(ph => {
+      if (ph !== selectedPhase) {
+        const count = BASE_EXERCISES.filter(ex =>
+          (ex.fase === ph || ex.fasesSecundarias?.includes(ph)) && checkMatch(ex)
+        ).length;
+        if (count > 0) resultsByPhase[ph] = count;
+      }
+    });
+    return Object.keys(resultsByPhase).length > 0 ? resultsByPhase : null;
+  }, [searchQuery, selectedPhase, primaryExercises.length, secondaryExercises.length]);
+
   // Efeito para rolar suavemente ao topo da lista ao alterar filtros
   useEffect(() => {
-    const currentKey = `${[...selectedMuscles].sort().join(',')}|${selectedPattern}|${selectedDifficulty}|${selectedEquipment}|${selectedJointSafety}|${searchQuery}|${quickFilter}`;
+    const currentKey = `${selectedPhase}|${[...selectedMuscles].sort().join(',')}|${selectedPattern}|${selectedWarmupJoint}|${selectedStretchTarget}|${selectedDifficulty}|${selectedEquipment}|${selectedJointSafety}|${searchQuery}|${quickFilter}`;
     if (prevFilterKeyRef.current && prevFilterKeyRef.current !== currentKey) {
       listTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       setVisibleCount(24);
     }
     prevFilterKeyRef.current = currentKey;
-  }, [selectedMuscles, selectedPattern, selectedDifficulty, selectedEquipment, selectedJointSafety, searchQuery, quickFilter]);
+  }, [selectedPhase, selectedMuscles, selectedPattern, selectedWarmupJoint, selectedStretchTarget, selectedDifficulty, selectedEquipment, selectedJointSafety, searchQuery, quickFilter]);
 
-  const patterns: Array<MovementPattern | 'Todos'> = [
+  const workoutPatterns: Array<MovementPattern | 'Todos'> = [
     'Todos',
     'empurrar-horizontal',
     'empurrar-vertical',
@@ -276,9 +455,31 @@ export const ExerciseLibraryView = ({
     'core-lateral',
     'costas-baixa',
     'agachamento-pernas',
-    'skills',
-    'aquecimento',
-    'alongamento'
+    'skills'
+  ];
+
+  const warmupJoints: WarmupJointRegion[] = [
+    'Todos',
+    'punho',
+    'ombro',
+    'escapula',
+    'coluna',
+    'quadril',
+    'tornozelo',
+    'cardio'
+  ];
+
+  const stretchTargets: StretchTargetGroup[] = [
+    'Todos',
+    'peitoral',
+    'dorsal',
+    'ombros',
+    'triceps',
+    'quadriceps',
+    'isquiotibiais',
+    'gluteos',
+    'panturrilha',
+    'coluna'
   ];
 
   const handleOpenExerciseModal = (ex: Exercise, defaultTab: ModalTab = 'como_fazer') => {
@@ -309,7 +510,29 @@ export const ExerciseLibraryView = ({
         {/* Chips de Metadados e Botão de Favoritar */}
         <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
           <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+            {/* Badge de Fase */}
+            <span
+              className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider ${
+                ex.fase === 'aquecimento'
+                  ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
+                  : ex.fase === 'alongamento'
+                  ? 'bg-cyan-500/15 text-cyan-300 border border-cyan-500/30'
+                  : 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
+              }`}
+            >
+              {ex.fase === 'aquecimento' && <Flame className="w-3 h-3 text-amber-400" />}
+              {ex.fase === 'treino' && <Target className="w-3 h-3 text-emerald-400" />}
+              {ex.fase === 'alongamento' && <Activity className="w-3 h-3 text-cyan-400" />}
+              <span>{ex.fase === 'aquecimento' ? 'Aquecimento' : ex.fase === 'alongamento' ? 'Alongamento' : 'Treino'}</span>
+            </span>
+
+            {ex.fasesSecundarias && ex.fasesSecundarias.length > 0 && (
+              <span className="px-1.5 py-0.5 rounded-md text-[10px] font-semibold text-slate-400 bg-white/5 border border-white/5">
+                +{ex.fasesSecundarias.map(s => s === 'aquecimento' ? 'Aquec.' : s === 'alongamento' ? 'Along.' : 'Treino').join(', ')}
+              </span>
+            )}
+
+            <span className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-white/5 text-slate-300 border border-white/10">
               {ex.padrao ? MOVEMENT_PATTERN_LABELS[ex.padrao] || ex.category : ex.category}
             </span>
             <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-slate-800 text-slate-300">
@@ -427,7 +650,7 @@ export const ExerciseLibraryView = ({
         <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
         <div className="space-y-1.5 relative z-10">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
-            <Sparkles className="w-3.5 h-3.5" /> 160+ Exercícios • Auditoria CREF
+            <Sparkles className="w-3.5 h-3.5" /> 208 Exercícios • 3 Fases: Aquecimento, Treino e Alongamento
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-slate-100 tracking-tight flex items-center gap-2">
             <Dumbbell className="w-7 h-7 text-emerald-400" />
@@ -437,6 +660,61 @@ export const ExerciseLibraryView = ({
             Progressões calistênicas do iniciante à elite com biomecânica detalhada, erros comuns, critérios de avanço e adaptações para dores e ambiente.
           </p>
         </div>
+      </div>
+
+      {/* Abas Segmentadas de Fase: Aquecimento, Treino, Alongamento */}
+      <div
+        role="tablist"
+        aria-label="Fase da Biblioteca"
+        className="grid grid-cols-3 gap-1.5 p-1.5 rounded-3xl glass-card border border-white/10 shadow-lg"
+      >
+        {(['aquecimento', 'treino', 'alongamento'] as const).map(ph => {
+          const isSelected = selectedPhase === ph;
+          const count = phaseCounts[ph];
+          const info = PHASE_LABELS[ph];
+          return (
+            <button
+              key={ph}
+              role="tab"
+              id={`tab-${ph}`}
+              aria-selected={isSelected}
+              aria-controls={`panel-${ph}`}
+              onClick={() => handlePhaseChange(ph)}
+              className={`relative py-3 px-2 sm:px-4 rounded-2xl flex flex-col items-center justify-center gap-1 transition-all duration-200 active:scale-95 min-h-[48px] ${
+                isSelected
+                  ? ph === 'aquecimento'
+                    ? 'bg-gradient-to-b from-amber-500/25 to-orange-500/15 text-amber-200 border border-amber-400/40 shadow-md shadow-amber-500/10'
+                    : ph === 'alongamento'
+                    ? 'bg-gradient-to-b from-cyan-500/25 to-teal-500/15 text-cyan-200 border border-cyan-400/40 shadow-md shadow-cyan-500/10'
+                    : 'bg-gradient-to-b from-emerald-500/25 to-teal-500/15 text-emerald-200 border border-emerald-400/40 shadow-md shadow-emerald-500/10'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]'
+              }`}
+            >
+              <div className="flex items-center gap-1.5">
+                {ph === 'aquecimento' && <Flame className={`w-4 h-4 ${isSelected ? 'text-amber-400' : 'text-slate-400'}`} />}
+                {ph === 'treino' && <Target className={`w-4 h-4 ${isSelected ? 'text-emerald-400' : 'text-slate-400'}`} />}
+                {ph === 'alongamento' && <Activity className={`w-4 h-4 ${isSelected ? 'text-cyan-400' : 'text-slate-400'}`} />}
+                <span className="text-xs sm:text-sm font-black tracking-tight">{info.label}</span>
+                <span
+                  className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-full ${
+                    isSelected
+                      ? ph === 'aquecimento'
+                        ? 'bg-amber-400/20 text-amber-300'
+                        : ph === 'alongamento'
+                        ? 'bg-cyan-400/20 text-cyan-300'
+                        : 'bg-emerald-400/20 text-emerald-300'
+                      : 'bg-white/10 text-slate-400'
+                  }`}
+                >
+                  {count}
+                </span>
+              </div>
+              <span className="hidden sm:inline text-[10px] text-slate-400 truncate max-w-full font-medium">
+                {info.description}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Barra de Busca com Sinônimos */}
@@ -461,6 +739,34 @@ export const ExerciseLibraryView = ({
           )}
         </div>
 
+        {/* Banner de Aviso: Termo Encontrado em Outras Fases */}
+        {otherPhaseMatches && (
+          <div className="glass-card p-4 rounded-3xl border border-cyan-500/30 bg-cyan-500/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-cyan-200 shadow-lg animate-in fade-in">
+            <div className="flex items-center gap-2.5">
+              <Sparkles className="w-4 h-4 text-cyan-400 shrink-0" />
+              <span>
+                Nenhum exercício encontrado em <strong>{PHASE_LABELS[selectedPhase].label}</strong> para "{searchQuery}". Encontrado em outras fases:
+              </span>
+            </div>
+            <div className="flex items-center gap-2 shrink-0 flex-wrap">
+              {(Object.entries(otherPhaseMatches) as [ExercisePhase, number][]).map(([ph, count]) => (
+                <button
+                  key={ph}
+                  type="button"
+                  onClick={() => {
+                    soundManager.triggerHaptic([20]);
+                    handlePhaseChange(ph);
+                  }}
+                  className="px-3.5 py-1.5 rounded-xl bg-cyan-400 text-slate-950 font-black text-xs hover:bg-cyan-300 transition active:scale-95 shadow-md flex items-center gap-1.5 min-h-[38px]"
+                >
+                  <span>Ver em {PHASE_LABELS[ph].label}</span>
+                  <span className="font-mono font-bold">({count})</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* D2: Filtros Rápidos (Todos / Favoritos / Recentes) e D14: Atalho da Árvore de Skills */}
         <div className="flex items-center justify-between gap-2 overflow-x-auto pb-0.5 no-scrollbar">
           <div className="flex items-center gap-1.5 shrink-0">
@@ -476,7 +782,7 @@ export const ExerciseLibraryView = ({
                   : 'text-slate-400 hover:text-white bg-white/5 border border-white/5'
               }`}
             >
-              Todos ({EXERCISES_DATABASE.length})
+              Todos ({BASE_EXERCISES.length})
             </button>
             <button
               type="button"
@@ -523,33 +829,93 @@ export const ExerciseLibraryView = ({
           </button>
         </div>
 
-        {/* Padrões de Movimento em Carrossel com Indicador de Rolagem */}
-        <div className="relative">
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none px-0.5">
-            {patterns.map(pat => {
-              const label = pat === 'Todos' ? 'Todos os Padrões' : MOVEMENT_PATTERN_LABELS[pat];
-              const isSelected = selectedPattern === pat;
-              return (
-                <button
-                  key={pat}
-                  onClick={() => {
-                    soundManager.triggerHaptic([20]);
-                    setSelectedPattern(pat);
-                  }}
-                  className={`px-3.5 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition-all active:scale-95 ${
-                    isSelected
-                      ? 'bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 shadow-lg shadow-emerald-500/20'
-                      : 'glass-card text-slate-400 hover:text-slate-200'
-                  }`}
-                >
-                  {label}
-                </button>
-              );
-            })}
+        {/* Sub-Filtros Contextuais por Fase */}
+        {selectedPhase === 'treino' && (
+          <div className="relative">
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none px-0.5">
+              {workoutPatterns.map(pat => {
+                const label = pat === 'Todos' ? 'Todos os Padrões' : MOVEMENT_PATTERN_LABELS[pat];
+                const isSelected = selectedPattern === pat;
+                return (
+                  <button
+                    key={pat}
+                    onClick={() => {
+                      soundManager.triggerHaptic([20]);
+                      setSelectedPattern(pat);
+                    }}
+                    className={`px-3.5 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition-all active:scale-95 min-h-[44px] ${
+                      isSelected
+                        ? 'bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 shadow-lg shadow-emerald-500/20'
+                        : 'glass-card text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="pointer-events-none absolute left-0 top-0 bottom-1 w-2.5 bg-gradient-to-r from-slate-950 to-transparent" />
+            <div className="pointer-events-none absolute right-0 top-0 bottom-1 w-5 bg-gradient-to-l from-slate-950 to-transparent" />
           </div>
-          <div className="pointer-events-none absolute left-0 top-0 bottom-1 w-2.5 bg-gradient-to-r from-slate-950 to-transparent" />
-          <div className="pointer-events-none absolute right-0 top-0 bottom-1 w-5 bg-gradient-to-l from-slate-950 to-transparent" />
-        </div>
+        )}
+
+        {selectedPhase === 'aquecimento' && (
+          <div className="relative">
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none px-0.5">
+              {warmupJoints.map(joint => {
+                const label = WARMUP_JOINT_LABELS[joint];
+                const isSelected = selectedWarmupJoint === joint;
+                return (
+                  <button
+                    key={joint}
+                    onClick={() => {
+                      soundManager.triggerHaptic([20]);
+                      setSelectedWarmupJoint(joint);
+                    }}
+                    className={`px-3.5 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition-all active:scale-95 min-h-[44px] ${
+                      isSelected
+                        ? 'bg-gradient-to-r from-amber-500 to-orange-400 text-slate-950 shadow-lg shadow-amber-500/20 font-black'
+                        : 'glass-card text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="pointer-events-none absolute left-0 top-0 bottom-1 w-2.5 bg-gradient-to-r from-slate-950 to-transparent" />
+            <div className="pointer-events-none absolute right-0 top-0 bottom-1 w-5 bg-gradient-to-l from-slate-950 to-transparent" />
+          </div>
+        )}
+
+        {selectedPhase === 'alongamento' && (
+          <div className="relative">
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none px-0.5">
+              {stretchTargets.map(tgt => {
+                const label = STRETCH_TARGET_LABELS[tgt];
+                const isSelected = selectedStretchTarget === tgt;
+                return (
+                  <button
+                    key={tgt}
+                    onClick={() => {
+                      soundManager.triggerHaptic([20]);
+                      setSelectedStretchTarget(tgt);
+                    }}
+                    className={`px-3.5 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition-all active:scale-95 min-h-[44px] ${
+                      isSelected
+                        ? 'bg-gradient-to-r from-cyan-500 to-teal-400 text-slate-950 shadow-lg shadow-cyan-500/20 font-black'
+                        : 'glass-card text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="pointer-events-none absolute left-0 top-0 bottom-1 w-2.5 bg-gradient-to-r from-slate-950 to-transparent" />
+            <div className="pointer-events-none absolute right-0 top-0 bottom-1 w-5 bg-gradient-to-l from-slate-950 to-transparent" />
+          </div>
+        )}
 
         {/* Barra de Controle de Filtros Avançados & Mapa */}
         <div className="flex items-center justify-between gap-2 pt-1 flex-wrap">
@@ -819,8 +1185,11 @@ export const ExerciseLibraryView = ({
                 <div className="pt-2 flex items-center justify-center gap-3">
                   <button
                     onClick={() => {
+                      soundManager.triggerHaptic([20]);
                       setSelectedMuscles([]);
                       setSelectedPattern('Todos');
+                      setSelectedWarmupJoint('Todos');
+                      setSelectedStretchTarget('Todos');
                       setSelectedDifficulty('Todos');
                       setSelectedEquipment('Todos');
                       setSelectedJointSafety('Todos');

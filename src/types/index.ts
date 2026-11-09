@@ -61,6 +61,8 @@ export type MovementPattern =
 
 export type ExerciseClassType = 'principal' | 'aquecimento' | 'alongamento' | 'skill';
 
+export type ExercisePhase = 'aquecimento' | 'treino' | 'alongamento';
+
 export interface ExerciseAdaptations {
   punho?: string[];
   ombro?: string[];
@@ -98,6 +100,8 @@ export interface Exercise {
   revisadoPor?: string | null;
   safetyCautions?: string[];
   padrao?: MovementPattern;
+  fase: ExercisePhase;
+  fasesSecundarias?: ExercisePhase[];
   equipamento?: EquipmentType[];
   tipoExercicio?: ExerciseClassType;
   estatico?: boolean;

@@ -18,6 +18,7 @@ export const PUSH_HORIZONTAL_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Pare imediatamente se sentir dor nos ombros ou punhos.', 'Mantenha o abdômen firme sem curvar a lombar.'],
     padrao: 'empurrar-horizontal',
+    fase: 'treino',
     equipamento: ['parede'],
     tipoExercicio: 'principal',
     estatico: false,
@@ -59,6 +60,7 @@ export const PUSH_HORIZONTAL_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Garanta que o apoio (banco ou mesa) esteja perfeitamente firme e travado.'],
     padrao: 'empurrar-horizontal',
+    fase: 'treino',
     equipamento: ['banco'],
     tipoExercicio: 'principal',
     estatico: false,
@@ -99,6 +101,7 @@ export const PUSH_HORIZONTAL_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Utilize um colchonete ou toalha sob os joelhos para amortecer a patela.'],
     padrao: 'empurrar-horizontal',
+    fase: 'treino',
     equipamento: ['nenhum'],
     tipoExercicio: 'principal',
     estatico: false,
@@ -144,6 +147,7 @@ export const PUSH_HORIZONTAL_EXERCISES: Exercise[] = [
       'Não deixe a pelve cair para proteger a coluna lombar.'
     ],
     padrao: 'empurrar-horizontal',
+    fase: 'treino',
     equipamento: ['nenhum'],
     tipoExercicio: 'principal',
     estatico: false,
@@ -185,6 +189,7 @@ export const PUSH_HORIZONTAL_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Não deixe os cotovelos abrirem lateralmente durante o esforço.'],
     padrao: 'empurrar-horizontal',
+    fase: 'treino',
     equipamento: ['nenhum'],
     tipoExercicio: 'principal',
     estatico: false,
@@ -228,6 +233,7 @@ export const PUSH_HORIZONTAL_EXERCISES: Exercise[] = [
       'Mantenha o core rígido para evitar compensação na coluna lombar.'
     ],
     padrao: 'empurrar-horizontal',
+    fase: 'treino',
     equipamento: ['nenhum'],
     tipoExercicio: 'principal',
     estatico: false,
@@ -268,6 +274,7 @@ export const PUSH_HORIZONTAL_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Não hiperestenda o pescoço olhando para a frente. Mantenha o olhar para o solo.'],
     padrao: 'empurrar-horizontal',
+    fase: 'treino',
     equipamento: ['banco'],
     tipoExercicio: 'principal',
     estatico: false,
@@ -308,6 +315,7 @@ export const PUSH_HORIZONTAL_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Pessoas com histórico de dor anterior de ombro devem evitar amplitudes excessivas.'],
     padrao: 'empurrar-horizontal',
+    fase: 'treino',
     equipamento: ['nenhum'],
     tipoExercicio: 'principal',
     estatico: false,
@@ -348,6 +356,8 @@ export const PUSH_HORIZONTAL_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Os braços ficam 100% estendidos o tempo todo; não dobre os cotovelos.'],
     padrao: 'empurrar-horizontal',
+    fase: 'treino',
+    fasesSecundarias: ['aquecimento'],
     equipamento: ['nenhum'],
     tipoExercicio: 'aquecimento',
     estatico: false,
@@ -387,6 +397,7 @@ export const PUSH_HORIZONTAL_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Evite hiperextensão forçada da coluna lombar caso sinta incômodo.'],
     padrao: 'empurrar-horizontal',
+    fase: 'treino',
     equipamento: ['nenhum'],
     tipoExercicio: 'principal',
     estatico: false,
@@ -427,6 +438,7 @@ export const PUSH_HORIZONTAL_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['O braço estendido deve girar a palma suavemente para acomodar o cotovelo.'],
     padrao: 'empurrar-horizontal',
+    fase: 'treino',
     equipamento: ['nenhum'],
     tipoExercicio: 'principal',
     estatico: false,
@@ -467,6 +479,7 @@ export const PUSH_HORIZONTAL_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Gire os dedos 45° para fora para proteger a articulação dos punhos.'],
     padrao: 'empurrar-horizontal',
+    fase: 'treino',
     equipamento: ['nenhum'],
     tipoExercicio: 'skill',
     estatico: false,
@@ -507,6 +520,7 @@ export const PUSH_HORIZONTAL_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Afaste bem os pés para dar suporte à rotação de tronco.'],
     padrao: 'empurrar-horizontal',
+    fase: 'treino',
     equipamento: ['nenhum'],
     tipoExercicio: 'principal',
     estatico: false,
@@ -547,6 +561,7 @@ export const PUSH_HORIZONTAL_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Exige excelente preparação prévia nos punhos e tendões dos cotovelos.'],
     padrao: 'empurrar-horizontal',
+    fase: 'treino',
     equipamento: ['nenhum'],
     tipoExercicio: 'principal',
     estatico: false,
@@ -597,6 +612,7 @@ export const PUSH_HORIZONTAL_EXERCISES: Exercise[] = [
       'Aterrisse com os cotovelos levemente flexionados para absorver o impacto nos punhos e ombros.'
     ],
     padrao: 'empurrar-horizontal',
+    fase: 'treino',
     equipamento: [
       'nenhum'
     ],
@@ -683,6 +699,7 @@ export const PUSH_HORIZONTAL_EXERCISES: Exercise[] = [
       'Se sentir estresse no punho, afaste levemente os polegares reduzindo a rotação interna.'
     ],
     padrao: 'empurrar-horizontal',
+    fase: 'treino',
     equipamento: [
       'banco'
     ],
@@ -772,6 +789,7 @@ export const PUSH_HORIZONTAL_EXERCISES: Exercise[] = [
       'Progredir com extremo cuidado; se sentir dor nas falanges, apoie os joelhos no chão antes da versão completa.'
     ],
     padrao: 'empurrar-horizontal',
+    fase: 'treino',
     equipamento: [
       'nenhum'
     ],

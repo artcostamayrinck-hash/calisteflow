@@ -110,11 +110,18 @@ for (const file of partialFiles) {
     if (!block.includes('padrao:')) {
       errors.push(`[${id}] Ausência de padrao motor.`);
     }
+    const faseMatch = block.match(/fase:\s*'([^']+)'/);
+    if (!faseMatch) {
+      errors.push(`[${id}] Ausência de fase obrigatória (aquecimento | treino | alongamento).`);
+    } else if (!['aquecimento', 'treino', 'alongamento'].includes(faseMatch[1])) {
+      errors.push(`[${id}] Fase inválida "${faseMatch[1]}". Deve ser aquecimento, treino ou alongamento.`);
+    }
+    const fase = faseMatch ? faseMatch[1] : undefined;
     if (!block.includes('criterioAvanco:')) {
       warnings.push(`[${id}] Sem criterioAvanco explicitado.`);
     }
 
-    totalExercises.push({ id, name, file });
+    totalExercises.push({ id, name, file, fase });
   }
 }
 
@@ -128,6 +135,10 @@ if (errors.length > 0) {
   console.log(`\n✅ VALIDAÇÃO CONCLUÍDA COM SUCESSO!`);
   console.log(`- 0 referências quebradas em regressões, progressões e adaptações.`);
   console.log(`- Total de exercícios únicos: ${totalExercises.length} (Meta mínima de 90 atingida com folga!).`);
+  const aquecimentoCount = totalExercises.filter(e => e.fase === 'aquecimento').length;
+  const treinoCount = totalExercises.filter(e => e.fase === 'treino').length;
+  const alongamentoCount = totalExercises.filter(e => e.fase === 'alongamento').length;
+  console.log(`- Distribuição por Fase: Aquecimento (${aquecimentoCount}) | Treino (${treinoCount}) | Alongamento (${alongamentoCount}) | Total: ${aquecimentoCount + treinoCount + alongamentoCount}`);
   if (warnings.length > 0) {
     console.log(`- Avisos informativos (${warnings.length}):`, warnings.slice(0, 5));
   }

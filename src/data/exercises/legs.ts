@@ -18,6 +18,7 @@ export const LEGS_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Não puxe os braços com força excessiva; use-os apenas para equilíbrio.'],
     padrao: 'agachamento-pernas',
+    fase: 'treino',
     equipamento: ['cadeira'],
     tipoExercicio: 'principal',
     estatico: false,
@@ -57,6 +58,7 @@ export const LEGS_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Mantenha os calcanhares totalmente colados ao chão.'],
     padrao: 'agachamento-pernas',
+    fase: 'treino',
     equipamento: ['nenhum'],
     tipoExercicio: 'principal',
     estatico: false,
@@ -96,6 +98,7 @@ export const LEGS_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Mantenha os joelhos alinhados a 90° sem ultrapassar os tornozelos.'],
     padrao: 'agachamento-pernas',
+    fase: 'treino',
     equipamento: ['nenhum'],
     tipoExercicio: 'principal',
     estatico: true,
@@ -135,6 +138,7 @@ export const LEGS_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Acompanhe a linha dos joelhos com a ponta dos pés.'],
     padrao: 'agachamento-pernas',
+    fase: 'treino',
     equipamento: ['nenhum'],
     tipoExercicio: 'principal',
     estatico: false,
@@ -174,6 +178,7 @@ export const LEGS_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Não relaxe na posição inferior; sustente a contração muscular ativa.'],
     padrao: 'agachamento-pernas',
+    fase: 'treino',
     equipamento: ['nenhum'],
     tipoExercicio: 'principal',
     estatico: false,
@@ -212,6 +217,7 @@ export const LEGS_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Aterrissagem deve ser macia com flexão imediata dos joelhos.'],
     padrao: 'agachamento-pernas',
+    fase: 'treino',
     equipamento: ['nenhum'],
     tipoExercicio: 'principal',
     estatico: false,
@@ -251,6 +257,7 @@ export const LEGS_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Não deixe o joelho dianteiro oscilar para dentro.'],
     padrao: 'agachamento-pernas',
+    fase: 'treino',
     equipamento: ['nenhum'],
     tipoExercicio: 'principal',
     estatico: false,
@@ -289,6 +296,7 @@ export const LEGS_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Mantenha a tíbia da perna dianteira quase vertical.'],
     padrao: 'agachamento-pernas',
+    fase: 'treino',
     equipamento: ['nenhum'],
     tipoExercicio: 'principal',
     estatico: false,
@@ -327,6 +335,7 @@ export const LEGS_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Encontre a distância correta do pé para não pinçar a virilha posterior.'],
     padrao: 'agachamento-pernas',
+    fase: 'treino',
     equipamento: ['banco'],
     tipoExercicio: 'principal',
     estatico: false,
@@ -366,6 +375,7 @@ export const LEGS_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Mantenha o calcanhar do lado que agacha colado ao solo.'],
     padrao: 'agachamento-pernas',
+    fase: 'treino',
     equipamento: ['nenhum'],
     tipoExercicio: 'principal',
     estatico: false,
@@ -405,6 +415,7 @@ export const LEGS_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Não pegue impulso com o pé que ficou no solo.'],
     padrao: 'agachamento-pernas',
+    fase: 'treino',
     equipamento: ['banco'],
     tipoExercicio: 'principal',
     estatico: false,
@@ -444,6 +455,7 @@ export const LEGS_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Verifique a estabilidade da caixa ou banco antes de subir.'],
     padrao: 'agachamento-pernas',
+    fase: 'treino',
     equipamento: ['banco'],
     tipoExercicio: 'principal',
     estatico: false,
@@ -483,6 +495,7 @@ export const LEGS_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Apoie a mão em uma parede para evitar perda de equilíbrio.'],
     padrao: 'agachamento-pernas',
+    fase: 'treino',
     equipamento: ['nenhum'],
     tipoExercicio: 'principal',
     estatico: false,
@@ -521,6 +534,7 @@ export const LEGS_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Mantenha a perna quase reta com joelho levemente destravado.'],
     padrao: 'agachamento-pernas',
+    fase: 'treino',
     equipamento: ['nenhum'],
     tipoExercicio: 'principal',
     estatico: false,
@@ -559,6 +573,7 @@ export const LEGS_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Mantenha o calcanhar do pé no solo firmemente apoiado.'],
     padrao: 'agachamento-pernas',
+    fase: 'treino',
     equipamento: ['barra'],
     tipoExercicio: 'principal',
     estatico: false,
@@ -598,6 +613,7 @@ export const LEGS_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Não desabe de peso sobre a caixa ao sentar.'],
     padrao: 'agachamento-pernas',
+    fase: 'treino',
     equipamento: ['banco'],
     tipoExercicio: 'principal',
     estatico: false,
@@ -637,6 +653,7 @@ export const LEGS_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Mantenha o calcanhar cravado no solo durante todo o movimento.'],
     padrao: 'agachamento-pernas',
+    fase: 'treino',
     equipamento: ['nenhum'],
     tipoExercicio: 'skill',
     estatico: false,
@@ -676,6 +693,7 @@ export const LEGS_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Toque o joelho de trás no chão com extrema delicadeza; use um colchonete.'],
     padrao: 'agachamento-pernas',
+    fase: 'treino',
     equipamento: ['nenhum'],
     tipoExercicio: 'skill',
     estatico: false,
@@ -724,6 +742,7 @@ export const LEGS_EXERCISES: Exercise[] = [
       'Não hiperestenda a lombar no topo; empurre com a força dos quadris e glúteos.'
     ],
     padrao: 'costas-baixa',
+    fase: 'treino',
     equipamento: [
       'banco'
     ],
@@ -809,6 +828,7 @@ export const LEGS_EXERCISES: Exercise[] = [
       'Mantenha o queixo apontando para o peito para proteger a coluna cervical.'
     ],
     padrao: 'costas-baixa',
+    fase: 'treino',
     equipamento: [
       'banco'
     ],
@@ -892,6 +912,7 @@ export const LEGS_EXERCISES: Exercise[] = [
       'Se sentir cãibra nos isquiotibiais, reduza a amplitude do deslizamento.'
     ],
     padrao: 'costas-baixa',
+    fase: 'treino',
     equipamento: [
       'toalha'
     ],
@@ -978,6 +999,7 @@ export const LEGS_EXERCISES: Exercise[] = [
       'Mantenha a coluna neutra e uma leve flexão destravada no joelho de apoio.'
     ],
     padrao: 'costas-baixa',
+    fase: 'treino',
     equipamento: [
       'nenhum'
     ],
@@ -1060,6 +1082,7 @@ export const LEGS_EXERCISES: Exercise[] = [
       'Não hiperestenda a coluna lombar ao elevar a coxa.'
     ],
     padrao: 'costas-baixa',
+    fase: 'treino',
     equipamento: [
       'nenhum'
     ],
@@ -1144,6 +1167,7 @@ export const LEGS_EXERCISES: Exercise[] = [
       'Não incline o tronco excessivamente para o lado oposto ao abrir a perna.'
     ],
     padrao: 'costas-baixa',
+    fase: 'treino',
     equipamento: [
       'nenhum'
     ],
@@ -1225,6 +1249,7 @@ export const LEGS_EXERCISES: Exercise[] = [
       'Desça os calcanhares sem impacto brusco na fáscia plantar.'
     ],
     padrao: 'agachamento-pernas',
+    fase: 'treino',
     equipamento: [
       'cadeira'
     ],
@@ -1303,6 +1328,7 @@ export const LEGS_EXERCISES: Exercise[] = [
       'Segure em uma parede ou corrimão para garantir o equilíbrio e não perder o foco.'
     ],
     padrao: 'agachamento-pernas',
+    fase: 'treino',
     equipamento: [
       'nenhum'
     ],
@@ -1385,6 +1411,7 @@ export const LEGS_EXERCISES: Exercise[] = [
       'Em caso de histórico de tendinopatia patelar ou de Aquiles, adapte para elevações sem impacto.'
     ],
     padrao: 'agachamento-pernas',
+    fase: 'treino',
     equipamento: [
       'nenhum'
     ],

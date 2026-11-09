@@ -18,6 +18,7 @@ export const WARMUP_MOBILITY_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Não force o punho além de um arco confortável sem dor.'],
     padrao: 'aquecimento',
+    fase: 'aquecimento',
     equipamento: ['nenhum'],
     tipoExercicio: 'aquecimento',
     estatico: false,
@@ -56,6 +57,7 @@ export const WARMUP_MOBILITY_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Controle o peso aplicado com os joelhos para não sobrecarregar.'],
     padrao: 'aquecimento',
+    fase: 'aquecimento',
     equipamento: ['nenhum'],
     tipoExercicio: 'aquecimento',
     estatico: false,
@@ -94,6 +96,7 @@ export const WARMUP_MOBILITY_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Mantenha os círculos sem estalidos ou dor articular.'],
     padrao: 'aquecimento',
+    fase: 'aquecimento',
     equipamento: ['nenhum'],
     tipoExercicio: 'aquecimento',
     estatico: false,
@@ -132,6 +135,7 @@ export const WARMUP_MOBILITY_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Segure bem afastado; NUNCA force nem dobre os cotovelos para passar.'],
     padrao: 'aquecimento',
+    fase: 'aquecimento',
     equipamento: ['nenhum'],
     tipoExercicio: 'aquecimento',
     estatico: false,
@@ -170,6 +174,8 @@ export const WARMUP_MOBILITY_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Mantenha os cotovelos travados durante todo o exercício.'],
     padrao: 'aquecimento',
+    fase: 'aquecimento',
+    fasesSecundarias: ['treino'],
     equipamento: ['nenhum'],
     tipoExercicio: 'aquecimento',
     estatico: false,
@@ -209,6 +215,7 @@ export const WARMUP_MOBILITY_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Movimentos fluidos e graduais sem trancos nas extremidades.'],
     padrao: 'aquecimento',
+    fase: 'aquecimento',
     equipamento: ['nenhum'],
     tipoExercicio: 'aquecimento',
     estatico: false,
@@ -247,6 +254,7 @@ export const WARMUP_MOBILITY_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Mantenha os quadris estáveis e perpendiculares ao solo.'],
     padrao: 'aquecimento',
+    fase: 'aquecimento',
     equipamento: ['nenhum'],
     tipoExercicio: 'aquecimento',
     estatico: false,
@@ -285,6 +293,8 @@ export const WARMUP_MOBILITY_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Mantenha o calcanhar do pé da frente firme no chão.'],
     padrao: 'aquecimento',
+    fase: 'aquecimento',
+    fasesSecundarias: ['alongamento'],
     equipamento: ['nenhum'],
     tipoExercicio: 'aquecimento',
     estatico: false,
@@ -323,6 +333,7 @@ export const WARMUP_MOBILITY_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Se tiver desconforto no joelho, apoie as mãos no solo atrás das costas.'],
     padrao: 'aquecimento',
+    fase: 'aquecimento',
     equipamento: ['nenhum'],
     tipoExercicio: 'aquecimento',
     estatico: false,
@@ -361,6 +372,8 @@ export const WARMUP_MOBILITY_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Mantenha os calcanhares no solo; se necessário, coloque um apoio sob eles.'],
     padrao: 'aquecimento',
+    fase: 'aquecimento',
+    fasesSecundarias: ['treino'],
     equipamento: ['nenhum'],
     tipoExercicio: 'aquecimento',
     estatico: true,
@@ -399,6 +412,8 @@ export const WARMUP_MOBILITY_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Não hiperestenda a coluna lombar; o esforço é nos glúteos.'],
     padrao: 'aquecimento',
+    fase: 'aquecimento',
+    fasesSecundarias: ['treino'],
     equipamento: ['nenhum'],
     tipoExercicio: 'aquecimento',
     estatico: true,
@@ -437,6 +452,8 @@ export const WARMUP_MOBILITY_EXERCISES: Exercise[] = [
     reviewedBy: CREF_REVIEWER_SPECIALIST,
     safetyCautions: ['Não solte a pegada de forma brusca; desça apoiando as pontas dos pés no solo.'],
     padrao: 'aquecimento',
+    fase: 'alongamento',
+    fasesSecundarias: ['aquecimento'],
     equipamento: ['barra'],
     tipoExercicio: 'aquecimento',
     estatico: true,
@@ -483,6 +500,7 @@ export const WARMUP_MOBILITY_EXERCISES: Exercise[] = [
       'Mantenha a lombar encostada na parede sem hiperestender a coluna.'
     ],
     padrao: 'aquecimento',
+    fase: 'aquecimento',
     equipamento: [
       'parede'
     ],
@@ -562,6 +580,7 @@ export const WARMUP_MOBILITY_EXERCISES: Exercise[] = [
       'Mantenha a testa apoiada ou próxima ao solo sem forçar o pescoço.'
     ],
     padrao: 'aquecimento',
+    fase: 'aquecimento',
     equipamento: [
       'nenhum'
     ],
@@ -642,6 +661,7 @@ export const WARMUP_MOBILITY_EXERCISES: Exercise[] = [
       'Não permita que o calcanhar descole do chão durante o avanço do joelho.'
     ],
     padrao: 'aquecimento',
+    fase: 'aquecimento',
     equipamento: [
       'parede'
     ],
@@ -721,6 +741,7 @@ export const WARMUP_MOBILITY_EXERCISES: Exercise[] = [
       'Inicie com amplitude reduzida e aumente gradualmente sem forçar o fim do curso.'
     ],
     padrao: 'aquecimento',
+    fase: 'aquecimento',
     equipamento: [
       'parede'
     ],
@@ -799,6 +820,7 @@ export const WARMUP_MOBILITY_EXERCISES: Exercise[] = [
       'Mantenha o cotovelo pressionado contra a toalha sem desgrudar da lateral do corpo.'
     ],
     padrao: 'aquecimento',
+    fase: 'aquecimento',
     equipamento: [
       'toalha'
     ],
@@ -879,6 +901,7 @@ export const WARMUP_MOBILITY_EXERCISES: Exercise[] = [
       'Em caso de sobrepeso ou dores articulares nos joelhos, execute a versão sem impacto (passo lateral).'
     ],
     padrao: 'aquecimento',
+    fase: 'aquecimento',
     equipamento: [
       'nenhum'
     ],

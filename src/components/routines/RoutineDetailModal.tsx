@@ -1,7 +1,7 @@
 import type { Routine, MuscleGroup } from '../../types';
 import { EXERCISES_DATABASE } from '../../data/exercisesData';
 import { MuscleMap } from '../visuals/MuscleMap';
-import { X, Play, Clock, Dumbbell, Shield, Info } from 'lucide-react';
+import { X, Play, Clock, Dumbbell, Shield, Info, AlertTriangle } from 'lucide-react';
 import { useBodyScrollLock } from '../../utils/useBodyScrollLock';
 
 interface RoutineDetailModalProps {
@@ -41,6 +41,15 @@ export const RoutineDetailModal = ({
   ) as MuscleGroup[];
 
   const totalSets = routine.exercises.reduce((acc, curr) => acc + curr.sets, 0);
+
+  const hasWarmup = routine.exercises.some(re => {
+    const ex = EXERCISES_DATABASE.find(e => e.id === re.exerciseId);
+    return ex?.fase === 'aquecimento' || ex?.fasesSecundarias?.includes('aquecimento');
+  });
+  const hasStretch = routine.exercises.some(re => {
+    const ex = EXERCISES_DATABASE.find(e => e.id === re.exerciseId);
+    return ex?.fase === 'alongamento' || ex?.fasesSecundarias?.includes('alongamento');
+  });
 
   return (
     <div
@@ -106,9 +115,30 @@ export const RoutineDetailModal = ({
 
           {/* Exercises Sequence */}
           <div className="space-y-3">
-            <h3 className="text-xs font-black uppercase tracking-wider text-slate-400">
-              Sequência de Exercícios ({routine.exercises.length})
-            </h3>
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-black uppercase tracking-wider text-slate-400">
+                Sequência de Exercícios ({routine.exercises.length})
+              </h3>
+              <span className="text-[10px] text-slate-400">
+                Ordem recomendada: Aquecimento → Treino → Alongamento
+              </span>
+            </div>
+
+            {(!hasWarmup || !hasStretch) && (
+              <div className="p-3.5 rounded-2xl glass-card border border-amber-500/30 bg-amber-500/10 text-xs text-amber-200 flex items-start gap-2.5">
+                <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  <div className="font-bold">Estrutura de Fases Recomendada:</div>
+                  <p className="text-[11px] text-amber-300/80 leading-relaxed">
+                    {!hasWarmup && !hasStretch
+                      ? 'Esta rotina possui apenas exercícios principais. Recomendamos realizar um bloco de Aquecimento antes e Alongamento ao final.'
+                      : !hasWarmup
+                      ? 'Recomendamos adicionar exercícios de Aquecimento articular antes de iniciar as séries intensas.'
+                      : 'Recomendamos finalizar o treino com exercícios de Alongamento estático para recuperação miofascial.'}
+                  </p>
+                </div>
+              </div>
+            )}
 
             <div className="space-y-2.5">
               {routine.exercises.map((re, index) => {
@@ -132,10 +162,21 @@ export const RoutineDetailModal = ({
                         </div>
                       )}
                       <div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <span className="font-extrabold text-sm text-slate-100">
                             {ex ? ex.name : re.exerciseId}
                           </span>
+                          {ex && (
+                            <span className={`text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded border ${
+                              ex.fase === 'aquecimento'
+                                ? 'bg-amber-500/15 text-amber-300 border-amber-500/30'
+                                : ex.fase === 'alongamento'
+                                ? 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30'
+                                : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+                            }`}>
+                              {ex.fase === 'aquecimento' ? 'Aquec.' : ex.fase === 'alongamento' ? 'Along.' : 'Treino'}
+                            </span>
+                          )}
                           {ex && (
                             <span className="text-[10px] px-2 py-0.5 rounded-md bg-white/[0.06] text-slate-300 border border-white/5">
                               {ex.type === 'isometric' ? 'Isometria' : 'Repetições'}
