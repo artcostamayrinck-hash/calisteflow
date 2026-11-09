@@ -74,3 +74,4 @@ export function isFuzzyMatch(targetText: string, query: string): boolean {
     });
   });
 }
+
