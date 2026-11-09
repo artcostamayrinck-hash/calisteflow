@@ -149,7 +149,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
 
   return (
     <div
-      className={`space-y-5 pb-28 ${lt ? 'text-base' : ''}`}
+      className={`space-y-5 safe-dock-pb ${lt ? 'text-base' : ''}`}
       style={lhm ? { direction: 'rtl' } : undefined}
     >
       {/* ── HERO SECTION ── */}
@@ -228,7 +228,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 >
                   <div className="text-left">
                     <span className="text-xs font-bold block">{label}</span>
-                    <span className="text-[10px] text-slate-500">{desc}</span>
+                    <span className="text-[10px] text-slate-400">{desc}</span>
                   </div>
                   <div
                     className={`w-8 h-4.5 rounded-full transition-colors relative shrink-0 ${
@@ -243,6 +243,13 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   </div>
                 </button>
               ))}
+
+              <div className="pt-2.5 border-t border-white/10 flex items-center justify-between text-[11px] text-slate-400 px-1">
+                <span>Versão do CalisteFlow</span>
+                <span className="font-mono font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20">
+                  v{typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '4.2.0'}
+                </span>
+              </div>
             </div>
           )}
 

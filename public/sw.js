@@ -1,6 +1,6 @@
 /**
  * CalisteFlow Service Worker
- * Versão do Cache: calisteflow-v4.1.0
+ * Versão do Cache: calisteflow-v4.2.0 (atualizado dinamicamente no build)
  * Escopo: /calisteflow/
  *
  * Estratégia de Cache:
@@ -10,7 +10,7 @@
  * - Não recarrega o app no meio de um treino ativo (skipWaiting só sob comando do usuário)
  */
 
-const CACHE_NAME = 'calisteflow-v4.1.0';
+const CACHE_NAME = 'calisteflow-v4.2.0';
 
 // Lista de arquivos fundamentais para inicialização offline no escopo /calisteflow/
 const PRECACHE_ASSETS = [

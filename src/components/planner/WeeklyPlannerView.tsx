@@ -114,7 +114,7 @@ export const WeeklyPlannerView = ({
     .map(mv => mv.muscle);
 
   return (
-    <div className="space-y-6 pb-28">
+    <div className="space-y-6 safe-dock-pb">
       {/* Hero Header Banner */}
       <div className="relative glass-card rounded-3xl p-5 sm:p-7 overflow-hidden border border-white/10 shadow-2xl">
         <div className="absolute top-0 right-0 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />

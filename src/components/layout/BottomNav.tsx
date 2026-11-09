@@ -47,17 +47,18 @@ export const BottomNav = ({
       )}
 
       {/* Floating Modern Glass Pill Dock */}
-      <nav className="w-full max-w-md pointer-events-auto glass-panel rounded-3xl p-1.5 shadow-2xl border border-white/10 grid grid-cols-5 gap-1 backdrop-blur-2xl">
+      <nav className="w-full max-w-md pointer-events-auto glass-panel rounded-3xl p-1.5 shadow-2xl border border-white/10 grid grid-cols-5 gap-1.5 backdrop-blur-2xl">
         {/* Rotinas */}
         <button
           onClick={() => handleTabClick('routines')}
-          className={`relative flex flex-col items-center justify-center py-2 px-2 rounded-2xl transition-all duration-200 active:scale-95 ${
+          aria-label="Aba Rotinas"
+          className={`relative min-h-[48px] flex flex-col items-center justify-center py-1.5 px-1 rounded-2xl transition-all duration-200 active:scale-95 ${
             activeTab === 'routines'
               ? 'text-emerald-400 font-bold bg-white/[0.06] shadow-inner'
               : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.02]'
           }`}
         >
-          <Dumbbell className={`w-5 h-5 mb-1 transition-transform ${activeTab === 'routines' ? 'scale-110 stroke-[2.5]' : 'stroke-[1.8]'}`} />
+          <Dumbbell className={`w-5 h-5 mb-0.5 transition-transform ${activeTab === 'routines' ? 'scale-110 stroke-[2.2]' : 'stroke-[1.8]'}`} />
           <span className="text-[10px] tracking-wide">Rotinas</span>
           {activeTab === 'routines' && (
             <span className="absolute bottom-1 w-4 h-0.5 bg-emerald-400 rounded-full glow-emerald" />
@@ -67,13 +68,14 @@ export const BottomNav = ({
         {/* Semana */}
         <button
           onClick={() => handleTabClick('planner')}
-          className={`relative flex flex-col items-center justify-center py-2 px-2 rounded-2xl transition-all duration-200 active:scale-95 ${
+          aria-label="Aba Planejador da Semana"
+          className={`relative min-h-[48px] flex flex-col items-center justify-center py-1.5 px-1 rounded-2xl transition-all duration-200 active:scale-95 ${
             activeTab === 'planner'
               ? 'text-emerald-400 font-bold bg-white/[0.06] shadow-inner'
               : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.02]'
           }`}
         >
-          <CalendarDays className={`w-5 h-5 mb-1 transition-transform ${activeTab === 'planner' ? 'scale-110 stroke-[2.5]' : 'stroke-[1.8]'}`} />
+          <CalendarDays className={`w-5 h-5 mb-0.5 transition-transform ${activeTab === 'planner' ? 'scale-110 stroke-[2.2]' : 'stroke-[1.8]'}`} />
           <span className="text-[10px] tracking-wide">Semana</span>
           {activeTab === 'planner' && (
             <span className="absolute bottom-1 w-4 h-0.5 bg-emerald-400 rounded-full glow-emerald" />
@@ -83,17 +85,17 @@ export const BottomNav = ({
         {/* HOME — Centre primary CTA button */}
         <button
           onClick={() => handleTabClick('home')}
-          className="relative flex flex-col items-center justify-center py-1 px-1 rounded-2xl transition-all duration-200 active:scale-90"
+          className="relative min-h-[48px] flex flex-col items-center justify-center py-0.5 px-1 rounded-2xl transition-all duration-200 active:scale-90"
           aria-label="Home – Treinar hoje"
         >
           <div
-            className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-xl transition-all duration-200 ${
+            className={`w-11 h-11 rounded-2xl flex items-center justify-center shadow-xl transition-all duration-200 ${
               activeTab === 'home'
                 ? 'bg-gradient-to-br from-emerald-400 via-teal-400 to-cyan-400 text-slate-950 shadow-emerald-500/40 glow-emerald scale-105'
                 : 'bg-gradient-to-br from-emerald-500/80 via-teal-500/80 to-cyan-500/80 text-slate-950 shadow-emerald-500/20'
             }`}
           >
-            <Home className="w-5 h-5 stroke-[2.5]" />
+            <Home className="w-5 h-5 stroke-[2.2]" />
           </div>
           <span className={`text-[10px] tracking-wide mt-0.5 ${activeTab === 'home' ? 'text-emerald-400 font-bold' : 'text-slate-400'}`}>Home</span>
         </button>
@@ -101,14 +103,15 @@ export const BottomNav = ({
         {/* Exercícios */}
         <button
           onClick={() => handleTabClick('exercises')}
-          className={`relative flex flex-col items-center justify-center py-2 px-3 rounded-2xl transition-all duration-200 active:scale-95 ${
+          aria-label="Aba Biblioteca de Exercícios"
+          className={`relative min-h-[48px] flex flex-col items-center justify-center py-1.5 px-1 rounded-2xl transition-all duration-200 active:scale-95 ${
             activeTab === 'exercises'
               ? 'text-emerald-400 font-bold bg-white/[0.06] shadow-inner'
               : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.02]'
           }`}
         >
-          <BookOpen className={`w-5 h-5 mb-1 transition-transform ${activeTab === 'exercises' ? 'scale-110 stroke-[2.5]' : 'stroke-[1.8]'}`} />
-          <span className="text-[11px] tracking-wide">Exercícios</span>
+          <BookOpen className={`w-5 h-5 mb-0.5 transition-transform ${activeTab === 'exercises' ? 'scale-110 stroke-[2.2]' : 'stroke-[1.8]'}`} />
+          <span className="text-[10px] tracking-wide">Exercícios</span>
           {activeTab === 'exercises' && (
             <span className="absolute bottom-1 w-4 h-0.5 bg-emerald-400 rounded-full glow-emerald" />
           )}
@@ -117,14 +120,15 @@ export const BottomNav = ({
         {/* Progresso */}
         <button
           onClick={() => handleTabClick('history')}
-          className={`relative flex flex-col items-center justify-center py-2 px-3 rounded-2xl transition-all duration-200 active:scale-95 ${
+          aria-label="Aba Histórico e Progresso"
+          className={`relative min-h-[48px] flex flex-col items-center justify-center py-1.5 px-1 rounded-2xl transition-all duration-200 active:scale-95 ${
             activeTab === 'history'
               ? 'text-emerald-400 font-bold bg-white/[0.06] shadow-inner'
               : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.02]'
           }`}
         >
-          <Trophy className={`w-5 h-5 mb-1 transition-transform ${activeTab === 'history' ? 'scale-110 stroke-[2.5]' : 'stroke-[1.8]'}`} />
-          <span className="text-[11px] tracking-wide">Progresso</span>
+          <Trophy className={`w-5 h-5 mb-0.5 transition-transform ${activeTab === 'history' ? 'scale-110 stroke-[2.2]' : 'stroke-[1.8]'}`} />
+          <span className="text-[10px] tracking-wide">Progresso</span>
           {activeTab === 'history' && (
             <span className="absolute bottom-1 w-4 h-0.5 bg-emerald-400 rounded-full glow-emerald" />
           )}

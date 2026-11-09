@@ -369,7 +369,7 @@ export const ExerciseLibraryView = ({
   );
 
   return (
-    <div className="space-y-6 pb-[calc(7rem+env(safe-area-inset-bottom))]">
+    <div className="space-y-6 safe-dock-pb">
       {/* Banner de Cabeçalho */}
       <div className="relative glass-card rounded-3xl p-5 sm:p-7 overflow-hidden border border-white/10 shadow-2xl">
         <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />

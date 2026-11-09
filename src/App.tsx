@@ -273,11 +273,14 @@ export function App() {
             <div>
               <span className="font-extrabold text-base sm:text-lg tracking-tight text-slate-100 flex items-center gap-1.5">
                 Caliste<span className="text-cyan-400">Flow</span>
-                <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 uppercase tracking-widest">
+                <span
+                  title="CalisteFlow PRO • Versão 100% Gratuita, Local e Offline"
+                  className="text-[10px] font-black px-1.5 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 uppercase tracking-widest cursor-help"
+                >
                   PRO
                 </span>
               </span>
-              <span className="text-[10px] text-slate-400 block -mt-0.5 font-medium">
+              <span className="hidden sm:block text-[10px] text-slate-400 -mt-0.5 font-medium">
                 Rotinas de Calistenia & Postura
               </span>
             </div>
