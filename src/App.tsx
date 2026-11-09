@@ -47,8 +47,8 @@ export function App() {
   // Persistence State
   const [routines, setRoutines] = useState<Routine[]>(() => getStoredRoutines());
   const [history, setHistory] = useState<WorkoutSession[]>(() => getWorkoutHistory());
-  const [stats, setStats] = useState<WorkoutStats>(() => calculateStats(getWorkoutHistory()));
   const [weeklyPlan, setWeeklyPlan] = useState<WeeklyPlan>(() => getStoredWeeklyPlan());
+  const [stats, setStats] = useState<WorkoutStats>(() => calculateStats(getWorkoutHistory(), getStoredWeeklyPlan()));
   const [isOnboardingOpen, setIsOnboardingOpen] = useState<boolean>(() => {
     try {
       const hasProfile = localStorage.getItem('calistheflow_user_profile_v1');
@@ -148,10 +148,10 @@ export function App() {
   const [summarySession, setSummarySession] = useState<WorkoutSession | null>(null);
   const [inspectExerciseId, setInspectExerciseId] = useState<string | null>(null);
 
-  // Keep stats in sync whenever history updates
+  // Keep stats in sync whenever history or weeklyPlan updates
   useEffect(() => {
-    setStats(calculateStats(history));
-  }, [history]);
+    setStats(calculateStats(history, weeklyPlan));
+  }, [history, weeklyPlan]);
 
   // Routine Handlers
   const handleStartRoutine = (routine: Routine) => {

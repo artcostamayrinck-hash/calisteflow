@@ -16,6 +16,7 @@ import {
   Download,
   Upload,
   BarChart3,
+  AlertCircle,
 } from 'lucide-react';
 
 interface HistoryViewProps {
@@ -69,10 +70,61 @@ export const HistoryView = ({
   const sortedMuscles = Object.entries(muscleVolumeMap).sort((a, b) => b[1] - a[1]);
   const maxMuscleSets = sortedMuscles.length > 0 ? sortedMuscles[0][1] : 1;
 
+  // Set of dates with completed workouts (YYYY-MM-DD)
+  const workoutDatesSet = new Set(
+    history.map(s => {
+      const d = new Date(s.endTime || s.startTime);
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    })
+  );
+
+  // Generate 28-day consistency calendar
+  const calendarDays = Array.from({ length: 28 }, (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() - (27 - i));
+    const str = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    return {
+      date: d,
+      dateStr: str,
+      dayNum: d.getDate(),
+      trained: workoutDatesSet.has(str),
+      isToday: i === 27,
+    };
+  });
+
+  // Calculate workouts completed this week (since Monday)
+  const workoutsThisWeek = (() => {
+    const now = new Date();
+    const dayOfWeek = now.getDay();
+    const mondayOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+    const monday = new Date(now);
+    monday.setDate(now.getDate() - mondayOffset);
+    monday.setHours(0, 0, 0, 0);
+
+    return history.filter(s => new Date(s.endTime || s.startTime).getTime() >= monday.getTime()).length;
+  })();
+
+  // Lembrete mensal de backup (D17)
+  const [backupDismissed, setBackupDismissed] = useState(false);
+  const isBackupReminderDue = (() => {
+    if (history.length < 2 || backupDismissed) return false;
+    try {
+      const last = localStorage.getItem('calistheflow_last_backup_date');
+      if (!last) return true;
+      const daysSince = (Date.now() - new Date(last).getTime()) / (1000 * 60 * 60 * 24);
+      return daysSince >= 30;
+    } catch {
+      return false;
+    }
+  })();
+
   // Export JSON Backup
   const handleExportBackup = () => {
+    try {
+      localStorage.setItem('calistheflow_last_backup_date', new Date().toISOString());
+    } catch {}
     const data = {
-      version: '1.1.0',
+      version: '1.2.0',
       exportedAt: new Date().toISOString(),
       stats,
       history,
@@ -86,7 +138,7 @@ export const HistoryView = ({
     URL.revokeObjectURL(url);
   };
 
-  // Import JSON Backup
+  // Import JSON Backup with Confirmation
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -96,18 +148,26 @@ export const HistoryView = ({
       try {
         const parsed = JSON.parse(event.target?.result as string);
         if (Array.isArray(parsed.history)) {
+          const confirmMsg = `ATENÇÃO: A restauração do backup substituirá seu histórico atual (${history.length} treinos) por ${parsed.history.length} treinos importados. Deseja realmente prosseguir?`;
+          if (!window.confirm(confirmMsg)) {
+            if (fileInputRef.current) fileInputRef.current.value = '';
+            return;
+          }
+
           if (onImportBackup) {
             onImportBackup(parsed.history);
           } else {
             localStorage.setItem('calistheflow_history_v1', JSON.stringify(parsed.history));
             window.location.reload();
           }
-          alert('Backup restaurado com sucesso!');
+          alert(`Backup restaurado com sucesso! (${parsed.history.length} treinos carregados).`);
         } else {
-          alert('Arquivo de backup inválido.');
+          alert('Arquivo de backup inválido: não contém a lista de treinos esperada.');
         }
       } catch {
-        alert('Erro ao ler arquivo de backup.');
+        alert('Erro ao processar o arquivo de backup. Certifique-se de que é um JSON válido.');
+      } finally {
+        if (fileInputRef.current) fileInputRef.current.value = '';
       }
     };
     reader.readAsText(file);
@@ -156,6 +216,41 @@ export const HistoryView = ({
           </div>
         </div>
       </div>
+
+      {/* Lembrete Mensal de Backup (D17) */}
+      {isBackupReminderDue && (
+        <div className="glass-card rounded-3xl p-4 sm:p-5 border border-amber-500/40 bg-amber-500/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 glow-amber animate-in fade-in">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-300 flex items-center justify-center shrink-0">
+              <AlertCircle className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="text-xs sm:text-sm font-bold text-slate-100">
+                Lembrete de Segurança: Faça seu backup mensal
+              </h4>
+              <p className="text-[11px] text-slate-300 mt-0.5">
+                Seus {history.length} treinos estão salvos no aparelho. Baixe o JSON para nunca perder seu histórico.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <button
+              type="button"
+              onClick={handleExportBackup}
+              className="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs transition active:scale-95 shadow-md flex items-center justify-center gap-1.5"
+            >
+              <Download className="w-3.5 h-3.5" /> Baixar Backup
+            </button>
+            <button
+              type="button"
+              onClick={() => setBackupDismissed(true)}
+              className="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 text-xs font-semibold transition"
+            >
+              Lembrar depois
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Aggregate Stats Bar */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
@@ -211,6 +306,57 @@ export const HistoryView = ({
             <div className="text-3xl font-black text-slate-100 font-mono tracking-tight">{stats.totalSets}</div>
             <div className="text-[11px] text-slate-400 mt-1 font-semibold">Séries executadas</div>
           </div>
+        </div>
+      </div>
+
+      {/* Calendário de Constância (Últimos 28 Dias) & Metas */}
+      <div className="glass-card rounded-3xl border border-white/10 p-5 sm:p-6 shadow-2xl space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/5 pb-3">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center shrink-0">
+              <Calendar className="w-4 h-4" />
+            </div>
+            <div>
+              <h3 className="text-xs sm:text-sm font-black text-slate-100 tracking-tight">
+                Constância de Treinos (Últimas 4 Semanas)
+              </h3>
+              <p className="text-[10px] sm:text-[11px] text-slate-400 font-medium">
+                {workoutsThisWeek} {workoutsThisWeek === 1 ? 'treino realizado' : 'treinos realizados'} nesta semana
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 text-[11px] text-slate-400">
+            <span className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 glow-emerald" /> Treinado
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-slate-800 border border-white/10" /> Descanso
+            </span>
+          </div>
+        </div>
+
+        {/* 28-Day Heat Grid (4 rows of 7 days) */}
+        <div className="grid grid-cols-7 gap-1.5 sm:gap-2 pt-1">
+          {calendarDays.map((cd) => (
+            <div
+              key={cd.dateStr}
+              title={`${cd.date.toLocaleDateString('pt-BR')}: ${cd.trained ? 'Treino concluído!' : 'Descanso planejado'}`}
+              className={`flex flex-col items-center justify-center p-2 rounded-xl transition cursor-default ${
+                cd.trained
+                  ? 'bg-emerald-500/20 border border-emerald-400 text-emerald-300 font-black glow-emerald'
+                  : cd.isToday
+                  ? 'bg-white/10 border border-cyan-400 text-cyan-300 font-bold'
+                  : 'bg-white/[0.03] border border-white/5 text-slate-400 font-medium hover:bg-white/[0.06]'
+              }`}
+            >
+              <span className="text-[11px] font-mono">{cd.dayNum}</span>
+              {cd.trained ? (
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1 glow-emerald" />
+              ) : (
+                <span className="w-1.5 h-1.5 rounded-full bg-transparent mt-1" />
+              )}
+            </div>
+          ))}
         </div>
       </div>
 

@@ -208,17 +208,20 @@ export const HomeView: React.FC<HomeViewProps> = ({
               style={{ direction: 'ltr' }}
             >
               <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                Preferências de Exibição
+                Preferências do Aplicativo
               </p>
               {(
                 [
                   { key: 'leftHandMode', label: 'Modo Mão Esquerda', desc: 'Inverte controles para a esquerda' },
                   { key: 'largeText', label: 'Texto Grande', desc: 'Aumenta legibilidade em treino' },
                   { key: 'reducedMotion', label: 'Reduzir Animações', desc: 'Desativa microinterações' },
+                  { key: 'wakeLockEnabled', label: 'Tela Sempre Ligada (Wake Lock)', desc: 'Evita bloqueio automático de tela no treino' },
+                  { key: 'soundEnabled', label: 'Efeitos Sonoros & Beeps', desc: 'Alarmes de descanso e início' },
                 ] as { key: keyof AppSettings; label: string; desc: string }[]
               ).map(({ key, label, desc }) => (
                 <button
                   key={key}
+                  type="button"
                   onClick={() => updateSetting(key, !settings[key])}
                   className={`w-full flex items-center justify-between p-2.5 rounded-xl transition active:scale-98 border ${
                     settings[key]
@@ -243,6 +246,78 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   </div>
                 </button>
               ))}
+
+              {/* Ajuste de Volume e Timbre */}
+              {settings.soundEnabled && (
+                <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/5 space-y-2">
+                  <div className="flex items-center justify-between text-xs font-bold text-slate-300">
+                    <span>Volume do Cronômetro</span>
+                    <span className="text-emerald-400 font-mono">{Math.round(settings.soundVolume * 100)}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.05"
+                    value={settings.soundVolume}
+                    onChange={e => updateSetting('soundVolume', parseFloat(e.target.value))}
+                    className="w-full accent-emerald-500 h-1.5 bg-slate-800 rounded-lg cursor-pointer"
+                  />
+                  <div className="flex items-center justify-between pt-1">
+                    <span className="text-[11px] text-slate-400 font-semibold">Timbre do Alarme</span>
+                    <div className="flex gap-1">
+                      {(['padrao', 'suave', 'apito'] as const).map(t => (
+                        <button
+                          key={t}
+                          type="button"
+                          onClick={() => {
+                            updateSetting('soundTimbre', t);
+                            soundManager.playStartBeep();
+                          }}
+                          className={`px-2 py-0.5 rounded-lg text-[10px] font-bold capitalize transition ${
+                            settings.soundTimbre === t
+                              ? 'bg-emerald-500 text-slate-950'
+                              : 'bg-white/5 text-slate-400 hover:text-white'
+                          }`}
+                        >
+                          {t}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <p className="text-[9px] text-slate-400 pt-0.5 italic">
+                    💡 No iPhone/Safari, desative a chave física de silencioso lateral para escutar os beeps.
+                  </p>
+                </div>
+              )}
+
+              {/* Tema Visual (Claro / Escuro) */}
+              <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-between">
+                <div>
+                  <span className="text-xs font-bold text-slate-300 block">Tema da Interface</span>
+                  <span className="text-[10px] text-slate-400">Escuro padrão ou Claro de alto contraste</span>
+                </div>
+                <div className="flex gap-1">
+                  <button
+                    type="button"
+                    onClick={() => updateSetting('theme', 'dark')}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition ${
+                      settings.theme !== 'light' ? 'bg-emerald-500 text-slate-950' : 'bg-white/5 text-slate-400'
+                    }`}
+                  >
+                    Escuro
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => updateSetting('theme', 'light')}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition ${
+                      settings.theme === 'light' ? 'bg-emerald-500 text-slate-950' : 'bg-white/5 text-slate-400'
+                    }`}
+                  >
+                    Claro
+                  </button>
+                </div>
+              </div>
 
               <div className="pt-2.5 border-t border-white/10 flex items-center justify-between text-[11px] text-slate-400 px-1">
                 <span>Versão do CalisteFlow</span>

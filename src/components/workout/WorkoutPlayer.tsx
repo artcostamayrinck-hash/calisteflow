@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import type { Routine, WorkoutSession, WorkoutExerciseRecord, MuscleGroup, ActiveWorkoutBackup, Exercise } from '../../types';
 import { EXERCISES_DATABASE, getExerciseById } from '../../data/exercisesData';
 import { soundManager } from '../../utils/audio';
+import { getAppSettings } from '../../utils/appSettings';
 import { saveActiveWorkoutBackup, clearActiveWorkoutBackup } from '../../utils/storage';
 import { ExercisePostureVisual } from '../visuals/ExercisePostureVisual';
 import { MuscleMap } from '../visuals/MuscleMap';
@@ -27,6 +28,7 @@ import {
   AlertTriangle,
   ShieldCheck,
   Sparkles,
+  Sun,
 } from 'lucide-react';
 
 interface WorkoutPlayerProps {
@@ -342,6 +344,8 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
   useEffect(() => {
     let wakeLock: any = null;
     const requestLock = async () => {
+      const settings = getAppSettings();
+      if (!settings.wakeLockEnabled) return;
       if ('wakeLock' in navigator && document.visibilityState === 'visible') {
         try {
           wakeLock = await (navigator as any).wakeLock?.request('screen');
@@ -703,6 +707,12 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
             <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-emerald-400">
               <Clock className="w-3.5 h-3.5 shrink-0" />
               <span className="tracking-wider tabular-nums inline-block min-w-[42px]">{formatMmSs(totalElapsedSeconds)}</span>
+              {getAppSettings().wakeLockEnabled && (
+                <span className="hidden sm:inline-flex items-center gap-1 text-[9px] uppercase font-sans px-1.5 py-0.5 rounded-md bg-emerald-500/15 text-emerald-300 font-bold border border-emerald-500/30 shrink-0" title="Tela ativa (Wake Lock ligado)">
+                  <Sun className="w-2.5 h-2.5 text-emerald-400" />
+                  Tela Ativa
+                </span>
+              )}
               {isWorkoutPaused && (
                 <span className="text-[9px] uppercase font-sans px-1.5 py-0.5 rounded-md bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30 shrink-0">
                   Pausado
