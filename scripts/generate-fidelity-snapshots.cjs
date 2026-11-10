@@ -229,3 +229,4 @@ run().catch(err => {
   console.error('❌ Falha:', err);
   process.exit(1);
 });
+
