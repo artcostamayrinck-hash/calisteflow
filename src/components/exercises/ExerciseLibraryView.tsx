@@ -3,6 +3,8 @@ import type { Exercise, MuscleGroup, MovementPattern, ExerciseDifficulty, Equipm
 import { BASE_EXERCISES, MUSCLE_LABELS, MUSCLE_DEFINITIONS, getExerciseById, CREF_REVIEWER_SPECIALIST } from '../../data/exercisesData';
 import { MuscleMap } from '../visuals/MuscleMap';
 import { ExerciseVideoPlayer } from '../workout/ExerciseVideoPlayer';
+import { ExerciseMedia } from '../visuals/figure/ExerciseMedia';
+import { ExerciseGalleryModal } from '../visuals/figure/ExerciseGalleryModal';
 import { soundManager } from '../../utils/audio';
 import { useBodyScrollLock } from '../../utils/useBodyScrollLock';
 import { isFuzzyMatch } from '../../utils/fuzzySearch';
@@ -240,6 +242,8 @@ export const ExerciseLibraryView = ({
 
   // D14: Modal da Árvore de Habilidades
   const [showSkillTree, setShowSkillTree] = useState<boolean>(false);
+  // Galeria de Revisão Biomecânica de Animações
+  const [showAnimationGallery, setShowAnimationGallery] = useState<boolean>(false);
 
   const listTopRef = useRef<HTMLDivElement>(null);
   const prevFilterKeyRef = useRef<string>('');
@@ -569,13 +573,15 @@ export const ExerciseLibraryView = ({
             <h3 className="text-base sm:text-lg font-bold text-slate-100">{ex.name}</h3>
             <p className="text-xs text-slate-400 mt-1 leading-relaxed line-clamp-2">{ex.description}</p>
           </div>
-          {ex.videoThumbnail && (
+          {ex.videoThumbnail ? (
             <img
               src={ex.videoThumbnail}
               alt={ex.name}
               loading="lazy"
               className="w-14 h-14 rounded-2xl object-cover bg-black/40 border border-white/10 shrink-0 shadow-md"
             />
+          ) : (
+            <ExerciseMedia exercise={ex} mode="card" className="w-14 h-14" />
           )}
         </div>
 
@@ -826,6 +832,19 @@ export const ExerciseLibraryView = ({
           >
             <Sparkles className="w-3.5 h-3.5 text-purple-400" />
             <span>Árvore de Skills</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              soundManager.triggerHaptic([30]);
+              setShowAnimationGallery(true);
+            }}
+            className="px-3 py-1.5 rounded-xl text-xs font-bold bg-gradient-to-r from-emerald-500/20 to-teal-500/20 text-emerald-300 border border-emerald-500/30 hover:brightness-110 flex items-center gap-1.5 shrink-0 active:scale-95 transition"
+            title="Abrir Galeria de Animações Biomecânicas"
+          >
+            <Layers className="w-3.5 h-3.5 text-emerald-400" />
+            <span>Galeria Biomecânica</span>
           </button>
         </div>
 
@@ -1659,6 +1678,14 @@ export const ExerciseLibraryView = ({
         <SkillTreeModal
           onClose={() => setShowSkillTree(false)}
           onOpenExerciseDetails={handleNavigateToExerciseId}
+        />
+      )}
+
+      {/* Modal Galeria de Animações Biomecânicas */}
+      {showAnimationGallery && (
+        <ExerciseGalleryModal
+          isOpen={showAnimationGallery}
+          onClose={() => setShowAnimationGallery(false)}
         />
       )}
     </div>
