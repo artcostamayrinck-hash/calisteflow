@@ -364,17 +364,17 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 </div>
               )}
 
-              {/* Tema Visual (Claro / Escuro) */}
-              <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-between">
+              {/* Tema Visual (Claro / Escuro / Auto) */}
+              <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
                   <span className="text-xs font-bold text-slate-300 block">Tema da Interface</span>
-                  <span className="text-[10px] text-slate-400">Escuro padrão ou Claro de alto contraste</span>
+                  <span className="text-[10px] text-slate-400">Escuro padrão, Claro de alto contraste ou Automático (sistema)</span>
                 </div>
-                <div className="flex gap-1">
+                <div className="flex gap-1 shrink-0">
                   <button
                     type="button"
                     onClick={() => updateSetting('theme', 'dark')}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition ${settings.theme !== 'light' ? 'bg-emerald-500 text-slate-950' : 'bg-white/5 text-slate-400'
+                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition ${settings.theme === 'dark' ? 'bg-emerald-500 text-slate-950' : 'bg-white/5 text-slate-400 hover:text-white'
                       }`}
                   >
                     Escuro
@@ -382,10 +382,18 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   <button
                     type="button"
                     onClick={() => updateSetting('theme', 'light')}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition ${settings.theme === 'light' ? 'bg-emerald-500 text-slate-950' : 'bg-white/5 text-slate-400'
+                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition ${settings.theme === 'light' ? 'bg-emerald-500 text-slate-950' : 'bg-white/5 text-slate-400 hover:text-white'
                       }`}
                   >
                     Claro
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => updateSetting('theme', 'auto')}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition ${settings.theme === 'auto' ? 'bg-emerald-500 text-slate-950' : 'bg-white/5 text-slate-400 hover:text-white'
+                      }`}
+                  >
+                    Auto
                   </button>
                 </div>
               </div>

@@ -40,6 +40,12 @@
         }
       ]
     }
+  ],
+  "rewrites": [
+    {
+      "source": "/calisteflow/(.*)",
+      "destination": "/$1"
+    }
   ]
 }
 

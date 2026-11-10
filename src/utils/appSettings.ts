@@ -17,7 +17,7 @@ export interface AppSettings {
   soundVolume: number; // 0.0 to 1.0
   soundTimbre: 'padrao' | 'suave' | 'apito';
   wakeLockEnabled: boolean;
-  theme: 'dark' | 'light';
+  theme: 'dark' | 'light' | 'auto';
   voiceEnabled: boolean;
   avatar: AvatarSettings;
 }
@@ -41,6 +41,53 @@ const DEFAULTS: AppSettings = {
   avatar: { ...DEFAULT_AVATAR_SETTINGS },
 };
 
+/** Aplica classes CSS de tema ('theme-light') e modo outdoor ('mode-outdoor') no <html> */
+export function applyThemeAndOutdoorClasses(theme: 'dark' | 'light' | 'auto', outdoorMode: boolean): void {
+  if (typeof document === 'undefined') return;
+
+  const isLight =
+    theme === 'light' ||
+    (theme === 'auto' &&
+      typeof window !== 'undefined' &&
+      window.matchMedia &&
+      window.matchMedia('(prefers-color-scheme: light)').matches);
+
+  if (isLight) {
+    document.documentElement.classList.add('theme-light');
+  } else {
+    document.documentElement.classList.remove('theme-light');
+  }
+
+  if (outdoorMode) {
+    document.documentElement.classList.add('mode-outdoor');
+  } else {
+    document.documentElement.classList.remove('mode-outdoor');
+  }
+}
+
+// Inicialização imediata de tema
+if (typeof window !== 'undefined') {
+  try {
+    const raw = localStorage.getItem(KEY);
+    const saved = raw ? JSON.parse(raw) : null;
+    const initialTheme = saved?.theme || DEFAULTS.theme;
+    const initialOutdoor = Boolean(saved?.outdoorMode);
+    applyThemeAndOutdoorClasses(initialTheme, initialOutdoor);
+
+    // Listener para transições do sistema quando em modo 'auto'
+    if (window.matchMedia) {
+      window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => {
+        const current = getAppSettings();
+        if (current.theme === 'auto') {
+          applyThemeAndOutdoorClasses('auto', current.outdoorMode);
+        }
+      });
+    }
+  } catch (e) {
+    // ignore
+  }
+}
+
 export function getAppSettings(): AppSettings {
   try {
     const raw = localStorage.getItem(KEY);
@@ -54,20 +101,7 @@ export function getAppSettings(): AppSettings {
 export function saveAppSettings(settings: AppSettings): void {
   try {
     localStorage.setItem(KEY, JSON.stringify(settings));
-    // Aplica tema visual no elemento HTML se alternado
-    if (typeof document !== 'undefined') {
-      if (settings.theme === 'light') {
-        document.documentElement.classList.add('theme-light');
-      } else {
-        document.documentElement.classList.remove('theme-light');
-      }
-
-      if (settings.outdoorMode) {
-        document.documentElement.classList.add('mode-outdoor');
-      } else {
-        document.documentElement.classList.remove('mode-outdoor');
-      }
-    }
+    applyThemeAndOutdoorClasses(settings.theme, settings.outdoorMode);
   } catch {
     // quota exceeded – silently ignore
   }

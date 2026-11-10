@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { Routine, WorkoutSession, WorkoutExerciseRecord, MuscleGroup, ActiveWorkoutBackup, Exercise, PersonalRecord } from '../../types';
 import { EXERCISES_DATABASE, getExerciseById } from '../../data/exercisesData';
 import { soundManager } from '../../utils/audio';
@@ -608,9 +608,15 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
     currentWeightKg,
   ]);
 
+  const lastRestAlertSecondRef = useRef<number | null>(null);
+  const lastIsoAlertSecondRef = useRef<number | null>(null);
+
   // Rest Countdown Timer (Timestamp-based, resilient to background screen lock)
   useEffect(() => {
-    if (phase !== 'rest' || isWorkoutPaused || !restTargetTimestamp) return;
+    if (phase !== 'rest' || isWorkoutPaused || !restTargetTimestamp) {
+      lastRestAlertSecondRef.current = null;
+      return;
+    }
 
     const checkRestTime = () => {
       const remaining = Math.max(0, Math.ceil((restTargetTimestamp - Date.now()) / 1000));
@@ -623,22 +629,28 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
         setRestTargetTimestamp(null);
         setShowRestDoneAlert(true);
         setIsRestTimerRunning(false);
+        lastRestAlertSecondRef.current = null;
         return;
       }
 
-      if (remaining <= 3 && remaining > 0) {
+      if (remaining <= 3 && remaining > 0 && lastRestAlertSecondRef.current !== remaining) {
+        lastRestAlertSecondRef.current = remaining;
         soundManager.playCountdownBeep();
+        soundManager.triggerHaptic([70]);
       }
     };
 
     checkRestTime();
-    const timer = setInterval(checkRestTime, 500);
+    const timer = setInterval(checkRestTime, 250);
     return () => clearInterval(timer);
   }, [phase, restTargetTimestamp, isWorkoutPaused]);
 
   // Isometric Exercise Countdown / Stopwatch (Timestamp-based)
   useEffect(() => {
-    if (phase !== 'exercise' || !isometricTimerRunning || isWorkoutPaused || !isometricTargetTimestamp) return;
+    if (phase !== 'exercise' || !isometricTimerRunning || isWorkoutPaused || !isometricTargetTimestamp) {
+      lastIsoAlertSecondRef.current = null;
+      return;
+    }
 
     const checkIsometricTime = () => {
       const remaining = Math.max(0, Math.ceil((isometricTargetTimestamp - Date.now()) / 1000));
@@ -646,19 +658,24 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
 
       if (remaining <= 0) {
         soundManager.playSuccessChime();
+        soundManager.triggerHaptic([200, 100, 200, 100, 400]);
+        speechVoice.speak('Série isométrica concluída!');
         setIsometricTimerRunning(false);
         setIsometricTargetTimestamp(null);
+        lastIsoAlertSecondRef.current = null;
         handleCompleteIsometricSet();
         return;
       }
 
-      if (remaining <= 3 && remaining > 0) {
+      if (remaining <= 3 && remaining > 0 && lastIsoAlertSecondRef.current !== remaining) {
+        lastIsoAlertSecondRef.current = remaining;
         soundManager.playCountdownBeep();
+        soundManager.triggerHaptic([70]);
       }
     };
 
     checkIsometricTime();
-    const timer = setInterval(checkIsometricTime, 500);
+    const timer = setInterval(checkIsometricTime, 250);
     return () => clearInterval(timer);
   }, [phase, isometricTimerRunning, isometricTargetTimestamp, isWorkoutPaused]);
 
@@ -1610,7 +1627,9 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
             </div>
 
             {/* Glowing Circular Countdown */}
-            <div className="relative w-56 h-56 sm:w-64 sm:h-64 flex items-center justify-center">
+            <div className={`relative w-56 h-56 sm:w-64 sm:h-64 flex items-center justify-center rounded-full transition-all duration-300 ${
+              restSecondsLeft <= 3 && restSecondsLeft > 0 ? 'ring-8 ring-rose-500/80 bg-rose-500/10 animate-pulse' : ''
+            }`}>
               <div className="absolute inset-4 rounded-full bg-emerald-500/5 blur-2xl animate-pulse" />
               <svg className="w-full h-full -rotate-90 filter drop-shadow-xl">
                 <circle
@@ -1637,11 +1656,13 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
 
               <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <span
-                  className={`text-5xl sm:text-6xl font-black font-mono tracking-tight tabular-nums ${
-                    restSecondsLeft <= 5
+                  className={`text-5xl sm:text-6xl font-black font-mono tracking-tight tabular-nums transition-transform ${
+                    restSecondsLeft <= 3
+                      ? 'text-rose-500 scale-110 drop-shadow-[0_0_15px_rgba(244,63,94,0.8)]'
+                      : restSecondsLeft <= 5
                       ? 'text-rose-400 animate-pulse'
                       : isOutdoorMode
-                      ? 'text-white'
+                      ? 'text-[#00FF88]'
                       : 'text-slate-100'
                   }`}
                 >

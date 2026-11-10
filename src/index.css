@@ -187,7 +187,7 @@
   color: #a1b0cb;
 }
 
-/* D19: Tema Claro Alternativo de Alto Contraste */
+/* D19: Tema Claro Alternativo de Alto Contraste (WCAG AAA >= 7:1) */
 html.theme-light body {
   background-color: #f8fafc;
   background-image: 
@@ -198,13 +198,18 @@ html.theme-light body {
 
 html.theme-light .glass-card {
   background: rgba(255, 255, 255, 0.95);
-  border-color: rgba(226, 232, 240, 0.9);
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+  border-color: rgba(203, 213, 225, 0.9);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.06);
 }
 
 html.theme-light .glass-panel {
   background: rgba(255, 255, 255, 0.98);
-  border-color: rgba(203, 213, 225, 0.8);
+  border-color: rgba(203, 213, 225, 0.9);
+}
+
+html.theme-light header {
+  background: rgba(255, 255, 255, 0.92) !important;
+  border-color: rgba(226, 232, 240, 0.9) !important;
 }
 
 html.theme-light .text-slate-100,
@@ -215,6 +220,55 @@ html.theme-light .text-slate-200 {
 html.theme-light .text-slate-300,
 html.theme-light .text-slate-400 {
   color: #334155 !important;
+}
+
+/* D20: Modo Outdoor de Altíssimo Contraste (Luz Solar Direta) */
+html.mode-outdoor body {
+  background-color: #000000 !important;
+  background-image: none !important;
+  color: #ffffff !important;
+}
+
+html.mode-outdoor .glass-card,
+html.mode-outdoor .glass-panel {
+  background: #090d16 !important;
+  border: 2px solid #00FF88 !important;
+  box-shadow: none !important;
+}
+
+html.mode-outdoor button,
+html.mode-outdoor [role="button"] {
+  min-height: 52px;
+  font-weight: 800 !important;
+}
+
+html.mode-outdoor .text-slate-400,
+html.mode-outdoor .text-slate-300 {
+  color: #e2e8f0 !important;
+}
+
+html.mode-outdoor .text-slate-500 {
+  color: #cbd5e1 !important;
+}
+
+html.mode-outdoor.theme-light body {
+  background-color: #ffffff !important;
+  background-image: none !important;
+  color: #000000 !important;
+}
+
+html.mode-outdoor.theme-light .glass-card,
+html.mode-outdoor.theme-light .glass-panel {
+  background: #ffffff !important;
+  border: 2px solid #000000 !important;
+  box-shadow: none !important;
+}
+
+html.mode-outdoor.theme-light .text-slate-100,
+html.mode-outdoor.theme-light .text-slate-200,
+html.mode-outdoor.theme-light .text-slate-300,
+html.mode-outdoor.theme-light .text-slate-400 {
+  color: #000000 !important;
 }
 
 /* D21: Estilos de Impressão Limpa para Ficha de Treino em PDF */

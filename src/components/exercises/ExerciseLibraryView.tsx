@@ -259,6 +259,15 @@ export const ExerciseLibraryView = ({
     return null;
   });
 
+  useEffect(() => {
+    if (initialExerciseId) {
+      const ex = getExerciseById(initialExerciseId);
+      if (ex) {
+        setSelectedExercise(ex);
+      }
+    }
+  }, [initialExerciseId]);
+
   useBodyScrollLock(Boolean(selectedExercise), () => setSelectedExercise(null));
 
   const [activeTab, setActiveTab] = useState<ModalTab>('como_fazer');

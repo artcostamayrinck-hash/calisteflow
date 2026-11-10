@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Allow: /exercicios/
 
-Sitemap: https://artcostamayrinck-hash.github.io/calisteflow/sitemap.xml
+Sitemap: https://calistenflow.vercel.app/sitemap.xml

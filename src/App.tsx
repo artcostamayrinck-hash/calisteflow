@@ -40,9 +40,43 @@ import { pwaManager } from './utils/pwaManager';
 import { Flame, ShieldCheck } from 'lucide-react';
 import logoImg from './assets/img/logo.png';
 
+function parseInitialRoute(): { tab: NavTab; exerciseId: string | null } {
+  if (typeof window === 'undefined') return { tab: 'home', exerciseId: null };
+  try {
+    const path = window.location.pathname;
+    const search = new URLSearchParams(window.location.search);
+    const hash = window.location.hash;
+
+    const exParam = search.get('ex');
+    if (exParam) {
+      return { tab: 'exercises', exerciseId: exParam };
+    }
+
+    const shortcut = search.get('shortcut');
+    if (shortcut === 'exercises') return { tab: 'exercises', exerciseId: null };
+    if (shortcut === 'today' || shortcut === 'planner') return { tab: 'planner', exerciseId: null };
+    if (shortcut === 'routines') return { tab: 'routines', exerciseId: null };
+    if (shortcut === 'history') return { tab: 'history', exerciseId: null };
+
+    // Suporta rotas limpas /exercicios/:id e /calisteflow/exercicios/:id
+    const exMatch = path.match(/\/exercicios\/([^/]+)/);
+    if (exMatch && exMatch[1]) {
+      return { tab: 'exercises', exerciseId: decodeURIComponent(exMatch[1]) };
+    }
+
+    if (hash.startsWith('#exercicio-')) {
+      return { tab: 'exercises', exerciseId: hash.replace('#exercicio-', '') };
+    }
+  } catch (e) {
+    console.warn('[Routing] Erro ao analisar rota inicial:', e);
+  }
+  return { tab: 'home', exerciseId: null };
+}
+
 export function App() {
-  // App Navigation — default to 'home'
-  const [activeTab, setActiveTab] = useState<NavTab>('home');
+  const [initialRoute] = useState(parseInitialRoute);
+  // App Navigation — default to initialRoute.tab
+  const [activeTab, setActiveTab] = useState<NavTab>(initialRoute.tab);
 
   // Persistence State
   const [routines, setRoutines] = useState<Routine[]>(() => getStoredRoutines());
@@ -146,7 +180,20 @@ export function App() {
   const [routineToEdit, setRoutineToEdit] = useState<Routine | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState<boolean>(false);
   const [summarySession, setSummarySession] = useState<WorkoutSession | null>(null);
-  const [inspectExerciseId, setInspectExerciseId] = useState<string | null>(null);
+  const [inspectExerciseId, setInspectExerciseId] = useState<string | null>(initialRoute.exerciseId);
+
+  // Escuta histórico de navegação do navegador (popstate)
+  useEffect(() => {
+    const handlePopState = () => {
+      const route = parseInitialRoute();
+      setActiveTab(route.tab);
+      if (route.exerciseId) {
+        setInspectExerciseId(route.exerciseId);
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   // Keep stats in sync whenever history or weeklyPlan updates
   useEffect(() => {
