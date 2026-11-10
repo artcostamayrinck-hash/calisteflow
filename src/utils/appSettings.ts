@@ -11,6 +11,8 @@ export interface AppSettings {
   largeText: boolean;
   reducedMotion: boolean; // user override; also checked against prefers-reduced-motion
   playAnimations: boolean; // Reproduzir animações ativas no app
+  outdoorMode: boolean; // Modo de alto contraste para visibilidade sob luz solar direta
+  defaultRestSeconds: number; // Tempo de descanso padrão configurável em segundos
   soundEnabled: boolean;
   soundVolume: number; // 0.0 to 1.0
   soundTimbre: 'padrao' | 'suave' | 'apito';
@@ -28,6 +30,8 @@ const DEFAULTS: AppSettings = {
   largeText: false,
   reducedMotion: false,
   playAnimations: true,
+  outdoorMode: false,
+  defaultRestSeconds: 60,
   soundEnabled: true,
   soundVolume: 0.8,
   soundTimbre: 'padrao',
@@ -56,6 +60,12 @@ export function saveAppSettings(settings: AppSettings): void {
         document.documentElement.classList.add('theme-light');
       } else {
         document.documentElement.classList.remove('theme-light');
+      }
+
+      if (settings.outdoorMode) {
+        document.documentElement.classList.add('mode-outdoor');
+      } else {
+        document.documentElement.classList.remove('mode-outdoor');
       }
     }
   } catch {

@@ -12,6 +12,8 @@ import type {
   StrengthAssessment,
   SkillStatus,
 } from '../types';
+import type { AppSettings } from './appSettings';
+import { getAppSettings, saveAppSettings } from './appSettings';
 import { DEFAULT_ROUTINES } from '../data/routinesData';
 import { createPresetWeeklyPlan } from './workoutGenerator';
 import { idbStorage } from './indexedDb';
@@ -515,47 +517,7 @@ export const setSafariBannerDismissed = (dismissed: boolean): void => {
   }
 };
 
-export interface FullBackupBundle {
-  version: string;
-  exportedAt: string;
-  routines: Routine[];
-  history: WorkoutSession[];
-  weeklyPlan: WeeklyPlan;
-  profile: UserOnboardingProfile | null;
-  journeyProgress: UserJourneyProgress;
-}
-
-export const generateFullBackupBundle = (): FullBackupBundle => {
-  return {
-    version: '1.0.0',
-    exportedAt: new Date().toISOString(),
-    routines: getStoredRoutines(),
-    history: getWorkoutHistory(),
-    weeklyPlan: getStoredWeeklyPlan(),
-    profile: getStoredUserProfile(),
-    journeyProgress: getUserJourneyProgress(),
-  };
-};
-
-export const downloadFullBackupFile = (): boolean => {
-  try {
-    const bundle = generateFullBackupBundle();
-    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(bundle, null, 2));
-    const downloadAnchor = document.createElement('a');
-    downloadAnchor.setAttribute('href', dataStr);
-    const dateStr = new Date().toISOString().split('T')[0];
-    downloadAnchor.setAttribute('download', `calisteflow-backup-${dateStr}.json`);
-    document.body.appendChild(downloadAnchor);
-    downloadAnchor.click();
-    downloadAnchor.remove();
-
-    recordBackupExport();
-    return true;
-  } catch (err) {
-    console.error('Failed to export backup file:', err);
-    return false;
-  }
-};
+// (FullBackupBundle e rotinas de exportação/importação definidas ao final do arquivo)
 
 // ================= D2: FAVORITES & RECENTS =================
 export const getFavoriteExerciseIds = (): string[] => {
@@ -718,6 +680,226 @@ export const saveSkillNodeStatus = (skillNodeId: string, status: SkillStatus): R
     return {};
   }
 };
+
+// ================= I1 & PWA: FULL BACKUP & RESTORE ENGINE =================
+
+export interface FullBackupBundle {
+  version: string;
+  appVersion?: string;
+  exportedAt: string;
+  routines: Routine[];
+  history: WorkoutSession[];
+  weeklyPlan: WeeklyPlan;
+  profile: UserOnboardingProfile | null;
+  journeyProgress: UserJourneyProgress;
+  personalRecords?: Record<string, PersonalRecord>;
+  favorites?: string[];
+  recents?: string[];
+  strengthAssessments?: StrengthAssessment[];
+  skillTreeProgress?: Record<string, SkillStatus>;
+  settings?: AppSettings;
+}
+
+export interface BackupValidationResult {
+  valid: boolean;
+  error?: string;
+  summary?: {
+    historyCount: number;
+    routinesCount: number;
+    prsCount: number;
+    exportedAt?: string;
+    version?: string;
+  };
+}
+
+export const generateFullBackupBundle = (): FullBackupBundle => {
+  return {
+    version: '1.2.0',
+    appVersion: typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '4.2.0',
+    exportedAt: new Date().toISOString(),
+    routines: getStoredRoutines(),
+    history: getWorkoutHistory(),
+    weeklyPlan: getStoredWeeklyPlan(),
+    profile: getStoredUserProfile(),
+    journeyProgress: getUserJourneyProgress(),
+    personalRecords: getPersonalRecords(),
+    favorites: getFavoriteExerciseIds(),
+    recents: getRecentExerciseIds(),
+    strengthAssessments: getStrengthAssessments(),
+    skillTreeProgress: getSkillTreeProgress(),
+    settings: getAppSettings(),
+  };
+};
+
+export const downloadFullBackupFile = (): boolean => {
+  try {
+    const bundle = generateFullBackupBundle();
+    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(bundle, null, 2));
+    const downloadAnchor = document.createElement('a');
+    downloadAnchor.setAttribute('href', dataStr);
+    const dateStr = new Date().toISOString().split('T')[0];
+    downloadAnchor.setAttribute('download', `calisteflow-backup-${dateStr}.json`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+
+    recordBackupExport();
+    return true;
+  } catch (err) {
+    console.error('Failed to export backup file:', err);
+    return false;
+  }
+};
+
+/**
+ * Valida a estrutura e integridade de um arquivo de backup JSON
+ */
+export const validateBackupBundle = (data: unknown): BackupValidationResult => {
+  if (!data || typeof data !== 'object') {
+    return { valid: false, error: 'Arquivo inválido: o formato não é um objeto JSON válido.' };
+  }
+
+  const obj = data as Partial<FullBackupBundle>;
+
+  if (!obj.history && !obj.routines && !obj.weeklyPlan) {
+    return {
+      valid: false,
+      error: 'Arquivo não reconhecido: não foram encontrados dados de treino, rotinas ou planejamento do CalisteFlow.',
+    };
+  }
+
+  const history = Array.isArray(obj.history) ? obj.history : [];
+  const routines = Array.isArray(obj.routines) ? obj.routines : [];
+  const prsCount = obj.personalRecords && typeof obj.personalRecords === 'object'
+    ? Object.keys(obj.personalRecords).length
+    : 0;
+
+  return {
+    valid: true,
+    summary: {
+      historyCount: history.length,
+      routinesCount: routines.length,
+      prsCount,
+      exportedAt: obj.exportedAt,
+      version: obj.version || '1.0.0',
+    },
+  };
+};
+
+/**
+ * Importa um bundle completo de backup para o LocalStorage e IndexedDB
+ */
+export const importFullBackupBundle = (
+  bundle: FullBackupBundle,
+  createSafetyBackup = true
+): { success: boolean; message: string; summary?: { historyCount: number; routinesCount: number; prsCount: number } } => {
+  try {
+    const validation = validateBackupBundle(bundle);
+    if (!validation.valid) {
+      return { success: false, message: validation.error || 'Arquivo de backup inválido.' };
+    }
+
+    // Cria um backup de segurança prévio dos dados atuais antes de sobrescrever
+    if (createSafetyBackup) {
+      createAutomaticDataBackup();
+    }
+
+    // 1. Rotinas
+    if (Array.isArray(bundle.routines) && bundle.routines.length > 0) {
+      saveRoutines(bundle.routines);
+    }
+
+    // 2. Histórico de Treinos
+    if (Array.isArray(bundle.history)) {
+      localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(bundle.history));
+      // Sincroniza todas as sessões com o IndexedDB para retenção robusta no iOS PWA
+      bundle.history.forEach(session => {
+        idbStorage.put('sessions', session).catch(() => {});
+      });
+    }
+
+    // 3. Planejamento Semanal
+    if (bundle.weeklyPlan && bundle.weeklyPlan.days) {
+      saveWeeklyPlan(bundle.weeklyPlan);
+    }
+
+    // 4. Perfil do Usuário
+    if (bundle.profile) {
+      saveUserProfile(bundle.profile);
+    }
+
+    // 5. Progresso da Jornada
+    if (bundle.journeyProgress) {
+      saveUserJourneyProgress(bundle.journeyProgress);
+    }
+
+    // 6. Recordes Pessoais (PRs)
+    if (bundle.personalRecords && typeof bundle.personalRecords === 'object') {
+      localStorage.setItem(STORAGE_KEYS.PERSONAL_RECORDS, JSON.stringify(bundle.personalRecords));
+    }
+
+    // 7. Favoritos
+    if (Array.isArray(bundle.favorites)) {
+      localStorage.setItem(STORAGE_KEYS.FAVORITES, JSON.stringify(bundle.favorites));
+    }
+
+    // 8. Recentes
+    if (Array.isArray(bundle.recents)) {
+      localStorage.setItem(STORAGE_KEYS.RECENTS, JSON.stringify(bundle.recents));
+    }
+
+    // 9. Avaliações de Força
+    if (Array.isArray(bundle.strengthAssessments)) {
+      localStorage.setItem(STORAGE_KEYS.STRENGTH_ASSESSMENTS, JSON.stringify(bundle.strengthAssessments));
+    }
+
+    // 10. Progresso da Árvore de Habilidades
+    if (bundle.skillTreeProgress && typeof bundle.skillTreeProgress === 'object') {
+      localStorage.setItem(STORAGE_KEYS.SKILL_TREE_PROGRESS, JSON.stringify(bundle.skillTreeProgress));
+    }
+
+    // 11. Configurações do App
+    if (bundle.settings && typeof bundle.settings === 'object') {
+      saveAppSettings(bundle.settings);
+    }
+
+    recordBackupExport();
+
+    return {
+      success: true,
+      message: 'Backup restaurado com sucesso!',
+      summary: {
+        historyCount: bundle.history?.length || 0,
+        routinesCount: bundle.routines?.length || 0,
+        prsCount: bundle.personalRecords ? Object.keys(bundle.personalRecords).length : 0,
+      },
+    };
+  } catch (err) {
+    console.error('Falha ao importar backup:', err);
+    return {
+      success: false,
+      message: `Erro ao restaurar dados: ${err instanceof Error ? err.message : 'desconhecido'}`,
+    };
+  }
+};
+
+/**
+ * Lê e processa a string JSON crua de um arquivo enviado pelo usuário
+ */
+export const importBackupFromJSON = (
+  jsonString: string
+): { success: boolean; message: string; summary?: { historyCount: number; routinesCount: number; prsCount: number } } => {
+  try {
+    const parsed = JSON.parse(jsonString);
+    return importFullBackupBundle(parsed, true);
+  } catch (err) {
+    return {
+      success: false,
+      message: `Falha ao interpretar arquivo JSON: ${err instanceof Error ? err.message : 'sintaxe inválida'}`,
+    };
+  }
+};
+
 
 
 

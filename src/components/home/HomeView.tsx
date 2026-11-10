@@ -25,12 +25,14 @@ import {
   RotateCcw,
   ShieldAlert,
   X,
+  Database,
 } from 'lucide-react';
 import { GuidedJourneyCard } from '../retention/GuidedJourneyCard';
 import { StrengthRadarModal } from '../assessment/StrengthRadarModal';
 import { StyleComparisonGalleryModal } from '../visuals/figure/StyleComparisonGalleryModal';
 import { SkillTreeModal } from '../skills/SkillTreeModal';
 import { InstallGuideModal } from '../pwa/InstallGuideModal';
+import { BackupRestoreModal } from '../pwa/BackupRestoreModal';
 import type { WorkoutSession } from '../../types';
 
 interface HomeViewProps {
@@ -81,6 +83,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
   const [settings, setSettings] = useState<AppSettings>(getAppSettings);
   const [showSettings, setShowSettings] = useState(false);
   const [showStyleComparison, setShowStyleComparison] = useState(false);
+  const [showBackupRestoreModal, setShowBackupRestoreModal] = useState(false);
   const [recordPulse, setRecordPulse] = useState(false);
 
   // D13, D14, D18: Modais de Avaliação, Skills e Instalação PWA
@@ -284,6 +287,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
               {(
                 [
                   { key: 'playAnimations', label: 'Reproduzir Animações', desc: 'Loop de movimento biomecânico nos exercícios' },
+                  { key: 'outdoorMode', label: 'Modo Outdoor (Alto Contraste)', desc: 'Preto puro e elementos ampliados para sol direto' },
                   { key: 'leftHandMode', label: 'Modo Mão Esquerda', desc: 'Inverte controles para a esquerda' },
                   { key: 'largeText', label: 'Texto Grande', desc: 'Aumenta legibilidade em treino' },
                   { key: 'reducedMotion', label: 'Reduzir Animações', desc: 'Desativa microinterações' },
@@ -385,6 +389,54 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   </button>
                 </div>
               </div>
+
+              {/* Tempo Padrão de Descanso entre Séries */}
+              <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/5 space-y-1.5">
+                <div className="flex items-center justify-between text-xs font-bold text-slate-300">
+                  <span className="flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-cyan-400" />
+                    Tempo Padrão de Descanso
+                  </span>
+                  <span className="font-mono text-cyan-400 font-bold">{settings.defaultRestSeconds || 60}s</span>
+                </div>
+                <div className="flex gap-1 justify-between pt-1">
+                  {[30, 45, 60, 90, 120].map(s => (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => updateSetting('defaultRestSeconds', s)}
+                      className={`flex-1 py-1 rounded-lg text-[10px] font-bold transition ${
+                        (settings.defaultRestSeconds || 60) === s
+                          ? 'bg-cyan-500 text-slate-950 font-black shadow'
+                          : 'bg-white/5 text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      {s}s
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Backup & Restauração de Dados */}
+              <button
+                type="button"
+                onClick={() => {
+                  soundManager.triggerHaptic([25]);
+                  setShowBackupRestoreModal(true);
+                }}
+                className="w-full p-2.5 rounded-xl bg-gradient-to-r from-emerald-500/10 via-cyan-500/10 to-emerald-500/5 border border-emerald-500/30 hover:border-emerald-500/50 flex items-center justify-between text-left transition active:scale-98 shadow-sm"
+              >
+                <div className="flex items-center gap-2.5">
+                  <Database className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <div>
+                    <span className="text-xs font-bold text-slate-100 block">Backup & Restauração (JSON)</span>
+                    <span className="text-[10px] text-emerald-300/80">
+                      Exportar ou importar treinos, rotinas e recordes offline
+                    </span>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-emerald-400 shrink-0" />
+              </button>
 
               {/* D18: Guia de Instalação PWA */}
               <button
@@ -916,6 +968,12 @@ export const HomeView: React.FC<HomeViewProps> = ({
         <StyleComparisonGalleryModal
           isOpen={showStyleComparison}
           onClose={() => setShowStyleComparison(false)}
+        />
+      )}
+      {showBackupRestoreModal && (
+        <BackupRestoreModal
+          isOpen={showBackupRestoreModal}
+          onClose={() => setShowBackupRestoreModal(false)}
         />
       )}
     </div>

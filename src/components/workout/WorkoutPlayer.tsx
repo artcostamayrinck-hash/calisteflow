@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import type { Routine, WorkoutSession, WorkoutExerciseRecord, MuscleGroup, ActiveWorkoutBackup, Exercise, PersonalRecord } from '../../types';
 import { EXERCISES_DATABASE, getExerciseById } from '../../data/exercisesData';
 import { soundManager } from '../../utils/audio';
-import { getAppSettings } from '../../utils/appSettings';
+import { getAppSettings, saveAppSettings } from '../../utils/appSettings';
 import { saveActiveWorkoutBackup, clearActiveWorkoutBackup, checkAndRecordPR } from '../../utils/storage';
 import { speechVoice } from '../../utils/speechVoice';
 import { ExercisePostureVisual } from '../visuals/ExercisePostureVisual';
@@ -10,6 +10,7 @@ import { ExerciseMedia } from '../visuals/figure/ExerciseMedia';
 import { MuscleMap } from '../visuals/MuscleMap';
 import { CadenceMetronome } from './CadenceMetronome';
 import { ExerciseVideoPlayer } from './ExerciseVideoPlayer';
+import { QuickProgressionReference } from '../exercises/QuickProgressionReference';
 import { useBodyScrollLock } from '../../utils/useBodyScrollLock';
 import {
   Play,
@@ -33,6 +34,8 @@ import {
   Sun,
   Maximize2,
   Minimize2,
+  ArrowUpDown,
+  BellRing,
 } from 'lucide-react';
 
 interface WorkoutPlayerProps {
@@ -75,18 +78,22 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
     }
     return null;
   });
+  const [isRestTimerRunning, setIsRestTimerRunning] = useState<boolean>(true);
+  const [showRestDoneAlert, setShowRestDoneAlert] = useState<boolean>(false);
 
   // Isometric Exercise Timer State (Timestamp-based)
   const [isometricTimerRunning, setIsometricTimerRunning] = useState<boolean>(false);
   const [isometricTargetTimestamp, setIsometricTargetTimestamp] = useState<number | null>(null);
   const [isometricSecondsLeft, setIsometricSecondsLeft] = useState<number>(initialBackup?.isometricSecondsLeft || 30);
   const [isometricInitialSeconds, setIsometricInitialSeconds] = useState<number>(initialBackup?.isometricSecondsLeft || 30);
+  const [overrideExecutionType, setOverrideExecutionType] = useState<'reps' | 'isometric' | null>(null);
 
   // D3: Contagem preparatória de 5 segundos para isometria
   const [countdown5s, setCountdown5s] = useState<number | null>(null);
 
-  // D5: Modo Foco (distraction-free & alto contraste)
+  // D5: Modo Foco (distraction-free) e Modo Outdoor (Alto Contraste para Luz Solar Direta)
   const [isFocusMode, setIsFocusMode] = useState<boolean>(false);
+  const [isOutdoorMode, setIsOutdoorMode] = useState<boolean>(() => getAppSettings().outdoorMode);
 
   // D11: Lista de novos Recordes Pessoais (PRs) batidos durante a sessão
   const [sessionPRs, setSessionPRs] = useState<PersonalRecord[]>([]);
@@ -103,6 +110,9 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
 
   // Posture modal drawer
   const [showPostureDrawer, setShowPostureDrawer] = useState<boolean>(false);
+
+  // Escada rápida de progressões e regressões
+  const [showProgressionDrawer, setShowProgressionDrawer] = useState<boolean>(false);
 
   // Adaptation / Regression drawer
   const [showAdaptationModal, setShowAdaptationModal] = useState<boolean>(false);
@@ -143,7 +153,8 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
 
   const currentRoutineExercise = activeRoutine.exercises[exerciseIndex];
   const currentExerciseData = getExerciseById(currentRoutineExercise.exerciseId) || EXERCISES_DATABASE.find(e => e.id === currentRoutineExercise.exerciseId);
-  const isIsometric = currentExerciseData?.type === 'isometric';
+  const activeExecutionType = overrideExecutionType || (currentExerciseData?.type === 'isometric' ? 'isometric' : 'reps');
+  const isIsometric = activeExecutionType === 'isometric';
 
   // Dynamic on-the-fly exercise adaptation
   const handleSwapCurrentExercise = (newEx: Exercise) => {
@@ -188,6 +199,9 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
   // Advance to next set or exercise after rest
   const advanceToNextSetOrExercise = () => {
     setRestTargetTimestamp(null);
+    setShowRestDoneAlert(false);
+    setIsRestTimerRunning(true);
+    setOverrideExecutionType(null);
     if (setIndex < currentRoutineExercise.sets - 1) {
       // Next set in current exercise
       setSetIndex(prev => prev + 1);
@@ -604,8 +618,11 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
 
       if (remaining <= 0) {
         soundManager.playSuccessChime();
+        soundManager.triggerHaptic([200, 100, 200, 100, 400]);
+        speechVoice.speak('Descanso concluído! Prepare-se para a próxima série.');
         setRestTargetTimestamp(null);
-        advanceToNextSetOrExercise();
+        setShowRestDoneAlert(true);
+        setIsRestTimerRunning(false);
         return;
       }
 
@@ -647,6 +664,7 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
 
   const handleSkipRest = () => {
     setRestTargetTimestamp(null);
+    setShowRestDoneAlert(false);
     advanceToNextSetOrExercise();
   };
 
@@ -654,9 +672,34 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
     soundManager.triggerHaptic([20]);
     setRestSecondsLeft(prev => {
       const next = Math.max(5, prev + deltaSeconds);
-      setRestTargetTimestamp(Date.now() + next * 1000);
+      if (isRestTimerRunning) {
+        setRestTargetTimestamp(Date.now() + next * 1000);
+      }
       return next;
     });
+  };
+
+  const handleSetRestDuration = (duration: number) => {
+    soundManager.triggerHaptic([25]);
+    setRestInitialSeconds(duration);
+    setRestSecondsLeft(duration);
+    setRestTargetTimestamp(Date.now() + duration * 1000);
+    setIsRestTimerRunning(true);
+    setShowRestDoneAlert(false);
+  };
+
+  const toggleRestTimer = () => {
+    soundManager.triggerHaptic([25]);
+    if (isRestTimerRunning) {
+      setIsRestTimerRunning(false);
+      if (restTargetTimestamp) {
+        setRestSecondsLeft(Math.max(0, Math.ceil((restTargetTimestamp - Date.now()) / 1000)));
+        setRestTargetTimestamp(null);
+      }
+    } else {
+      setIsRestTimerRunning(true);
+      setRestTargetTimestamp(Date.now() + restSecondsLeft * 1000);
+    }
   };
 
   const handleSkipBlock = () => {
@@ -796,9 +839,21 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#060913] text-slate-100 flex flex-col justify-between h-[100dvh] max-h-[100dvh] w-full overflow-hidden select-none box-border">
+    <div
+      className={`fixed inset-0 z-50 flex flex-col justify-between h-[100dvh] max-h-[100dvh] w-full overflow-hidden select-none box-border ${
+        isOutdoorMode
+          ? 'bg-black text-white'
+          : 'bg-[#060913] text-slate-100'
+      }`}
+    >
       {/* Top HUD Bar */}
-      <header className="px-3 pt-[max(0.625rem,env(safe-area-inset-top,0.625rem))] pb-2.5 sm:px-4 sm:py-3 glass-panel border-b border-white/[0.08] backdrop-blur-2xl flex items-center justify-between gap-2 shrink-0 w-full min-w-0">
+      <header
+        className={`px-3 pt-[max(0.625rem,env(safe-area-inset-top,0.625rem))] pb-2.5 sm:px-4 sm:py-3 border-b flex items-center justify-between gap-2 shrink-0 w-full min-w-0 ${
+          isOutdoorMode
+            ? 'bg-black border-white/20'
+            : 'glass-panel border-white/[0.08] backdrop-blur-2xl'
+        }`}
+      >
         {/* Workout elapsed timer & Pause */}
         <div className="flex items-center gap-2 min-w-0 flex-1">
           <button
@@ -807,6 +862,8 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
             className={`w-10 h-10 rounded-2xl border transition active:scale-95 flex items-center justify-center shrink-0 ${
               isWorkoutPaused
                 ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 glow-amber'
+                : isOutdoorMode
+                ? 'bg-black text-white border-2 border-white'
                 : 'glass-card text-slate-300 hover:text-white border-white/10'
             }`}
             title={isWorkoutPaused ? 'Retomar treino' : 'Pausar treino'}
@@ -831,14 +888,37 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
                 </span>
               )}
             </div>
-            <div className="text-[11px] text-slate-400 font-semibold truncate block w-full max-w-full">
+            <div className={`text-[11px] font-semibold truncate block w-full max-w-full ${isOutdoorMode ? 'text-white' : 'text-slate-400'}`}>
               {routine.title}
             </div>
           </div>
         </div>
 
-        {/* Right HUD Controls: Sound & Exit */}
+        {/* Right HUD Controls: Outdoor, Focus, Sound & Exit */}
         <div className="flex items-center gap-1.5 shrink-0">
+          {/* Outdoor Mode Button (Alto Contraste para Luz Solar) */}
+          <button
+            type="button"
+            onClick={() => {
+              soundManager.triggerHaptic([30]);
+              setIsOutdoorMode(prev => {
+                const next = !prev;
+                const set = getAppSettings();
+                saveAppSettings({ ...set, outdoorMode: next });
+                return next;
+              });
+            }}
+            className={`w-10 h-10 rounded-2xl border transition active:scale-95 flex items-center justify-center shrink-0 ${
+              isOutdoorMode
+                ? 'bg-amber-400 text-slate-950 border-amber-300 font-black shadow-lg shadow-amber-400/25 glow-amber'
+                : 'glass-card text-slate-400 hover:text-white border-white/10'
+            }`}
+            title={isOutdoorMode ? 'Desativar Modo Outdoor' : 'Ativar Modo Outdoor (Alto Contraste para Luz Solar)'}
+            aria-label={isOutdoorMode ? 'Desativar Modo Outdoor' : 'Ativar Modo Outdoor'}
+          >
+            <Sun className={`w-4 h-4 ${isOutdoorMode ? 'fill-current stroke-[2.5]' : ''}`} />
+          </button>
+
           <button
             type="button"
             onClick={toggleSound}
@@ -1101,8 +1181,27 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
                 )}
               </div>
 
-              {/* View Posture Guide & Quick Adapt Buttons */}
+              {/* View Posture Guide, Quick Adapt & Progression Buttons */}
               <div className="flex items-center gap-1.5 shrink-0">
+                {currentExerciseData && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      soundManager.triggerHaptic([25]);
+                      setShowProgressionDrawer(true);
+                    }}
+                    className={`px-2.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1 transition active:scale-95 min-h-[40px] border ${
+                      isOutdoorMode
+                        ? 'border-2 border-cyan-400 bg-black text-cyan-300 font-black'
+                        : 'glass-card text-cyan-300 hover:text-white hover:bg-white/[0.08] border-cyan-500/30'
+                    }`}
+                    title="Escada rápida de progressões e regressões"
+                  >
+                    <ArrowUpDown className="w-4 h-4 text-cyan-400 shrink-0" />
+                    <span className="hidden sm:inline">Progressão</span>
+                  </button>
+                )}
+
                 {currentExerciseData && (
                   <button
                     type="button"
@@ -1165,12 +1264,45 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
               })}
             </div>
 
-            {/* Execution Card: Isometric vs Reps (Directly after title & set pills) */}
+            {/* Seletor Rápido: Modo Repetições vs Isometria (Holds) */}
+            <div className="flex items-center justify-between w-full max-w-sm px-1 text-xs">
+              <span className={`text-[10px] font-bold uppercase tracking-wider ${isOutdoorMode ? 'text-white' : 'text-slate-400'}`}>
+                Modo de Registro:
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  soundManager.triggerHaptic([25]);
+                  setOverrideExecutionType(isIsometric ? 'reps' : 'isometric');
+                }}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition active:scale-95 flex items-center gap-1.5 border ${
+                  isOutdoorMode
+                    ? isIsometric
+                      ? 'border-2 border-emerald-400 bg-emerald-400 text-black font-black'
+                      : 'border-2 border-white bg-black text-white font-black'
+                    : isIsometric
+                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 glow-emerald font-black'
+                    : 'glass-card border-white/10 text-slate-300 hover:text-white font-bold'
+                }`}
+                title="Alternar entre contagem de repetições e sustentação isométrica em segundos"
+              >
+                <Clock className="w-3.5 h-3.5" />
+                <span>{isIsometric ? '⏱️ Isometria (Segundos)' : '🔄 Repetições'}</span>
+              </button>
+            </div>
+
+            {/* Execution Card: Isometric vs Reps */}
             {isIsometric ? (
               /* ISOMETRIC EXERCISE HUD */
-              <div className="w-full glass-card border border-white/10 rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center space-y-4 shadow-xl relative">
+              <div
+                className={`w-full rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center space-y-4 shadow-xl relative ${
+                  isOutdoorMode
+                    ? 'bg-black border-2 border-white text-white'
+                    : 'glass-card border border-white/10'
+                }`}
+              >
                 <div className="text-[11px] uppercase font-extrabold tracking-widest text-slate-400 flex items-center gap-1.5">
-                  <Flame className="w-4 h-4 text-amber-400 animate-bounce" /> Sustentação Isométrica
+                  <Flame className="w-4 h-4 text-amber-400 animate-bounce" /> Sustentação Isométrica (Hold)
                 </div>
 
                 {/* Big Isometric Timer */}
@@ -1180,7 +1312,7 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
                       cx="50%"
                       cy="50%"
                       r="76"
-                      stroke="rgba(255,255,255,0.08)"
+                      stroke={isOutdoorMode ? '#333333' : 'rgba(255,255,255,0.08)'}
                       strokeWidth="10"
                       fill="none"
                     />
@@ -1188,7 +1320,7 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
                       cx="50%"
                       cy="50%"
                       r="76"
-                      stroke="#10b981"
+                      stroke={isOutdoorMode ? '#00FF88' : '#10b981'}
                       strokeWidth="10"
                       strokeDasharray={2 * Math.PI * 76}
                       strokeDashoffset={
@@ -1201,59 +1333,136 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
                     />
                   </svg>
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-5xl font-black font-mono text-slate-100 tracking-tight tabular-nums">
+                    <span className={`text-5xl sm:text-6xl font-black font-mono tracking-tight tabular-nums ${isOutdoorMode ? 'text-white' : 'text-slate-100'}`}>
                       {isometricSecondsLeft}s
                     </span>
                     <span className="text-xs text-slate-400 font-semibold mt-1 tabular-nums">Meta: {isometricInitialSeconds}s</span>
                   </div>
                 </div>
 
-                {/* Isometric Controls (min 48px touch targets) */}
+                {/* Steppers & Presets de Tempo de Isometria */}
+                <div className="flex items-center justify-center gap-3 w-full max-w-xs">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      soundManager.triggerHaptic([15]);
+                      setIsometricInitialSeconds(prev => Math.max(5, prev - 5));
+                      setIsometricSecondsLeft(prev => Math.max(5, prev - 5));
+                    }}
+                    className={`w-12 h-12 min-w-[48px] min-h-[48px] rounded-2xl flex items-center justify-center active:scale-90 transition font-bold text-sm ${
+                      isOutdoorMode
+                        ? 'border-2 border-white bg-black text-white'
+                        : 'glass-card border border-white/10 text-slate-200'
+                    }`}
+                    title="Diminuir 5 segundos da meta"
+                  >
+                    -5s
+                  </button>
+
+                  <div className="flex items-center gap-1 overflow-x-auto py-1 scrollbar-none">
+                    {[10, 15, 20, 30, 45, 60].map(sec => (
+                      <button
+                        key={sec}
+                        type="button"
+                        onClick={() => {
+                          soundManager.triggerHaptic([20]);
+                          setIsometricInitialSeconds(sec);
+                          setIsometricSecondsLeft(sec);
+                        }}
+                        className={`px-2.5 py-1 rounded-lg text-xs font-bold transition active:scale-95 ${
+                          isometricInitialSeconds === sec
+                            ? 'bg-emerald-500 text-slate-950 font-black'
+                            : isOutdoorMode
+                            ? 'border border-white/40 text-white'
+                            : 'bg-white/5 text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        {sec}s
+                      </button>
+                    ))}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      soundManager.triggerHaptic([15]);
+                      setIsometricInitialSeconds(prev => prev + 5);
+                      setIsometricSecondsLeft(prev => prev + 5);
+                    }}
+                    className={`w-12 h-12 min-w-[48px] min-h-[48px] rounded-2xl flex items-center justify-center active:scale-90 transition font-bold text-sm ${
+                      isOutdoorMode
+                        ? 'border-2 border-white bg-black text-white'
+                        : 'glass-card border border-white/10 text-slate-200'
+                    }`}
+                    title="Aumentar 5 segundos da meta"
+                  >
+                    +5s
+                  </button>
+                </div>
+
+                {/* Isometric Controls (min 56px touch targets) */}
                 <div className="flex items-center gap-2.5 w-full max-w-xs justify-center">
                   <button
                     type="button"
                     onClick={toggleIsometricTimer}
-                    className={`h-12 px-6 rounded-2xl font-black text-xs flex items-center justify-center gap-2 shadow-lg transition active:scale-95 flex-1 ${
+                    className={`min-h-[56px] px-6 rounded-2xl font-black text-sm flex items-center justify-center gap-2 shadow-lg transition active:scale-95 flex-1 ${
                       isometricTimerRunning
                         ? 'bg-amber-500 text-slate-950 shadow-amber-500/25 glow-amber'
+                        : isOutdoorMode
+                        ? 'bg-emerald-400 text-black border-2 border-white'
                         : 'bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 text-slate-950 shadow-emerald-500/25 glow-emerald hover:brightness-110'
                     }`}
                   >
-                    {isometricTimerRunning ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 fill-current" />}
-                    <span>{isometricTimerRunning ? 'Pausar' : 'Iniciar'}</span>
+                    {isometricTimerRunning ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current" />}
+                    <span>{isometricTimerRunning ? 'Pausar' : 'Iniciar Hold'}</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={resetIsometricTimer}
-                    className="w-12 h-12 rounded-2xl glass-card text-slate-300 hover:text-white border border-white/10 transition active:scale-95 flex items-center justify-center shrink-0"
+                    className={`w-14 h-14 min-w-[56px] min-h-[56px] rounded-2xl transition active:scale-95 flex items-center justify-center shrink-0 ${
+                      isOutdoorMode
+                        ? 'border-2 border-white bg-black text-white'
+                        : 'glass-card text-slate-300 hover:text-white border border-white/10'
+                    }`}
                     title="Reiniciar tempo"
                     aria-label="Reiniciar tempo"
                   >
-                    <RotateCcw className="w-4 h-4" />
+                    <RotateCcw className="w-5 h-5" />
                   </button>
                 </div>
 
-                {/* Complete Isometric Set Button */}
+                {/* Complete Isometric Set Button (Jumbo Touch Target: min 56px height) */}
                 <button
                   type="button"
                   onClick={() => {
                     soundManager.triggerHaptic([40]);
                     handleCompleteIsometricSet();
                   }}
-                  className="w-full h-12 rounded-2xl glass-card hover:bg-white/[0.08] text-emerald-300 font-bold text-xs border border-emerald-500/30 flex items-center justify-center gap-2 transition active:scale-98"
+                  className={`w-full min-h-[56px] py-3.5 px-6 rounded-2xl font-black text-sm flex items-center justify-center gap-2 transition active:scale-98 ${
+                    isOutdoorMode
+                      ? 'border-2 border-emerald-400 bg-emerald-400 text-black font-black text-base shadow-xl'
+                      : 'glass-card hover:bg-white/[0.08] text-emerald-300 border border-emerald-500/30'
+                  }`}
                 >
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Concluir Série Isométrica
+                  <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                  <span>Concluir Série Isométrica ({isometricInitialSeconds - Math.max(0, isometricSecondsLeft) || isometricInitialSeconds}s)</span>
                 </button>
               </div>
             ) : (
               /* REPETITIONS EXERCISE HUD */
-              <div className="w-full glass-card border border-white/10 rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center space-y-4 shadow-xl">
-                <div className="text-[11px] uppercase font-extrabold tracking-widest text-slate-400 text-center">
+              <div
+                className={`w-full rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center space-y-4 shadow-xl ${
+                  isOutdoorMode
+                    ? 'bg-black border-2 border-white text-white'
+                    : 'glass-card border border-white/10'
+                }`}
+              >
+                <div className={`text-[11px] uppercase font-extrabold tracking-widest text-center ${isOutdoorMode ? 'text-white' : 'text-slate-400'}`}>
                   Repetições Concluídas nesta Série
                 </div>
 
-                {/* Large Reps Counter with Steppers (min 48px touch targets) */}
+                {/* Large Reps Counter with Steppers (min 56px to 64px touch targets) */}
                 <div className="flex items-center justify-center gap-5 w-full">
                   <button
                     type="button"
@@ -1261,14 +1470,18 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
                       soundManager.triggerHaptic([20]);
                       setCurrentReps(Math.max(1, currentReps - 1));
                     }}
-                    className="w-12 h-12 min-w-[48px] min-h-[48px] rounded-2xl glass-card hover:bg-white/[0.1] border border-white/10 text-slate-100 flex items-center justify-center active:scale-90 transition shadow-lg shrink-0"
+                    className={`w-14 h-14 sm:w-16 sm:h-16 min-w-[56px] min-h-[56px] rounded-2xl flex items-center justify-center active:scale-90 transition shadow-lg shrink-0 ${
+                      isOutdoorMode
+                        ? 'border-2 border-white bg-black text-white text-3xl font-black'
+                        : 'glass-card hover:bg-white/[0.1] border border-white/10 text-slate-100'
+                    }`}
                     aria-label="Diminuir repetição"
                   >
-                    <Minus className="w-6 h-6" />
+                    <Minus className="w-7 h-7" />
                   </button>
 
                   <div className="flex flex-col items-center min-w-[90px]">
-                    <span className="text-6xl font-black font-mono tracking-tight text-slate-100 drop-shadow-md tabular-nums leading-none">
+                    <span className={`text-6xl sm:text-7xl font-black font-mono tracking-tight drop-shadow-md tabular-nums leading-none ${isOutdoorMode ? 'text-white' : 'text-slate-100'}`}>
                       {currentReps}
                     </span>
                     <span className="text-[11px] text-slate-400 font-bold uppercase tracking-wider mt-1">repetições</span>
@@ -1280,16 +1493,24 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
                       soundManager.triggerHaptic([20]);
                       setCurrentReps(currentReps + 1);
                     }}
-                    className="w-12 h-12 min-w-[48px] min-h-[48px] rounded-2xl glass-card hover:bg-white/[0.1] border border-white/10 text-slate-100 flex items-center justify-center active:scale-90 transition shadow-lg shrink-0"
+                    className={`w-14 h-14 sm:w-16 sm:h-16 min-w-[56px] min-h-[56px] rounded-2xl flex items-center justify-center active:scale-90 transition shadow-lg shrink-0 ${
+                      isOutdoorMode
+                        ? 'border-2 border-white bg-black text-white text-3xl font-black'
+                        : 'glass-card hover:bg-white/[0.1] border border-white/10 text-slate-100'
+                    }`}
                     aria-label="Aumentar repetição"
                   >
-                    <Plus className="w-6 h-6" />
+                    <Plus className="w-7 h-7" />
                   </button>
                 </div>
 
                 {/* Optional Weight / Extra Load Selector */}
-                <div className="flex items-center justify-between w-full max-w-xs px-3.5 py-2 rounded-xl bg-white/[0.04] border border-white/5 text-xs">
-                  <span className="font-bold text-slate-400 text-[11px]">Carga Extra:</span>
+                <div className={`flex items-center justify-between w-full max-w-xs px-3.5 py-2 rounded-xl text-xs border ${
+                  isOutdoorMode
+                    ? 'bg-black border-white/30 text-white'
+                    : 'bg-white/[0.04] border-white/5 text-slate-400'
+                }`}>
+                  <span className="font-bold text-[11px]">Carga Extra:</span>
                   <div className="flex items-center gap-1.5">
                     <button
                       type="button"
@@ -1319,16 +1540,21 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
                   </div>
                 </div>
 
-                {/* Big Finish Set CTA (48px touch height) */}
+                {/* Big Finish Set CTA (Jumbo Touch Target: min 60px to 64px height) */}
                 <button
                   type="button"
                   onClick={() => {
                     soundManager.triggerHaptic([50]);
                     handleCompleteRepsSet();
                   }}
-                  className="w-full h-12 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 text-slate-950 font-black text-sm tracking-wide flex items-center justify-center gap-2 shadow-xl shadow-emerald-500/25 hover:brightness-110 active:scale-98 transition glow-emerald shrink-0"
+                  className={`w-full min-h-[60px] sm:min-h-[64px] py-4 px-6 rounded-2xl font-black text-base tracking-wide flex items-center justify-center gap-2.5 shadow-xl transition active:scale-98 shrink-0 ${
+                    isOutdoorMode
+                      ? 'border-2 border-white bg-emerald-400 text-black shadow-2xl text-lg'
+                      : 'bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 text-slate-950 shadow-emerald-500/25 hover:brightness-110 glow-emerald'
+                  }`}
                 >
-                  <CheckCircle2 className="w-5 h-5 stroke-[3]" /> CONCLUIR SÉRIE
+                  <CheckCircle2 className="w-6 h-6 stroke-[3]" />
+                  <span>CONCLUIR SÉRIE ({currentReps} REPS)</span>
                 </button>
 
                 {/* Cadence TUT Metronome */}
@@ -1348,12 +1574,39 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
           </div>
         ) : (
           /* ================= PHASE 2: REST TIMER SCREEN ================= */
-          <div className="w-full flex flex-col items-center space-y-5 animate-in fade-in zoom-in-95 duration-200">
+          <div className="w-full flex flex-col items-center space-y-4 animate-in fade-in zoom-in-95 duration-200">
+            {/* Alerta Visual de Descanso Concluído */}
+            {showRestDoneAlert && (
+              <div className="w-full p-4 rounded-3xl bg-emerald-500 text-slate-950 flex flex-col items-center justify-center space-y-2.5 animate-bounce shadow-2xl border-2 border-white">
+                <div className="flex items-center gap-2 font-black text-sm uppercase tracking-wider">
+                  <BellRing className="w-6 h-6 fill-current animate-pulse" />
+                  Descanso Finalizado!
+                </div>
+                <p className="text-xs font-bold text-slate-950 text-center">
+                  Recuperação concluída. Hora de iniciar a próxima série!
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    soundManager.triggerHaptic([40]);
+                    setShowRestDoneAlert(false);
+                    advanceToNextSetOrExercise();
+                  }}
+                  className="w-full min-h-[52px] py-3 px-6 rounded-2xl bg-slate-950 text-white font-black text-sm active:scale-98 shadow-xl mt-1 flex items-center justify-center gap-2"
+                >
+                  <span>Iniciar Próxima Série Agora</span>
+                  <ChevronRight className="w-5 h-5 stroke-[3]" />
+                </button>
+              </div>
+            )}
+
             <div className="text-center">
               <span className="px-3.5 py-1 rounded-full text-xs font-black uppercase tracking-widest bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 glow-emerald">
                 Intervalo de Recuperação
               </span>
-              <h3 className="text-xl sm:text-2xl font-black text-slate-100 mt-2 tracking-tight">Respire Fundo</h3>
+              <h3 className={`text-xl sm:text-2xl font-black mt-2 tracking-tight ${isOutdoorMode ? 'text-white' : 'text-slate-100'}`}>
+                Respire Fundo & Recupere
+              </h3>
             </div>
 
             {/* Glowing Circular Countdown */}
@@ -1364,7 +1617,7 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
                   cx="50%"
                   cy="50%"
                   r="80"
-                  stroke="rgba(255,255,255,0.08)"
+                  stroke={isOutdoorMode ? '#222222' : 'rgba(255,255,255,0.08)'}
                   strokeWidth="12"
                   fill="none"
                 />
@@ -1372,7 +1625,7 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
                   cx="50%"
                   cy="50%"
                   r="80"
-                  stroke={restSecondsLeft <= 5 ? '#f43f5e' : '#10b981'}
+                  stroke={restSecondsLeft <= 5 ? '#f43f5e' : isOutdoorMode ? '#00FF88' : '#10b981'}
                   strokeWidth="12"
                   strokeDasharray={restCircumference}
                   strokeDashoffset={restStrokeDashoffset}
@@ -1385,41 +1638,102 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
               <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <span
                   className={`text-5xl sm:text-6xl font-black font-mono tracking-tight tabular-nums ${
-                    restSecondsLeft <= 5 ? 'text-rose-400 animate-pulse' : 'text-slate-100'
+                    restSecondsLeft <= 5
+                      ? 'text-rose-400 animate-pulse'
+                      : isOutdoorMode
+                      ? 'text-white'
+                      : 'text-slate-100'
                   }`}
                 >
                   {formatMmSs(restSecondsLeft)}
                 </span>
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-400 mt-1">Descanso</span>
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-400 mt-1">
+                  {isRestTimerRunning ? 'Descanso Ativo' : 'Descanso Pausado'}
+                </span>
               </div>
             </div>
 
-            {/* Rest Adjusters (-15s / +15s) with 48px touch height */}
-            <div className="flex items-center gap-2.5 w-full max-w-xs justify-center">
+            {/* Presets Configuráveis de Descanso */}
+            <div className="flex flex-col items-center space-y-1.5 w-full max-w-xs">
+              <span className={`text-[10px] font-bold uppercase tracking-wider ${isOutdoorMode ? 'text-white' : 'text-slate-400'}`}>
+                Ajustar Tempo de Descanso:
+              </span>
+              <div className="flex items-center justify-center gap-1.5 flex-wrap">
+                {[30, 45, 60, 90, 120, 180].map(sec => (
+                  <button
+                    key={sec}
+                    type="button"
+                    onClick={() => handleSetRestDuration(sec)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-black transition active:scale-95 ${
+                      restInitialSeconds === sec
+                        ? 'bg-cyan-500 text-slate-950 shadow-md font-black'
+                        : isOutdoorMode
+                        ? 'border-2 border-white bg-black text-white'
+                        : 'glass-card border border-white/10 text-slate-300 hover:text-white'
+                    }`}
+                  >
+                    {sec}s
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Rest Adjusters (-15s / Pause / +15s / Skip) with min 48px to 56px touch height */}
+            <div className="flex items-center gap-2 w-full max-w-xs justify-center">
               <button
                 type="button"
                 onClick={() => handleAdjustRest(-15)}
-                className="h-12 px-4 rounded-2xl glass-card text-slate-200 text-xs font-black hover:bg-white/[0.08] transition active:scale-95 flex items-center justify-center shrink-0"
+                className={`h-12 min-h-[48px] px-3.5 rounded-2xl text-xs font-black transition active:scale-95 flex items-center justify-center shrink-0 ${
+                  isOutdoorMode
+                    ? 'border-2 border-white bg-black text-white'
+                    : 'glass-card text-slate-200 hover:bg-white/[0.08]'
+                }`}
                 aria-label="Diminuir 15 segundos"
               >
                 -15s
               </button>
+
+              <button
+                type="button"
+                onClick={toggleRestTimer}
+                className={`h-12 min-h-[48px] px-3.5 rounded-2xl text-xs font-black transition active:scale-95 flex items-center justify-center shrink-0 border ${
+                  !isRestTimerRunning
+                    ? 'bg-amber-400 text-slate-950 border-amber-300 font-black shadow-md'
+                    : isOutdoorMode
+                    ? 'border-2 border-white bg-black text-white'
+                    : 'glass-card text-slate-200 border-white/10 hover:text-white'
+                }`}
+                title={isRestTimerRunning ? 'Pausar descanso' : 'Retomar descanso'}
+                aria-label={isRestTimerRunning ? 'Pausar descanso' : 'Retomar descanso'}
+              >
+                {isRestTimerRunning ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 fill-current" />}
+              </button>
+
               <button
                 type="button"
                 onClick={() => {
                   soundManager.triggerHaptic([40]);
                   handleSkipRest();
                 }}
-                className="h-12 px-5 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 shadow-xl shadow-emerald-500/25 hover:brightness-110 active:scale-95 transition glow-emerald flex-1 truncate"
+                className={`h-12 min-h-[48px] px-4 rounded-2xl font-black text-xs flex items-center justify-center gap-1.5 shadow-xl transition active:scale-95 flex-1 truncate ${
+                  isOutdoorMode
+                    ? 'border-2 border-white bg-emerald-400 text-black text-sm'
+                    : 'bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 text-slate-950 shadow-emerald-500/25 hover:brightness-110 glow-emerald'
+                }`}
                 aria-label="Pular Descanso"
               >
                 <SkipForward className="w-4 h-4 fill-current shrink-0" />
                 <span className="truncate">Pular</span>
               </button>
+
               <button
                 type="button"
                 onClick={() => handleAdjustRest(15)}
-                className="h-12 px-4 rounded-2xl glass-card text-slate-200 text-xs font-black hover:bg-white/[0.08] transition active:scale-95 flex items-center justify-center shrink-0"
+                className={`h-12 min-h-[48px] px-3.5 rounded-2xl text-xs font-black transition active:scale-95 flex items-center justify-center shrink-0 ${
+                  isOutdoorMode
+                    ? 'border-2 border-white bg-black text-white'
+                    : 'glass-card text-slate-200 hover:bg-white/[0.08]'
+                }`}
                 aria-label="Aumentar 15 segundos"
               >
                 +15s
@@ -1733,6 +2047,51 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
               >
                 Manter Exercício Atual
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Slide-over Quick Progression & Regression Ladder Drawer */}
+      {showProgressionDrawer && currentExerciseData && (
+        <div
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200"
+          onClick={() => setShowProgressionDrawer(false)}
+        >
+          <div
+            className="w-full max-w-lg max-h-[min(90dvh,calc(100dvh-2rem))] bg-slate-900 border border-white/10 rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="p-4 border-b border-white/10 flex items-center justify-between shrink-0 bg-slate-950/60">
+              <div className="flex items-center gap-2">
+                <ArrowUpDown className="w-5 h-5 text-cyan-400" />
+                <div>
+                  <h3 className="font-black text-sm text-slate-100">
+                    Escada de Progressões: {currentExerciseData.name}
+                  </h3>
+                  <span className="text-[10px] text-slate-400">
+                    Orientações de alavanca para facilitar ou intensificar
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowProgressionDrawer(false)}
+                className="p-1.5 rounded-full text-slate-400 hover:text-white"
+                aria-label="Fechar"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-4">
+              <QuickProgressionReference
+                exercise={currentExerciseData}
+                onSelectExercise={ex => {
+                  handleSwapCurrentExercise(ex);
+                  setShowProgressionDrawer(false);
+                }}
+              />
             </div>
           </div>
         </div>
