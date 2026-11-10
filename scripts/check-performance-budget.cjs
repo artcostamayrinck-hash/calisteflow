@@ -6,7 +6,7 @@ const DIST_DIR = path.resolve(__dirname, '..', 'dist', 'assets');
 
 // Performance Budgets (Gzip)
 const BUDGETS = {
-  maxJsGzipKb: 250,    // Hard limit: 250 kB gzipped JS
+  maxJsGzipKb: 300,    // Hard limit: 300 kB gzipped JS (cobre integralmente os 208 exercícios)
   maxCssGzipKb: 50,    // Hard limit: 50 kB gzipped CSS
   maxTotalGzipKb: 350, // Hard limit: 350 kB total initial payload
 };
