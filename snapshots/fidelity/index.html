@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>CalisteFlow • Snapshots de Fidelidade do Protótipo Aprovado</title>
+  <style>
+    body { background: #030712; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 32px 24px; }
+    h1 { color: #34d399; font-size: 24px; margin-bottom: 8px; }
+    p.sub { color: #94a3b8; font-size: 14px; margin-top: 0; margin-bottom: 24px; }
+    .checklist { background: #0f172a; padding: 16px 20px; border-radius: 12px; border: 1px solid #1e293b; margin-bottom: 32px; max-width: 800px; font-size: 13px; line-height: 1.6; }
+    .checklist strong { color: #38bdf8; }
+    .exercise-card { background: #070d19; border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 20px; margin-bottom: 32px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    .exercise-title { font-size: 18px; font-weight: 800; margin: 0 0 4px 0; color: #ffffff; }
+    .exercise-cat { font-size: 12px; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; }
+    .snapshots-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+    .frame-box { background: #020617; border-radius: 12px; overflow: hidden; border: 1px solid #1e293b; }
+    .frame-box img { width: 100%; height: auto; display: block; }
+    .frame-caption { padding: 10px 14px; font-size: 12px; font-weight: 700; color: #cbd5e1; background: #090f1d; border-top: 1px solid #1e293b; }
+  </style>
+</head>
+<body>
+  <h1>CalisteFlow • Teste de Fidelidade Visual (Etapa 3)</h1>
+  <p class="sub">15 Snapshots canônicos gravados para proteção contra regressão visual.</p>
+
+  <div class="checklist">
+    <strong>Auditoria Técnica de Paridade com o Protótipo Aprovado:</strong><br>
+    ✓ <strong>Medidas dos Ossos:</strong> Braço 38px, antebraço 34px, coxa 56px, canela 52px, tronco 66px, cabeça a 27px do ombro.<br>
+    ✓ <strong>Espessuras Trapezoidais:</strong> Tronco 31→26, coxa 24→17, canela 16→10, pé 9→7, braço 14→11, antebraço 11→8.<br>
+    ✓ <strong>Cores Canônicas:</strong> Fundo #0F1B33→#050B18, chão #0A1222, linha #1F3B5C (y=272), sombra rx 140, ry 6.<br>
+    ✓ <strong>Músculos Ativos:</strong> Alvo #34D399 (opacidade 0.35 + 0.45·u), Secundário #22D3EE (80% da opacidade do alvo).<br>
+    ✓ <strong>Ordem das Camadas:</strong> Fundo → chão → sombra → props → perna oposta → braço oposto → tronco → bermuda quadril → pescoço → cabelo → rosto → perna próxima → braço próximo → músculos.
+  </div>
+
+  
+    <div class="exercise-card">
+      <h2 class="exercise-title">Barra fixa pronada</h2>
+      <div class="exercise-cat">Puxar Vertical • ID: pullup</div>
+      <div class="snapshots-grid">
+        
+          <div class="frame-box">
+            <img src="pullup_Inicio_u0.png" alt="Barra fixa pronada Início / Fase Neutra (u = 0.0)" loading="lazy" />
+            <div class="frame-caption">Início / Fase Neutra (u = 0.0)</div>
+          </div>
+        
+          <div class="frame-box">
+            <img src="pullup_Meio_u05.png" alt="Barra fixa pronada Meio do Movimento (u = 0.5)" loading="lazy" />
+            <div class="frame-caption">Meio do Movimento (u = 0.5)</div>
+          </div>
+        
+          <div class="frame-box">
+            <img src="pullup_Pico_u10.png" alt="Barra fixa pronada Pico de Esforço / Contração (u = 1.0)" loading="lazy" />
+            <div class="frame-caption">Pico de Esforço / Contração (u = 1.0)</div>
+          </div>
+        
+      </div>
+    </div>
+  
+    <div class="exercise-card">
+      <h2 class="exercise-title">Flexão tradicional</h2>
+      <div class="exercise-cat">Empurrar Horizontal • ID: pushup</div>
+      <div class="snapshots-grid">
+        
+          <div class="frame-box">
+            <img src="pushup_Inicio_u0.png" alt="Flexão tradicional Início / Fase Neutra (u = 0.0)" loading="lazy" />
+            <div class="frame-caption">Início / Fase Neutra (u = 0.0)</div>
+          </div>
+        
+          <div class="frame-box">
+            <img src="pushup_Meio_u05.png" alt="Flexão tradicional Meio do Movimento (u = 0.5)" loading="lazy" />
+            <div class="frame-caption">Meio do Movimento (u = 0.5)</div>
+          </div>
+        
+          <div class="frame-box">
+            <img src="pushup_Pico_u10.png" alt="Flexão tradicional Pico de Esforço / Contração (u = 1.0)" loading="lazy" />
+            <div class="frame-caption">Pico de Esforço / Contração (u = 1.0)</div>
+          </div>
+        
+      </div>
+    </div>
+  
+    <div class="exercise-card">
+      <h2 class="exercise-title">Flexão inclinada</h2>
+      <div class="exercise-cat">Empurrar Horizontal • ID: incline_pushup</div>
+      <div class="snapshots-grid">
+        
+          <div class="frame-box">
+            <img src="incline_pushup_Inicio_u0.png" alt="Flexão inclinada Início / Fase Neutra (u = 0.0)" loading="lazy" />
+            <div class="frame-caption">Início / Fase Neutra (u = 0.0)</div>
+          </div>
+        
+          <div class="frame-box">
+            <img src="incline_pushup_Meio_u05.png" alt="Flexão inclinada Meio do Movimento (u = 0.5)" loading="lazy" />
+            <div class="frame-caption">Meio do Movimento (u = 0.5)</div>
+          </div>
+        
+          <div class="frame-box">
+            <img src="incline_pushup_Pico_u10.png" alt="Flexão inclinada Pico de Esforço / Contração (u = 1.0)" loading="lazy" />
+            <div class="frame-caption">Pico de Esforço / Contração (u = 1.0)</div>
+          </div>
+        
+      </div>
+    </div>
+  
+    <div class="exercise-card">
+      <h2 class="exercise-title">Agachamento livre</h2>
+      <div class="exercise-cat">Agachamentos • ID: squat</div>
+      <div class="snapshots-grid">
+        
+          <div class="frame-box">
+            <img src="squat_Inicio_u0.png" alt="Agachamento livre Início / Fase Neutra (u = 0.0)" loading="lazy" />
+            <div class="frame-caption">Início / Fase Neutra (u = 0.0)</div>
+          </div>
+        
+          <div class="frame-box">
+            <img src="squat_Meio_u05.png" alt="Agachamento livre Meio do Movimento (u = 0.5)" loading="lazy" />
+            <div class="frame-caption">Meio do Movimento (u = 0.5)</div>
+          </div>
+        
+          <div class="frame-box">
+            <img src="squat_Pico_u10.png" alt="Agachamento livre Pico de Esforço / Contração (u = 1.0)" loading="lazy" />
+            <div class="frame-caption">Pico de Esforço / Contração (u = 1.0)</div>
+          </div>
+        
+      </div>
+    </div>
+  
+    <div class="exercise-card">
+      <h2 class="exercise-title">Ponte de glúteo</h2>
+      <div class="exercise-cat">Cadeia Posterior • ID: bridge</div>
+      <div class="snapshots-grid">
+        
+          <div class="frame-box">
+            <img src="bridge_Inicio_u0.png" alt="Ponte de glúteo Início / Fase Neutra (u = 0.0)" loading="lazy" />
+            <div class="frame-caption">Início / Fase Neutra (u = 0.0)</div>
+          </div>
+        
+          <div class="frame-box">
+            <img src="bridge_Meio_u05.png" alt="Ponte de glúteo Meio do Movimento (u = 0.5)" loading="lazy" />
+            <div class="frame-caption">Meio do Movimento (u = 0.5)</div>
+          </div>
+        
+          <div class="frame-box">
+            <img src="bridge_Pico_u10.png" alt="Ponte de glúteo Pico de Esforço / Contração (u = 1.0)" loading="lazy" />
+            <div class="frame-caption">Pico de Esforço / Contração (u = 1.0)</div>
+          </div>
+        
+      </div>
+    </div>
+  
+</body>
+</html>
