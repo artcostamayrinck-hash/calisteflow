@@ -22,7 +22,17 @@ export interface RawPoseDef {
     | 'handstand'
     | 'pistol'
     | 'bulgarian'
-    | 'calf';
+    | 'calf'
+    | 'hollow'
+    | 'crunch'
+    | 'superman'
+    | 'bird_dog'
+    | 'side_plank'
+    | 'hanging_core'
+    | 'dragon_flag'
+    | 'ab_wheel'
+    | 'mountain_climber'
+    | 'nordic_curl';
   params?: Record<string, any>;
   far: [number, number];
   durationSeconds: number;
@@ -482,6 +492,225 @@ export const REFERENCE_POSES_DATA: Record<string, RawPoseDef> = {
       ['p', 'S', 'E', 0.5, 0, -1, 4, 14, 6],
       ['s', 'S', 'H', 0.05, -1, 0, 5, 14, 7],
       ['s', 'E', 'W', 0.45, 0, -1, 3, 12, 5],
+    ],
+  },
+
+  // ==========================================
+  // LOTE 3: CORE E DEITADO
+  // ==========================================
+
+  // 27. Hollow Body Hold (Canoa Completa)
+  hollowbody: {
+    id: 'hollowbody',
+    name: 'Hollow Body Hold (Canoa)',
+    model: 'hollow',
+    params: { isTuck: false },
+    far: [5, -3],
+    durationSeconds: 3.4,
+    muscles: [
+      ['p', 'S', 'H', 0.5, 0, 1, 7, 24, 9],
+      ['p', 'H', 'K', 0.2, 1, 0, 6, 16, 7],
+      ['s', 'S', 'E', 0.2, 0, 1, 4, 12, 5],
+    ],
+  },
+
+  // 28. Hollow Hold Tuck (Canoa Dobrada)
+  'hollow-hold-tuck': {
+    id: 'hollow-hold-tuck',
+    name: 'Hollow Hold Tuck',
+    model: 'hollow',
+    params: { isTuck: true },
+    far: [5, -3],
+    durationSeconds: 3.2,
+    muscles: [
+      ['p', 'S', 'H', 0.5, 0, 1, 7, 22, 9],
+      ['s', 'H', 'K', 0.2, 1, 0, 6, 14, 7],
+    ],
+  },
+
+  // 29. Elevação de Pernas no Solo (Lying Leg Raise)
+  'elevacao-pernas-chao': {
+    id: 'elevacao-pernas-chao',
+    name: 'Elevação de Pernas no Solo',
+    model: 'crunch',
+    params: { isLegRaise: true },
+    far: [5, -3],
+    durationSeconds: 3.6,
+    muscles: [
+      ['p', 'S', 'H', 0.6, 0, 1, 7, 22, 9],
+      ['p', 'H', 'K', 0.15, 1, 0, 6, 18, 7],
+      ['s', 'H', 'K', 0.5, 1, 0, 5, 16, 6],
+    ],
+  },
+
+  // 30. Abdominal Canivete no Solo (V-Up)
+  'abdominal-canivete': {
+    id: 'abdominal-canivete',
+    name: 'Abdominal Canivete (V-Up)',
+    model: 'crunch',
+    params: { isVUp: true },
+    far: [5, -3],
+    durationSeconds: 3.5,
+    muscles: [
+      ['p', 'S', 'H', 0.5, 0, 1, 7, 24, 9],
+      ['p', 'H', 'K', 0.2, 1, 0, 6, 18, 7],
+      ['s', 'S', 'E', 0.3, 0, -1, 4, 14, 6],
+    ],
+  },
+
+  // 31. Abdominal Curto no Solo (Crunch Tradicional)
+  'crunch-solo': {
+    id: 'crunch-solo',
+    name: 'Abdominal Tradicional (Crunch)',
+    model: 'crunch',
+    params: {},
+    far: [5, -3],
+    durationSeconds: 3.2,
+    muscles: [
+      ['p', 'S', 'H', 0.45, 0, 1, 7, 22, 8],
+      ['s', 'S', 'H', 0.1, 0, 1, 5, 14, 7],
+    ],
+  },
+
+  // 32. Superman Isométrico no Solo
+  superman: {
+    id: 'superman',
+    name: 'Superman no Solo',
+    model: 'superman',
+    params: {},
+    far: [5, -3],
+    durationSeconds: 3.4,
+    muscles: [
+      ['p', 'S', 'H', 0.7, 0, -1, 6, 20, 8],
+      ['p', 'S', 'H', 0.95, 0, 1, 5, 15, 10],
+      ['s', 'S', 'H', 0.1, -1, 0, 6, 16, 7],
+      ['s', 'H', 'K', 0.5, 0.4, 1, 6, 20, 7],
+    ],
+  },
+
+  // 33. Bird Dog (Perdigueiro)
+  'bird-dog': {
+    id: 'bird-dog',
+    name: 'Bird Dog (Perdigueiro)',
+    model: 'bird_dog',
+    params: {},
+    far: [6, -2],
+    durationSeconds: 3.6,
+    muscles: [
+      ['p', 'S', 'H', 0.7, 0, -1, 6, 20, 8],
+      ['p', 'S', 'H', 0.95, 0, 1, 5, 15, 10],
+      ['s', 'S', 'E', 0.2, 0, 1, 4, 12, 5],
+      ['s', 'S', 'H', 0.4, 0, 1, 6, 18, 7],
+    ],
+  },
+
+  // 34. Prancha Lateral Tradicional
+  'prancha-lateral': {
+    id: 'prancha-lateral',
+    name: 'Prancha Lateral Tradicional',
+    model: 'side_plank',
+    params: { isKnee: false },
+    far: [4, -2],
+    durationSeconds: 3.4,
+    muscles: [
+      ['p', 'S', 'H', 0.5, 0, 1, 7, 24, 9],
+      ['s', 'S', 'E', 0.2, 0, 1, 4, 12, 6],
+      ['s', 'H', 'K', 0.5, 0, 1, 6, 18, 7],
+    ],
+  },
+
+  // 35. Elevação de Pernas na Barra (Hanging Leg Raise)
+  'elevacao-pernas-barra': {
+    id: 'elevacao-pernas-barra',
+    name: 'Elevação de Pernas na Barra',
+    model: 'hanging_core',
+    params: { isToesToBar: false, isKnees: false },
+    far: [6, -2],
+    durationSeconds: 3.6,
+    muscles: [
+      ['p', 'S', 'H', 0.55, 1, 0, 7, 24, 10],
+      ['p', 'H', 'K', 0.2, 1, 0, 6, 18, 8],
+      ['s', 'S', 'H', 0.18, -1, 0, 6, 18, 8],
+      ['s', 'E', 'W', 0.45, 0, -1, 4, 14, 6],
+    ],
+  },
+
+  // 36. Pés na Barra Estritos (Toes to Bar)
+  'toes-to-bar': {
+    id: 'toes-to-bar',
+    name: 'Pés na Barra (Toes to Bar)',
+    model: 'hanging_core',
+    params: { isToesToBar: true },
+    far: [6, -2],
+    durationSeconds: 3.8,
+    muscles: [
+      ['p', 'S', 'H', 0.55, 1, 0, 8, 26, 10],
+      ['p', 'H', 'K', 0.2, 1, 0, 7, 20, 8],
+      ['s', 'S', 'H', 0.18, -1, 0, 7, 20, 8],
+      ['s', 'E', 'W', 0.45, 0, -1, 4, 14, 6],
+    ],
+  },
+
+  // 37. Dragon Flag Completo
+  'dragon-flag': {
+    id: 'dragon-flag',
+    name: 'Dragon Flag Completo',
+    model: 'dragon_flag',
+    params: {},
+    far: [5, -3],
+    durationSeconds: 3.8,
+    muscles: [
+      ['p', 'S', 'H', 0.5, 0, 1, 8, 26, 10],
+      ['p', 'S', 'H', 0.18, -1, 0, 7, 20, 8],
+      ['s', 'H', 'K', 0.3, 1, 0, 6, 18, 7],
+      ['s', 'S', 'E', 0.4, 0, 1, 4, 14, 6],
+    ],
+  },
+
+  // 38. Roda Abdominal de Joelhos (Ab Wheel Rollout)
+  'ab-wheel-joelhos': {
+    id: 'ab-wheel-joelhos',
+    name: 'Roda Abdominal de Joelhos',
+    model: 'ab_wheel',
+    params: {},
+    far: [6, -2],
+    durationSeconds: 3.6,
+    muscles: [
+      ['p', 'S', 'H', 0.5, 0, 1, 8, 24, 9],
+      ['p', 'S', 'H', 0.18, -1, 0, 6, 18, 8],
+      ['s', 'S', 'E', 0.1, 1, 0, 5, 14, 6],
+      ['s', 'H', 'K', 0.2, 1, 0, 6, 16, 7],
+    ],
+  },
+
+  // 39. Mountain Climbers Frontal Tradicional
+  'mountain-climbers': {
+    id: 'mountain-climbers',
+    name: 'Mountain Climbers Tradicional',
+    model: 'mountain_climber',
+    params: {},
+    far: [6, -2],
+    durationSeconds: 3.0,
+    muscles: [
+      ['p', 'S', 'H', 0.5, 0, 1, 7, 22, 8],
+      ['p', 'H', 'K', 0.2, 1, 0, 6, 18, 7],
+      ['s', 'S', 'E', 0.1, 1, 0, 5, 12, 6],
+    ],
+  },
+
+  // 40. Nordic Hamstring Curl Completo
+  'nordic-curl': {
+    id: 'nordic-curl',
+    name: 'Nordic Hamstring Curl',
+    model: 'nordic_curl',
+    params: {},
+    far: [6, -2],
+    durationSeconds: 3.8,
+    muscles: [
+      ['p', 'H', 'K', 0.55, -1, 0.2, 8, 26, 8],
+      ['p', 'S', 'H', 0.95, 0, 1, 6, 16, 10],
+      ['s', 'S', 'H', 0.5, 0, 1, 6, 18, 7],
+      ['s', 'K', 'A', 0.35, -1, 0, 6, 16, 6],
     ],
   },
 };
