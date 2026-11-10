@@ -571,3 +571,4 @@ export const renderFigureStyle = ({
     </g>
   );
 };
+

@@ -12,6 +12,7 @@ import { getAnimationDefForExercise } from './poseDatabase';
 import { ExerciseFigure } from './ExerciseFigure';
 import { Play, Pause, Maximize2, X } from 'lucide-react';
 import { useBodyScrollLock } from '../../../utils/useBodyScrollLock';
+import { getAvatarSettings } from '../../../utils/appSettings';
 
 export interface ExerciseMediaProps {
   exercise: Exercise;
@@ -36,12 +37,27 @@ export const ExerciseMedia: React.FC<ExerciseMediaProps> = ({
   const [playbackRate, setPlaybackRate] = useState<number>(1.0);
   const [userPaused, setUserPaused] = useState<boolean>(!autoPlay || isPaused);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+  const [selectedStyle, setSelectedStyle] = useState<FigureStyle | null>(null);
 
   useBodyScrollLock(isFullscreen, () => setIsFullscreen(false));
 
   const animDef = useMemo(() => {
     return getAnimationDefForExercise(exercise.id, exercise.name);
   }, [exercise.id, exercise.name]);
+
+  // Resolução inteligente do estilo visual conforme contexto e preferências do usuário
+  const activeStyle: FigureStyle = useMemo(() => {
+    if (selectedStyle) return selectedStyle;
+    if (style) return style;
+    const globalAvatar = getAvatarSettings();
+    if (globalAvatar.preferredStyle && globalAvatar.preferredStyle !== 'anatomical') {
+      return globalAvatar.preferredStyle;
+    }
+    // Contextos de uso padrão conforme especificação:
+    if (mode === 'card' || mode === 'compact') return 'mannequin'; // Manequim neutro em listas
+    if (mode === 'workout') return 'silhouette';                  // Silhueta sólida em treino ativo
+    return 'anatomical';                                          // Anatômico simplificado em detalhes
+  }, [selectedStyle, style, mode]);
 
   const toggleSlowMo = () => {
     setPlaybackRate(prev => (prev === 1.0 ? 0.5 : 1.0));
@@ -71,7 +87,7 @@ export const ExerciseMedia: React.FC<ExerciseMediaProps> = ({
           staticFrame={0.45} // Poster estático no ápice do movimento para economizar processamento na rolagem de lista
           showControls={false}
           className="w-full h-full object-cover"
-          style={style}
+          style={activeStyle}
           avatarSettings={avatarSettings}
         />
       </div>
@@ -89,7 +105,7 @@ export const ExerciseMedia: React.FC<ExerciseMediaProps> = ({
             playbackRate={playbackRate}
             showControls={false}
             className="w-full h-auto aspect-[4/3] sm:aspect-[16/10]"
-            style={style}
+            style={activeStyle}
             avatarSettings={avatarSettings}
           />
 
@@ -145,6 +161,37 @@ export const ExerciseMedia: React.FC<ExerciseMediaProps> = ({
           </div>
         </div>
 
+        {/* Seletor Rápido de Estilos de Figura */}
+        <div className="w-full mt-2.5 flex items-center justify-between gap-2 overflow-x-auto pb-1 scrollbar-none px-1">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 shrink-0">
+            Estilo Visual:
+          </span>
+          <div className="flex items-center gap-1 bg-slate-900/90 border border-white/10 p-1 rounded-xl shrink-0">
+            {(
+              [
+                { id: 'anatomical', label: 'Anatômico' },
+                { id: 'mannequin', label: 'Manequim' },
+                { id: 'silhouette', label: 'Silhueta' },
+                { id: 'outline', label: 'Contorno' },
+                { id: 'xray', label: 'Raio-X' },
+              ] as { id: FigureStyle; label: string }[]
+            ).map(st => (
+              <button
+                key={st.id}
+                type="button"
+                onClick={() => setSelectedStyle(st.id)}
+                className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition ${
+                  activeStyle === st.id
+                    ? 'bg-emerald-500 text-slate-950 font-black shadow'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                {st.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Legenda Textual Obrigatória dos Músculos (nunca depender só de cor) */}
         <div className="w-full mt-3 p-3.5 rounded-2xl glass-card border border-white/10 space-y-2">
           <div className="flex items-center justify-between text-xs">
@@ -197,14 +244,45 @@ export const ExerciseMedia: React.FC<ExerciseMediaProps> = ({
 
             {/* Corpo do Modal */}
             <div className="p-4 sm:p-6 flex flex-col items-center">
-              <div className="w-full rounded-2xl overflow-hidden border border-white/10">
+              {/* Barra de Seleção de Estilos no Modal */}
+              <div className="w-full mb-3 flex items-center justify-between gap-2 overflow-x-auto pb-1 scrollbar-none">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 shrink-0">
+                  Visualização:
+                </span>
+                <div className="flex items-center gap-1 bg-slate-900/90 border border-white/10 p-1 rounded-xl shrink-0">
+                  {(
+                    [
+                      { id: 'anatomical', label: 'Anatômico' },
+                      { id: 'mannequin', label: 'Manequim' },
+                      { id: 'silhouette', label: 'Silhueta' },
+                      { id: 'outline', label: 'Contorno' },
+                      { id: 'xray', label: 'Raio-X' },
+                    ] as { id: FigureStyle; label: string }[]
+                  ).map(st => (
+                    <button
+                      key={st.id}
+                      type="button"
+                      onClick={() => setSelectedStyle(st.id)}
+                      className={`px-3 py-1 rounded-lg text-xs font-bold transition ${
+                        activeStyle === st.id
+                          ? 'bg-emerald-500 text-slate-950 font-black shadow'
+                          : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      {st.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="w-full rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
                 <ExerciseFigure
                   animationDef={animDef}
                   isPaused={userPaused}
                   playbackRate={playbackRate}
                   showControls={true}
                   className="w-full h-auto"
-                  style={style}
+                  style={activeStyle}
                   avatarSettings={avatarSettings}
                 />
               </div>

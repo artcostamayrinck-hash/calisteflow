@@ -296,25 +296,22 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   key={key}
                   type="button"
                   onClick={() => updateSetting(key, !settings[key])}
-                  className={`w-full flex items-center justify-between p-2.5 rounded-xl transition active:scale-98 border ${
-                    settings[key]
+                  className={`w-full flex items-center justify-between p-2.5 rounded-xl transition active:scale-98 border ${settings[key]
                       ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300'
                       : 'border-white/5 text-slate-400'
-                  }`}
+                    }`}
                 >
                   <div className="text-left">
                     <span className="text-xs font-bold block">{label}</span>
                     <span className="text-[10px] text-slate-400">{desc}</span>
                   </div>
                   <div
-                    className={`w-8 h-4.5 rounded-full transition-colors relative shrink-0 ${
-                      settings[key] ? 'bg-emerald-500' : 'bg-white/15'
-                    }`}
+                    className={`w-8 h-4.5 rounded-full transition-colors relative shrink-0 ${settings[key] ? 'bg-emerald-500' : 'bg-white/15'
+                      }`}
                   >
                     <span
-                      className={`absolute top-0.5 left-0.5 w-3.5 h-3.5 rounded-full bg-white shadow transition-transform ${
-                        settings[key] ? 'translate-x-3.5' : 'translate-x-0'
-                      }`}
+                      className={`absolute top-0.5 left-0.5 w-3.5 h-3.5 rounded-full bg-white shadow transition-transform ${settings[key] ? 'translate-x-3.5' : 'translate-x-0'
+                        }`}
                     />
                   </div>
                 </button>
@@ -347,11 +344,10 @@ export const HomeView: React.FC<HomeViewProps> = ({
                             updateSetting('soundTimbre', t);
                             soundManager.playStartBeep();
                           }}
-                          className={`px-2 py-0.5 rounded-lg text-[10px] font-bold capitalize transition ${
-                            settings.soundTimbre === t
+                          className={`px-2 py-0.5 rounded-lg text-[10px] font-bold capitalize transition ${settings.soundTimbre === t
                               ? 'bg-emerald-500 text-slate-950'
                               : 'bg-white/5 text-slate-400 hover:text-white'
-                          }`}
+                            }`}
                         >
                           {t}
                         </button>
@@ -374,18 +370,16 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   <button
                     type="button"
                     onClick={() => updateSetting('theme', 'dark')}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition ${
-                      settings.theme !== 'light' ? 'bg-emerald-500 text-slate-950' : 'bg-white/5 text-slate-400'
-                    }`}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition ${settings.theme !== 'light' ? 'bg-emerald-500 text-slate-950' : 'bg-white/5 text-slate-400'
+                      }`}
                   >
                     Escuro
                   </button>
                   <button
                     type="button"
                     onClick={() => updateSetting('theme', 'light')}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition ${
-                      settings.theme === 'light' ? 'bg-emerald-500 text-slate-950' : 'bg-white/5 text-slate-400'
-                    }`}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition ${settings.theme === 'light' ? 'bg-emerald-500 text-slate-950' : 'bg-white/5 text-slate-400'
+                      }`}
                   >
                     Claro
                   </button>
@@ -527,9 +521,8 @@ export const HomeView: React.FC<HomeViewProps> = ({
 
               <button
                 onClick={handleStartTodayWorkout}
-                className={`w-full min-h-[64px] flex items-center justify-between gap-3 px-5 py-4 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 text-slate-950 font-black shadow-2xl shadow-emerald-500/30 hover:brightness-110 active:scale-98 transition ${
-                  noMotion ? '' : 'animate-pulse-ring'
-                } glow-emerald`}
+                className={`w-full min-h-[64px] flex items-center justify-between gap-3 px-5 py-4 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 text-slate-950 font-black shadow-2xl shadow-emerald-500/30 hover:brightness-110 active:scale-98 transition ${noMotion ? '' : 'animate-pulse-ring'
+                  } glow-emerald`}
                 aria-label={`Iniciar treino: ${todayPlan?.name}`}
               >
                 <div className="flex items-center gap-3">
@@ -620,29 +613,26 @@ export const HomeView: React.FC<HomeViewProps> = ({
             return (
               <div
                 key={d.dayOfWeek}
-                className={`flex flex-col items-center gap-1 py-2 rounded-xl transition ${
-                  isToday
+                className={`flex flex-col items-center gap-1 py-2 rounded-xl transition ${isToday
                     ? 'bg-emerald-500/20 border border-emerald-500/50'
                     : 'border border-white/5'
-                }`}
+                  }`}
               >
                 <span
-                  className={`text-[10px] font-black uppercase ${
-                    isToday ? 'text-emerald-400' : 'text-slate-500'
-                  }`}
+                  className={`text-[10px] font-black uppercase ${isToday ? 'text-emerald-400' : 'text-slate-500'
+                    }`}
                 >
                   {d.shortName}
                 </span>
                 <div
-                  className={`w-3 h-3 rounded-full ${
-                    done
+                  className={`w-3 h-3 rounded-full ${done
                       ? 'bg-emerald-400'
                       : d.isActive
-                      ? isToday
-                        ? 'bg-emerald-400 animate-pulse'
-                        : 'bg-emerald-500/40'
-                      : 'bg-white/10'
-                  }`}
+                        ? isToday
+                          ? 'bg-emerald-400 animate-pulse'
+                          : 'bg-emerald-500/40'
+                        : 'bg-white/10'
+                    }`}
                 />
               </div>
             );
@@ -673,11 +663,10 @@ export const HomeView: React.FC<HomeViewProps> = ({
           ].map((s, i) => (
             <div
               key={i}
-              className={`flex flex-col items-center gap-0.5 p-2.5 rounded-2xl glass-card border ${
-                s.highlight
+              className={`flex flex-col items-center gap-0.5 p-2.5 rounded-2xl glass-card border ${s.highlight
                   ? `border-amber-500/30 bg-amber-500/10 ${recordPulse && !noMotion ? 'animate-pulse' : ''}`
                   : 'border-white/5'
-              }`}
+                }`}
             >
               {s.icon}
               <span
@@ -700,9 +689,8 @@ export const HomeView: React.FC<HomeViewProps> = ({
           </h2>
 
           <div
-            className={`flex items-center justify-between gap-3 p-3 rounded-2xl bg-white/[0.04] border border-white/5 ${
-              lhm ? 'flex-row-reverse' : ''
-            }`}
+            className={`flex items-center justify-between gap-3 p-3 rounded-2xl bg-white/[0.04] border border-white/5 ${lhm ? 'flex-row-reverse' : ''
+              }`}
           >
             <div>
               <p className={`${lt ? 'text-sm' : 'text-xs'} font-bold text-slate-200`}>
@@ -827,9 +815,8 @@ export const HomeView: React.FC<HomeViewProps> = ({
               <button
                 key={routine.id}
                 onClick={() => handleStartFromRoutine(routine)}
-                className={`w-full min-h-[56px] flex items-center justify-between gap-3 p-3.5 rounded-2xl glass-card border border-white/5 hover:border-emerald-500/30 hover:bg-emerald-500/5 transition active:scale-98 group ${
-                  lhm ? 'flex-row-reverse text-right' : ''
-                }`}
+                className={`w-full min-h-[56px] flex items-center justify-between gap-3 p-3.5 rounded-2xl glass-card border border-white/5 hover:border-emerald-500/30 hover:bg-emerald-500/5 transition active:scale-98 group ${lhm ? 'flex-row-reverse text-right' : ''
+                  }`}
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center shrink-0">
