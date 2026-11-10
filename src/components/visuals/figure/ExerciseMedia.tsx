@@ -6,6 +6,7 @@
 
 import React, { useState, useMemo } from 'react';
 import type { Exercise } from '../../../types';
+import type { FigureStyle, AvatarSettings } from './types';
 import { MUSCLE_LABELS } from '../../../data/exercisesData';
 import { getAnimationDefForExercise } from './poseDatabase';
 import { ExerciseFigure } from './ExerciseFigure';
@@ -19,6 +20,8 @@ export interface ExerciseMediaProps {
   className?: string;
   autoPlay?: boolean;
   onExpand?: () => void;
+  style?: FigureStyle;
+  avatarSettings?: Partial<AvatarSettings>;
 }
 
 export const ExerciseMedia: React.FC<ExerciseMediaProps> = ({
@@ -27,6 +30,8 @@ export const ExerciseMedia: React.FC<ExerciseMediaProps> = ({
   isPaused = false,
   className = '',
   autoPlay = true,
+  style,
+  avatarSettings,
 }) => {
   const [playbackRate, setPlaybackRate] = useState<number>(1.0);
   const [userPaused, setUserPaused] = useState<boolean>(!autoPlay || isPaused);
@@ -66,6 +71,8 @@ export const ExerciseMedia: React.FC<ExerciseMediaProps> = ({
           staticFrame={0.45} // Poster estático no ápice do movimento para economizar processamento na rolagem de lista
           showControls={false}
           className="w-full h-full object-cover"
+          style={style}
+          avatarSettings={avatarSettings}
         />
       </div>
     );
@@ -82,6 +89,8 @@ export const ExerciseMedia: React.FC<ExerciseMediaProps> = ({
             playbackRate={playbackRate}
             showControls={false}
             className="w-full h-auto aspect-[4/3] sm:aspect-[16/10]"
+            style={style}
+            avatarSettings={avatarSettings}
           />
 
           {/* Barra Flutuante Superior de Controles */}
@@ -195,6 +204,8 @@ export const ExerciseMedia: React.FC<ExerciseMediaProps> = ({
                   playbackRate={playbackRate}
                   showControls={true}
                   className="w-full h-auto"
+                  style={style}
+                  avatarSettings={avatarSettings}
                 />
               </div>
 

@@ -3,30 +3,38 @@
  * Stored in localStorage, read synchronously to avoid flash on mount.
  */
 
+import type { AvatarSettings } from '../components/visuals/figure/types';
+import { DEFAULT_AVATAR_SETTINGS } from '../components/visuals/figure/constants';
+
 export interface AppSettings {
   leftHandMode: boolean;
   largeText: boolean;
   reducedMotion: boolean; // user override; also checked against prefers-reduced-motion
+  playAnimations: boolean; // Reproduzir animações ativas no app
   soundEnabled: boolean;
   soundVolume: number; // 0.0 to 1.0
   soundTimbre: 'padrao' | 'suave' | 'apito';
   wakeLockEnabled: boolean;
   theme: 'dark' | 'light';
   voiceEnabled: boolean;
+  avatar: AvatarSettings;
 }
 
 const KEY = 'calistheflow_app_settings_v1';
+const AVATAR_KEY = 'calistheflow_avatar_settings_v1';
 
 const DEFAULTS: AppSettings = {
   leftHandMode: false,
   largeText: false,
   reducedMotion: false,
+  playAnimations: true,
   soundEnabled: true,
   soundVolume: 0.8,
   soundTimbre: 'padrao',
   wakeLockEnabled: true,
   theme: 'dark',
   voiceEnabled: false,
+  avatar: { ...DEFAULT_AVATAR_SETTINGS },
 };
 
 export function getAppSettings(): AppSettings {
@@ -57,10 +65,33 @@ export function saveAppSettings(settings: AppSettings): void {
 
 /** Returns true if animations should be suppressed (OS preference OR user override). */
 export function prefersReducedMotion(): boolean {
-  const userPref = getAppSettings().reducedMotion;
-  if (userPref) return true;
+  const settings = getAppSettings();
+  if (settings.reducedMotion || settings.playAnimations === false) return true;
   if (typeof window !== 'undefined' && window.matchMedia) {
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   }
   return false;
+}
+
+/** Obtém as configurações do avatar do usuário */
+export function getAvatarSettings(): AvatarSettings {
+  try {
+    const raw = localStorage.getItem(AVATAR_KEY);
+    if (!raw) return { ...DEFAULT_AVATAR_SETTINGS };
+    return { ...DEFAULT_AVATAR_SETTINGS, ...JSON.parse(raw) };
+  } catch {
+    return { ...DEFAULT_AVATAR_SETTINGS };
+  }
+}
+
+/** Salva as configurações do avatar do usuário */
+export function saveAvatarSettings(avatar: AvatarSettings): void {
+  try {
+    localStorage.setItem(AVATAR_KEY, JSON.stringify(avatar));
+    // Sincroniza com as appSettings globais
+    const current = getAppSettings();
+    saveAppSettings({ ...current, avatar });
+  } catch {
+    // quota exceeded
+  }
 }

@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import { GuidedJourneyCard } from '../retention/GuidedJourneyCard';
 import { StrengthRadarModal } from '../assessment/StrengthRadarModal';
+import { StyleComparisonGalleryModal } from '../visuals/figure/StyleComparisonGalleryModal';
 import { SkillTreeModal } from '../skills/SkillTreeModal';
 import { InstallGuideModal } from '../pwa/InstallGuideModal';
 import type { WorkoutSession } from '../../types';
@@ -79,6 +80,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
 }) => {
   const [settings, setSettings] = useState<AppSettings>(getAppSettings);
   const [showSettings, setShowSettings] = useState(false);
+  const [showStyleComparison, setShowStyleComparison] = useState(false);
   const [recordPulse, setRecordPulse] = useState(false);
 
   // D13, D14, D18: Modais de Avaliação, Skills e Instalação PWA
@@ -255,11 +257,33 @@ export const HomeView: React.FC<HomeViewProps> = ({
               className={`mb-4 p-3 rounded-2xl bg-white/[0.04] border border-white/10 space-y-2.5 ${noMotion ? '' : 'animate-in fade-in duration-150'}`}
               style={{ direction: 'ltr' }}
             >
-              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                Preferências do Aplicativo
-              </p>
+              <div className="flex items-center justify-between">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  Preferências do Aplicativo
+                </p>
+              </div>
+
+              {/* Acesso Rápido: Avatar e Estilos de Figura */}
+              <button
+                type="button"
+                onClick={() => setShowStyleComparison(true)}
+                className="w-full flex items-center justify-between p-3 rounded-xl border border-cyan-500/30 bg-gradient-to-r from-cyan-500/15 to-blue-500/10 hover:from-cyan-500/20 hover:to-blue-500/15 text-cyan-300 transition active:scale-98 shadow-sm"
+              >
+                <div className="flex items-center gap-2.5 text-left">
+                  <Sparkles className="w-4 h-4 text-cyan-400 shrink-0" />
+                  <div>
+                    <span className="text-xs font-bold block text-slate-100">Avatar & Estilos de Figura</span>
+                    <span className="text-[10px] text-cyan-300/80">
+                      5 estilos (Manequim, Anatômico, Silhueta, Contorno, Raio-X), biotipo e cores
+                    </span>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-cyan-400 shrink-0" />
+              </button>
+
               {(
                 [
+                  { key: 'playAnimations', label: 'Reproduzir Animações', desc: 'Loop de movimento biomecânico nos exercícios' },
                   { key: 'leftHandMode', label: 'Modo Mão Esquerda', desc: 'Inverte controles para a esquerda' },
                   { key: 'largeText', label: 'Texto Grande', desc: 'Aumenta legibilidade em treino' },
                   { key: 'reducedMotion', label: 'Reduzir Animações', desc: 'Desativa microinterações' },
@@ -901,6 +925,12 @@ export const HomeView: React.FC<HomeViewProps> = ({
         />
       )}
       {showInstallGuide && <InstallGuideModal onClose={() => setShowInstallGuide(false)} />}
+      {showStyleComparison && (
+        <StyleComparisonGalleryModal
+          isOpen={showStyleComparison}
+          onClose={() => setShowStyleComparison(false)}
+        />
+      )}
     </div>
   );
 };

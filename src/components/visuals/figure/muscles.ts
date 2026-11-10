@@ -4,7 +4,7 @@
  */
 
 import type { SkeletonJoints, Point2D } from './types';
-import { FIGURE_PALETTE } from './constants';
+import { FIGURE_PALETTE, COLORBLIND_PALETTE } from './constants';
 
 export interface MuscleVisualConfig {
   id: string;
@@ -160,7 +160,8 @@ export const calculateActiveMuscles = (
   joints: SkeletonJoints,
   primaryMuscles: string[],
   secondaryMuscles: string[],
-  effort: number // 0 a 1
+  effort: number, // 0 a 1
+  colorBlindMode: boolean = false
 ): RenderedMuscleEllipse[] => {
   const result: RenderedMuscleEllipse[] = [];
 
@@ -214,7 +215,9 @@ export const calculateActiveMuscles = (
       : FIGURE_PALETTE.musclePeakOpacity * FIGURE_PALETTE.secondaryOpacityFactor;
 
     const opacity = minOp + (maxOp - minOp) * effort;
-    const color = isPrimary ? FIGURE_PALETTE.primaryMuscle : FIGURE_PALETTE.secondaryMuscle;
+    const standardColor = isPrimary ? FIGURE_PALETTE.primaryMuscle : FIGURE_PALETTE.secondaryMuscle;
+    const colorBlindColor = isPrimary ? COLORBLIND_PALETTE.primaryMuscle : COLORBLIND_PALETTE.secondaryMuscle;
+    const color = colorBlindMode ? colorBlindColor : standardColor;
 
     result.push({
       muscleId,

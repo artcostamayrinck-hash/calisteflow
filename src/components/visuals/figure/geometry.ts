@@ -118,3 +118,53 @@ export const createSneakerPath = (ankle: Point2D, toe: Point2D): string => {
   return `M ${p1.x.toFixed(2)} ${p1.y.toFixed(2)} L ${p2.x.toFixed(2)} ${p2.y.toFixed(2)} Q ${toe.x + ux * 4} ${toe.y + uy * 4} ${p3.x.toFixed(2)} ${p3.y.toFixed(2)} L ${p4.x.toFixed(2)} ${p4.y.toFixed(2)} Z`;
 };
 
+/**
+ * Cria a regata atlética (tank top) com cavas confortáveis para visão dos deltoides
+ */
+export const createTankTopPath = (
+  shoulder: Point2D,
+  hip: Point2D,
+  _torsoAngleRad: number,
+  shoulderWidth: number = 31,
+  hipWidth: number = 26
+): string => {
+  const dx = hip.x - shoulder.x;
+  const dy = hip.y - shoulder.y;
+  const len = Math.max(0.001, Math.sqrt(dx * dx + dy * dy));
+  const nx = -dy / len;
+  const ny = dx / len;
+
+  const rS = (shoulderWidth * 0.95) / 2;
+  const rH = (hipWidth * 1.02) / 2;
+
+  const p1 = { x: shoulder.x + nx * rS, y: shoulder.y + ny * rS };
+  const p2 = { x: hip.x + nx * rH, y: hip.y + ny * rH };
+  const p3 = { x: hip.x - nx * rH, y: hip.y - ny * rH };
+  const p4 = { x: shoulder.x - nx * rS, y: shoulder.y - ny * rS };
+
+  return `M ${p1.x.toFixed(2)} ${p1.y.toFixed(2)} L ${p2.x.toFixed(2)} ${p2.y.toFixed(2)} L ${p3.x.toFixed(2)} ${p3.y.toFixed(2)} L ${p4.x.toFixed(2)} ${p4.y.toFixed(2)} Z`;
+};
+
+/**
+ * Cria a camiseta esportiva com mangas curtas no terço superior do braço
+ */
+export const createTShirtPath = (
+  shoulder: Point2D,
+  hip: Point2D,
+  elbow: Point2D,
+  _torsoAngleRad: number,
+  shoulderWidth: number = 31,
+  hipWidth: number = 26
+): { torso: string; sleeve: string } => {
+  const torso = createTankTopPath(shoulder, hip, _torsoAngleRad, shoulderWidth * 1.05, hipWidth * 1.05);
+
+  // Manga curta cobrindo o primeiro terço do braço
+  const sleeveEnd = {
+    x: shoulder.x + (elbow.x - shoulder.x) * 0.42,
+    y: shoulder.y + (elbow.y - shoulder.y) * 0.42,
+  };
+  const sleeve = createTaperedLimbPath(shoulder, sleeveEnd, 17, 14);
+
+  return { torso, sleeve };
+};
+

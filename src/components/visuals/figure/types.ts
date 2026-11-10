@@ -95,3 +95,30 @@ export interface ExerciseAnimationDef {
   generatePose: (timeNormalized: number) => PoseState;
 }
 
+// ==========================================
+// ESTILOS DE FIGURA E PERSONALIZAÇÃO DE AVATAR
+// ==========================================
+
+export type FigureStyle =
+  | 'mannequin'   // 1. Manequim neutro (cinza-azulado, articulações marcadas, sem rosto)
+  | 'anatomical'  // 2. Anatômico simplificado (pele, bermuda/roupa, músculos destacados)
+  | 'silhouette'  // 3. Silhueta sólida (uma cor de alto contraste para miniaturas e treino)
+  | 'outline'     // 4. Contorno (traço ciano neon de 2px sobre fundo escuro)
+  | 'xray';       // 5. Raio-X (ossos translúcidos e articulações para alinhamento)
+
+export type AvatarGender = 'masculino' | 'feminino' | 'neutro';
+export type AvatarBiotype = 'magro' | 'medio' | 'atletico' | 'maior';
+export type AvatarSkinTone = 'claro' | 'moreno' | 'bronze' | 'escuro' | 'retinto';
+export type AvatarHairStyle = 'curto' | 'longo' | 'preso' | 'careca';
+export type AvatarClothing = 'bermuda' | 'regata' | 'camiseta';
+
+export interface AvatarSettings {
+  preferredStyle: FigureStyle;
+  gender: AvatarGender;
+  biotype: AvatarBiotype;
+  skinTone: AvatarSkinTone;
+  hairStyle: AvatarHairStyle;
+  clothing: AvatarClothing;
+  colorBlindMode: boolean; // Ativa laranja/azul e padrão de listras táteis
+}
+

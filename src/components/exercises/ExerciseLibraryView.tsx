@@ -5,6 +5,7 @@ import { MuscleMap } from '../visuals/MuscleMap';
 import { ExerciseVideoPlayer } from '../workout/ExerciseVideoPlayer';
 import { ExerciseMedia } from '../visuals/figure/ExerciseMedia';
 import { ExerciseGalleryModal } from '../visuals/figure/ExerciseGalleryModal';
+import { StyleComparisonGalleryModal } from '../visuals/figure/StyleComparisonGalleryModal';
 import { soundManager } from '../../utils/audio';
 import { useBodyScrollLock } from '../../utils/useBodyScrollLock';
 import { isFuzzyMatch } from '../../utils/fuzzySearch';
@@ -244,6 +245,7 @@ export const ExerciseLibraryView = ({
   const [showSkillTree, setShowSkillTree] = useState<boolean>(false);
   // Galeria de Revisão Biomecânica de Animações
   const [showAnimationGallery, setShowAnimationGallery] = useState<boolean>(false);
+  const [showStyleGallery, setShowStyleGallery] = useState<boolean>(false);
 
   const listTopRef = useRef<HTMLDivElement>(null);
   const prevFilterKeyRef = useRef<string>('');
@@ -845,6 +847,19 @@ export const ExerciseLibraryView = ({
           >
             <Layers className="w-3.5 h-3.5 text-emerald-400" />
             <span>Galeria Biomecânica</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              soundManager.triggerHaptic([30]);
+              setShowStyleGallery(true);
+            }}
+            className="px-3 py-1.5 rounded-xl text-xs font-bold bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-cyan-300 border border-cyan-500/30 hover:brightness-110 flex items-center gap-1.5 shrink-0 active:scale-95 transition"
+            title="Comparar os 5 Estilos de Figura e Personalizar Avatar"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+            <span>Estilos & Avatar</span>
           </button>
         </div>
 
@@ -1686,6 +1701,14 @@ export const ExerciseLibraryView = ({
         <ExerciseGalleryModal
           isOpen={showAnimationGallery}
           onClose={() => setShowAnimationGallery(false)}
+        />
+      )}
+
+      {/* Modal Galeria de Estilos & Personalização de Avatar */}
+      {showStyleGallery && (
+        <StyleComparisonGalleryModal
+          isOpen={showStyleGallery}
+          onClose={() => setShowStyleGallery(false)}
         />
       )}
     </div>

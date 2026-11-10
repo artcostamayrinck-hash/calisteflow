@@ -4,18 +4,19 @@
  */
 
 import React, { useRef, useEffect, useState, useMemo, useCallback } from 'react';
-import type { ExerciseAnimationDef, PoseState } from './types';
+import type { ExerciseAnimationDef, PoseState, FigureStyle, AvatarSettings } from './types';
 import {
   CANVAS_WIDTH,
   CANVAS_HEIGHT,
   GROUND_Y,
-  LIMB_WIDTHS,
   STAGE_THEME,
   FIGURE_PALETTE,
+  getLimbWidths,
 } from './constants';
-import { createTaperedLimbPath, createShortsPath, createSneakerPath } from './geometry';
 import { calculateActiveMuscles } from './muscles';
 import { renderPropElement } from './props';
+import { renderFigureStyle } from './renderers';
+import { getAvatarSettings } from '../../../utils/appSettings';
 
 export interface ExerciseFigureProps {
   animationDef: ExerciseAnimationDef;
@@ -25,6 +26,8 @@ export interface ExerciseFigureProps {
   className?: string;
   onTogglePlay?: () => void;
   showControls?: boolean;
+  style?: FigureStyle;
+  avatarSettings?: Partial<AvatarSettings>;
 }
 
 export const ExerciseFigure: React.FC<ExerciseFigureProps> = ({
@@ -35,6 +38,8 @@ export const ExerciseFigure: React.FC<ExerciseFigureProps> = ({
   className = '',
   onTogglePlay,
   showControls = true,
+  style,
+  avatarSettings,
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [isVisible, setIsVisible] = useState<boolean>(true);
@@ -127,15 +132,32 @@ export const ExerciseFigure: React.FC<ExerciseFigureProps> = ({
     return animationDef.generatePose(activeNormTime);
   }, [animationDef, activeNormTime]);
 
-  // Calcula os músculos destacados para a pose
+  // Configurações do Avatar e Estilo
+  const activeAvatar: AvatarSettings = useMemo(() => {
+    const globalAvatar = getAvatarSettings();
+    return {
+      ...globalAvatar,
+      ...(avatarSettings || {}),
+      preferredStyle: style || avatarSettings?.preferredStyle || globalAvatar.preferredStyle || 'anatomical',
+    };
+  }, [style, avatarSettings]);
+
+  const currentStyle: FigureStyle = activeAvatar.preferredStyle;
+  const widths = useMemo(
+    () => getLimbWidths(activeAvatar.gender, activeAvatar.biotype),
+    [activeAvatar.gender, activeAvatar.biotype]
+  );
+
+  // Calcula os músculos destacados para a pose (considerando Modo Daltônico)
   const activeMuscles = useMemo(() => {
     return calculateActiveMuscles(
       pose.joints,
       animationDef.primaryMuscles,
       animationDef.secondaryMuscles,
-      pose.effort
+      pose.effort,
+      activeAvatar.colorBlindMode
     );
-  }, [pose, animationDef.primaryMuscles, animationDef.secondaryMuscles]);
+  }, [pose, animationDef.primaryMuscles, animationDef.secondaryMuscles, activeAvatar.colorBlindMode]);
 
   const togglePause = useCallback(() => {
     if (onTogglePlay) {
@@ -146,46 +168,6 @@ export const ExerciseFigure: React.FC<ExerciseFigureProps> = ({
   }, [onTogglePlay]);
 
   const { joints } = pose;
-
-  // Lado oposto (profundidade de trás com pele mais escura)
-  const backOffset = {
-    x: FIGURE_PALETTE.backLimbOffsetX,
-    y: FIGURE_PALETTE.backLimbOffsetY,
-  };
-
-  const backShoulder = joints.backShoulder ?? {
-    x: joints.shoulder.x + backOffset.x,
-    y: joints.shoulder.y + backOffset.y,
-  };
-  const backElbow = joints.backElbow ?? {
-    x: joints.elbow.x + backOffset.x,
-    y: joints.elbow.y + backOffset.y,
-  };
-  const backWrist = joints.backWrist ?? {
-    x: joints.wrist.x + backOffset.x,
-    y: joints.wrist.y + backOffset.y,
-  };
-  const backHand = joints.backHand ?? {
-    x: joints.hand.x + backOffset.x,
-    y: joints.hand.y + backOffset.y,
-  };
-
-  const backHip = joints.backHip ?? {
-    x: joints.hip.x + backOffset.x,
-    y: joints.hip.y + backOffset.y,
-  };
-  const backKnee = joints.backKnee ?? {
-    x: joints.knee.x + backOffset.x,
-    y: joints.knee.y + backOffset.y,
-  };
-  const backAnkle = joints.backAnkle ?? {
-    x: joints.ankle.x + backOffset.x,
-    y: joints.ankle.y + backOffset.y,
-  };
-  const backToe = joints.backToe ?? {
-    x: joints.toe.x + backOffset.x,
-    y: joints.toe.y + backOffset.y,
-  };
 
   // Ângulo do tronco
   const torsoAngle = Math.atan2(
@@ -270,125 +252,16 @@ export const ExerciseFigure: React.FC<ExerciseFigureProps> = ({
         {/* 2. Props de Trás (poste de barra, parede, estrutura traseira de paralelas) */}
         {renderPropElement(pose.prop, true)}
 
-        {/* 3. Lado Oposto (Perna e Braço Traseiros) */}
-        <g id="opposite-side-limbs" opacity="0.9">
-          {/* Coxa e Canela Traseiras */}
-          <path
-            d={createTaperedLimbPath(backHip, backKnee, LIMB_WIDTHS.thigh.start, LIMB_WIDTHS.thigh.end)}
-            fill="url(#cfSkinBack)"
-          />
-          <path
-            d={createTaperedLimbPath(backKnee, backAnkle, LIMB_WIDTHS.shin.start, LIMB_WIDTHS.shin.end)}
-            fill="url(#cfSkinBack)"
-          />
-          {/* Tênis Traseiro */}
-          <path d={createSneakerPath(backAnkle, backToe)} fill="#CBD5E1" opacity="0.8" />
-
-          {/* Braço e Antebraço Traseiros */}
-          <path
-            d={createTaperedLimbPath(backShoulder, backElbow, LIMB_WIDTHS.upperArm.start, LIMB_WIDTHS.upperArm.end)}
-            fill="url(#cfSkinBack)"
-          />
-          <path
-            d={createTaperedLimbPath(backElbow, backWrist, LIMB_WIDTHS.forearm.start, LIMB_WIDTHS.forearm.end)}
-            fill="url(#cfSkinBack)"
-          />
-          <circle cx={backHand.x} cy={backHand.y} r={LIMB_WIDTHS.handRadius} fill="url(#cfSkinBack)" />
-        </g>
-
-        {/* 4. Tronco com Bermuda */}
-        <g id="torso-and-clothing">
-          {/* Tronco Nu (para visibilidade anatômica dos músculos) */}
-          <path
-            d={createTaperedLimbPath(joints.shoulder, joints.hip, LIMB_WIDTHS.torso.start, LIMB_WIDTHS.torso.end)}
-            fill="url(#cfSkinNear)"
-          />
-
-          {/* Bermuda Cobrindo Quadril e Topo da Coxa */}
-          <path d={createShortsPath(joints.hip, joints.knee, torsoAngle)} fill={FIGURE_PALETTE.shorts} />
-          {/* Cós elástico sutil */}
-          <circle cx={joints.hip.x} cy={joints.hip.y} r={LIMB_WIDTHS.torso.end / 2 + 1} fill={FIGURE_PALETTE.shorts} />
-        </g>
-
-        {/* 5. Pescoço e Cabeça com Rosto e Cabelo */}
-        <g id="head-and-neck">
-          {/* Pescoço */}
-          <path
-            d={createTaperedLimbPath(joints.shoulder, joints.neck, LIMB_WIDTHS.neck.start, LIMB_WIDTHS.neck.end)}
-            fill="url(#cfSkinNear)"
-          />
-
-          {/* Cabelo (círculo r=13) */}
-          <circle cx={joints.head.x} cy={joints.head.y} r={LIMB_WIDTHS.hairRadius} fill={FIGURE_PALETTE.hair} />
-
-          {/* Rosto deslocado na direção do olhar (r=11) */}
-          <circle
-            cx={joints.head.x + gazeOffset.x}
-            cy={joints.head.y + gazeOffset.y}
-            r={LIMB_WIDTHS.headRadius}
-            fill="url(#cfSkinNear)"
-          />
-
-          {/* Olho discreto acompanhando a direção do olhar */}
-          <circle
-            cx={joints.head.x + gazeOffset.x * 2.2 + 3}
-            cy={joints.head.y + gazeOffset.y * 1.5 - 1}
-            r={1.3}
-            fill={FIGURE_PALETTE.faceEye}
-          />
-        </g>
-
-        {/* 6. Lado Próximo (Perna e Braço em Primeiro Plano) */}
-        <g id="near-side-limbs">
-          {/* Coxa e Canela Próximas */}
-          <path
-            d={createTaperedLimbPath(joints.hip, joints.knee, LIMB_WIDTHS.thigh.start, LIMB_WIDTHS.thigh.end)}
-            fill="url(#cfSkinNear)"
-          />
-          <path
-            d={createTaperedLimbPath(joints.knee, joints.ankle, LIMB_WIDTHS.shin.start, LIMB_WIDTHS.shin.end)}
-            fill="url(#cfSkinNear)"
-          />
-          {/* Tênis Claro */}
-          <path d={createSneakerPath(joints.ankle, joints.toe)} fill={FIGURE_PALETTE.sneaker} />
-          {/* Sola do Tênis */}
-          <line
-            x1={joints.ankle.x - 2}
-            y1={joints.ankle.y + 4}
-            x2={joints.toe.x + 2}
-            y2={joints.toe.y + 4}
-            stroke={FIGURE_PALETTE.sneakerSole}
-            strokeWidth="2.5"
-            strokeLinecap="round"
-          />
-
-          {/* Braço e Antebraço Próximos */}
-          <path
-            d={createTaperedLimbPath(joints.shoulder, joints.elbow, LIMB_WIDTHS.upperArm.start, LIMB_WIDTHS.upperArm.end)}
-            fill="url(#cfSkinNear)"
-          />
-          <path
-            d={createTaperedLimbPath(joints.elbow, joints.wrist, LIMB_WIDTHS.forearm.start, LIMB_WIDTHS.forearm.end)}
-            fill="url(#cfSkinNear)"
-          />
-          <circle cx={joints.hand.x} cy={joints.hand.y} r={LIMB_WIDTHS.handRadius} fill="url(#cfSkinNear)" />
-        </g>
-
-        {/* 7. Músculos Destacados (Elipses com Opacidade Dinâmica) */}
-        <g id="highlighted-muscles" filter="url(#cfMuscleGlow)">
-          {activeMuscles.map(m => (
-            <ellipse
-              key={m.muscleId}
-              cx={m.cx}
-              cy={m.cy}
-              rx={m.rx}
-              ry={m.ry}
-              transform={`rotate(${m.angleDeg} ${m.cx} ${m.cy})`}
-              fill={m.color}
-              opacity={m.opacity}
-            />
-          ))}
-        </g>
+        {/* 3 a 7. Renderização da Figura no Estilo Ativo */}
+        {renderFigureStyle({
+          style: currentStyle,
+          joints,
+          widths,
+          avatar: activeAvatar,
+          activeMuscles,
+          torsoAngle,
+          gazeOffset,
+        })}
 
         {/* 8. Props da Frente (barra frontal, pegadas, apoios) */}
         {renderPropElement(pose.prop, false)}
