@@ -20,8 +20,6 @@ export const RoutineEditorModal = ({
 }: RoutineEditorModalProps) => {
   useBodyScrollLock(isOpen, onClose);
 
-  if (!isOpen) return null;
-
   const [title, setTitle] = useState(routineToEdit?.title || '');
   const [description, setDescription] = useState(routineToEdit?.description || '');
   const [category, setCategory] = useState<ExerciseCategory>(routineToEdit?.category || 'Push');
@@ -34,6 +32,8 @@ export const RoutineEditorModal = ({
   );
   const [showAddDrawer, setShowAddDrawer] = useState(false);
   const [pickerPhaseFilter, setPickerPhaseFilter] = useState<'todos' | 'aquecimento' | 'treino' | 'alongamento'>('todos');
+
+  if (!isOpen) return null;
 
   const handleAddExercise = (exerciseId: string) => {
     const exData = EXERCISES_DATABASE.find(e => e.id === exerciseId);

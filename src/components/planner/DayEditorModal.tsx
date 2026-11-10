@@ -10,6 +10,7 @@ import type {
 import { EXERCISES_DATABASE } from '../../data/exercisesData';
 import { FOCUS_LABELS, generateDayWorkout } from '../../utils/workoutGenerator';
 import { MuscleMap } from '../visuals/MuscleMap';
+import { ExerciseMedia } from '../visuals/figure/ExerciseMedia';
 import { soundManager } from '../../utils/audio';
 import { useBodyScrollLock } from '../../utils/useBodyScrollLock';
 import {
@@ -406,12 +407,10 @@ export const DayEditorModal = ({ day, onSaveDay, onClose }: DayEditorModalProps)
                               </div>
 
                               {/* Thumbnail / Avatar */}
-                              {exData?.videoThumbnail && (
-                                <img
-                                  src={exData.videoThumbnail}
-                                  alt={exData.name}
-                                  className="w-10 h-10 rounded-xl object-cover bg-black/40 border border-white/10 shrink-0"
-                                />
+                              {exData && (
+                                <div className="w-10 h-10 rounded-xl overflow-hidden border border-white/10 shrink-0 shadow-sm bg-slate-900/60">
+                                  <ExerciseMedia exercise={exData} mode="card" className="w-full h-full" />
+                                </div>
                               )}
 
                               <div className="min-w-0 flex-1">
@@ -521,13 +520,9 @@ export const DayEditorModal = ({ day, onSaveDay, onClose }: DayEditorModalProps)
                   className="w-full p-2.5 rounded-2xl glass-card border border-white/5 hover:border-white/20 transition flex items-center justify-between gap-3 text-left"
                 >
                   <div className="flex items-center gap-2.5">
-                    {ex.videoThumbnail && (
-                      <img
-                        src={ex.videoThumbnail}
-                        alt={ex.name}
-                        className="w-9 h-9 rounded-xl object-cover bg-black/40 border border-white/10"
-                      />
-                    )}
+                    <div className="w-9 h-9 rounded-xl overflow-hidden border border-white/10 shrink-0 shadow-sm bg-slate-900/60">
+                      <ExerciseMedia exercise={ex} mode="card" className="w-full h-full" />
+                    </div>
                     <div>
                       <span className="font-extrabold text-xs text-slate-100 block">
                         {ex.name}

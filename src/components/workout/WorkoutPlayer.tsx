@@ -6,6 +6,7 @@ import { getAppSettings } from '../../utils/appSettings';
 import { saveActiveWorkoutBackup, clearActiveWorkoutBackup, checkAndRecordPR } from '../../utils/storage';
 import { speechVoice } from '../../utils/speechVoice';
 import { ExercisePostureVisual } from '../visuals/ExercisePostureVisual';
+import { ExerciseMedia } from '../visuals/figure/ExerciseMedia';
 import { MuscleMap } from '../visuals/MuscleMap';
 import { CadenceMetronome } from './CadenceMetronome';
 import { ExerciseVideoPlayer } from './ExerciseVideoPlayer';
@@ -1502,8 +1503,8 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
                       className="w-11 h-11 rounded-xl object-cover bg-black/40 border border-white/10 shrink-0 shadow-md"
                     />
                   ) : (
-                    <div className="w-11 h-11 rounded-xl bg-white/[0.06] border border-white/10 flex items-center justify-center shrink-0">
-                      <Play className="w-4 h-4 text-emerald-400" />
+                    <div className="w-11 h-11 rounded-xl overflow-hidden border border-white/10 shrink-0 shadow-md bg-slate-900/60">
+                      <ExerciseMedia exercise={nextExerciseData} mode="card" className="w-full h-full" />
                     </div>
                   )}
                   <div className="min-w-0">

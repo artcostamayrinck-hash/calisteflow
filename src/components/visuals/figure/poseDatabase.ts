@@ -1164,13 +1164,913 @@ export const createSkillAnimation = (
 };
 
 // ==========================================
-// 11. MAPA GERAL DOS 208 EXERCÍCIOS
+// 11. FAMÍLIA: PENDURADO E ROLAMENTOS (CORE AVANÇADO)
+// ==========================================
+
+export interface HangingCoreOptions {
+  isKnees?: boolean;
+  isToesToBar?: boolean;
+}
+
+export const createHangingCoreAnimation = (
+  id: string,
+  name: string,
+  options: HangingCoreOptions = {}
+): ExerciseAnimationDef => {
+  const isKnees = options.isKnees ?? false;
+  const isToes = options.isToesToBar ?? false;
+
+  return {
+    exerciseId: id,
+    name,
+    familyId: 10,
+    familyName: 'Pendurado e rolamentos',
+    view: 'side',
+    timingType: 'smooth-loop',
+    durationSeconds: 3.2,
+    primaryMuscles: ['abdomen', 'flexores_quadril'],
+    secondaryMuscles: ['antibraco', 'dorsais'],
+    generatePose: (tNorm: number): PoseState => {
+      const phase = sineLoopPhase(tNorm); // 0 = suspenso reto, 1 = pico de flexão
+      const effort = phase;
+
+      const barX = 200;
+      const barY = 46;
+      const wrist = { x: barX, y: barY + 4 };
+      const hand = { x: barX, y: barY };
+
+      // Ombros pendurados abaixo da barra
+      const shoulderX = barX;
+      const shoulderY = barY + 68;
+      const shoulder = { x: shoulderX, y: shoulderY };
+
+      const elbow = solveTwoBoneIK(shoulder, wrist, BONE_LENGTHS.upperArm, BONE_LENGTHS.forearm, -1);
+
+      // Quadril: em repouso abaixo do ombro; na contração move ligeiramente para trás e para cima
+      const restHipY = shoulderY + BONE_LENGTHS.torso;
+      const hipX = barX - 12 * phase;
+      const hipY = restHipY - 18 * phase;
+      const hip = { x: hipX, y: hipY };
+
+      // Tronco e cabeça
+      const torsoAngle = Math.atan2(hipY - shoulderY, hipX - shoulderX);
+      const neck = {
+        x: shoulderX + Math.cos(torsoAngle - Math.PI) * 12,
+        y: shoulderY + Math.sin(torsoAngle - Math.PI) * 12,
+      };
+      const head = {
+        x: shoulderX + Math.cos(torsoAngle - Math.PI) * BONE_LENGTHS.headCenterDistance,
+        y: shoulderY + Math.sin(torsoAngle - Math.PI) * BONE_LENGTHS.headCenterDistance,
+      };
+
+      let knee: Point2D;
+      let ankle: Point2D;
+      let toe: Point2D;
+
+      if (isToes) {
+        // Toes to bar: pernas estendidas sobem até tocar a barra
+        const legAngle = lerp(Math.PI / 2, -0.22, phase);
+        knee = {
+          x: hip.x + Math.cos(legAngle) * BONE_LENGTHS.thigh,
+          y: hip.y + Math.sin(legAngle) * BONE_LENGTHS.thigh,
+        };
+        ankle = {
+          x: knee.x + Math.cos(legAngle) * BONE_LENGTHS.shin,
+          y: knee.y + Math.sin(legAngle) * BONE_LENGTHS.shin,
+        };
+        toe = {
+          x: ankle.x + Math.cos(legAngle) * 18,
+          y: ankle.y + Math.sin(legAngle) * 18,
+        };
+      } else if (isKnees) {
+        // Elevação de joelhos: coxa sobe além da horizontal, joelho dobra
+        const thighAngle = lerp(Math.PI / 2, -0.35, phase);
+        knee = {
+          x: hip.x + Math.cos(thighAngle) * BONE_LENGTHS.thigh,
+          y: hip.y + Math.sin(thighAngle) * BONE_LENGTHS.thigh,
+        };
+        ankle = {
+          x: knee.x - 12,
+          y: knee.y + BONE_LENGTHS.shin * 0.75,
+        };
+        toe = {
+          x: ankle.x + 8,
+          y: ankle.y + 12,
+        };
+      } else {
+        // Elevação de pernas (L-hang / 90 graus)
+        const legAngle = lerp(Math.PI / 2, 0.05, phase);
+        knee = {
+          x: hip.x + Math.cos(legAngle) * BONE_LENGTHS.thigh,
+          y: hip.y + Math.sin(legAngle) * BONE_LENGTHS.thigh,
+        };
+        ankle = {
+          x: knee.x + Math.cos(legAngle) * BONE_LENGTHS.shin,
+          y: knee.y + Math.sin(legAngle) * BONE_LENGTHS.shin,
+        };
+        toe = {
+          x: ankle.x + Math.cos(legAngle) * 18,
+          y: ankle.y + Math.sin(legAngle) * 18,
+        };
+      }
+
+      return {
+        joints: {
+          shoulder,
+          elbow,
+          wrist,
+          hand,
+          hip,
+          knee,
+          ankle,
+          toe,
+          neck,
+          head,
+        },
+        view: 'side',
+        gazeAngle: isToes ? -0.4 : 0.1,
+        effort,
+        shadow: {
+          cx: barX,
+          cy: GROUND_Y,
+          rx: 40,
+          ry: 4,
+          opacity: 0.15,
+        },
+        prop: { type: 'pullupBar', x: barX, y: barY },
+      };
+    },
+  };
+};
+
+export interface AbWheelOptions {
+  isStanding?: boolean;
+  isNegative?: boolean;
+}
+
+export const createAbWheelAnimation = (
+  id: string,
+  name: string,
+  options: AbWheelOptions = {}
+): ExerciseAnimationDef => {
+  return {
+    exerciseId: id,
+    name,
+    familyId: 10,
+    familyName: 'Pendurado e rolamentos',
+    view: 'side',
+    timingType: 'smooth-loop',
+    durationSeconds: options.isNegative ? 4.2 : 3.4,
+    primaryMuscles: ['abdomen'],
+    secondaryMuscles: ['dorsais', 'ombros', 'triceps'],
+    generatePose: (tNorm: number): PoseState => {
+      const phase = options.isNegative ? eccentricPhase(tNorm) : sineLoopPhase(tNorm);
+      const effort = phase;
+
+      const kneeX = 100;
+      const kneeY = GROUND_Y - 4;
+      const ankleX = kneeX - 35;
+      const ankleY = GROUND_Y - 10;
+      const toeX = kneeX - 48;
+      const toeY = GROUND_Y - 4;
+
+      // Início: roda recolhida (x=165), Fim: roda estendida (x=275)
+      const wheelX = lerp(165, 275, phase);
+      const wheelY = GROUND_Y - 14;
+      const hand = { x: wheelX, y: wheelY };
+      const wrist = { x: wheelX, y: wheelY - 4 };
+
+      // Quadril se desloca para frente e para baixo
+      const hipX = lerp(125, 175, phase);
+      const hipY = lerp(GROUND_Y - 62, GROUND_Y - 26, phase);
+      const hip = { x: hipX, y: hipY };
+
+      // Ombro acompanha em direção às mãos
+      const shoulderX = lerp(165, 235, phase);
+      const shoulderY = lerp(GROUND_Y - 68, GROUND_Y - 28, phase);
+      const shoulder = { x: shoulderX, y: shoulderY };
+
+      const elbow = solveTwoBoneIK(shoulder, wrist, BONE_LENGTHS.upperArm, BONE_LENGTHS.forearm, 1);
+
+      const torsoAngle = Math.atan2(shoulderY - hipY, shoulderX - hipX);
+      const neck = {
+        x: shoulderX + Math.cos(torsoAngle) * 12,
+        y: shoulderY + Math.sin(torsoAngle) * 12,
+      };
+      const head = {
+        x: shoulderX + Math.cos(torsoAngle) * BONE_LENGTHS.headCenterDistance,
+        y: shoulderY + Math.sin(torsoAngle) * BONE_LENGTHS.headCenterDistance,
+      };
+
+      const knee = { x: kneeX, y: kneeY };
+      const ankle = { x: ankleX, y: ankleY };
+      const toe = { x: toeX, y: toeY };
+
+      return {
+        joints: {
+          shoulder,
+          elbow,
+          wrist,
+          hand,
+          hip,
+          knee,
+          ankle,
+          toe,
+          neck,
+          head,
+        },
+        view: 'side',
+        gazeAngle: 0.2,
+        effort,
+        shadow: {
+          cx: (kneeX + wheelX) / 2,
+          cy: GROUND_Y,
+          rx: 90,
+          ry: 5,
+          opacity: 0.35,
+        },
+        prop: { type: 'abWheel', x: wheelX, y: wheelY },
+      };
+    },
+  };
+};
+
+export interface DragonFlagOptions {
+  isTuck?: boolean;
+  isOneLeg?: boolean;
+  isNegative?: boolean;
+}
+
+export const createDragonFlagAnimation = (
+  id: string,
+  name: string,
+  options: DragonFlagOptions = {}
+): ExerciseAnimationDef => {
+  return {
+    exerciseId: id,
+    name,
+    familyId: 10,
+    familyName: 'Pendurado e rolamentos',
+    view: 'side',
+    timingType: 'smooth-loop',
+    durationSeconds: options.isNegative ? 4.5 : 3.6,
+    primaryMuscles: ['abdomen', 'flexores_quadril'],
+    secondaryMuscles: ['dorsais', 'gluteos', 'lombar'],
+    generatePose: (tNorm: number): PoseState => {
+      const phase = options.isNegative ? eccentricPhase(tNorm) : sineLoopPhase(tNorm);
+      const effort = 1 - phase * 0.4;
+
+      // Ombros apoiados no banco
+      const benchH = 40;
+      const shoulderX = 145;
+      const shoulderY = GROUND_Y - benchH - 12;
+      const shoulder = { x: shoulderX, y: shoulderY };
+
+      // Mãos seguram a borda do banco atrás da cabeça
+      const handX = 85;
+      const handY = shoulderY + 4;
+      const wrist = { x: handX, y: handY };
+      const hand = { x: handX, y: handY };
+      const elbow = solveTwoBoneIK(shoulder, wrist, BONE_LENGTHS.upperArm, BONE_LENGTHS.forearm, -1);
+
+      // Cabeça descansando no banco
+      const head = { x: 115, y: shoulderY };
+      const neck = { x: 132, y: shoulderY };
+
+      const leverAngle = lerp(-0.2, -1.05, phase);
+
+      const hip = {
+        x: shoulderX + Math.cos(leverAngle) * BONE_LENGTHS.torso,
+        y: shoulderY + Math.sin(leverAngle) * BONE_LENGTHS.torso,
+      };
+
+      let knee: Point2D;
+      let ankle: Point2D;
+      let toe: Point2D;
+
+      if (options.isTuck) {
+        knee = {
+          x: hip.x - 14,
+          y: hip.y - 35,
+        };
+        ankle = {
+          x: hip.x + 8,
+          y: hip.y - 12,
+        };
+        toe = {
+          x: ankle.x + 10,
+          y: ankle.y,
+        };
+      } else {
+        knee = {
+          x: hip.x + Math.cos(leverAngle) * BONE_LENGTHS.thigh,
+          y: hip.y + Math.sin(leverAngle) * BONE_LENGTHS.thigh,
+        };
+        ankle = {
+          x: knee.x + Math.cos(leverAngle) * BONE_LENGTHS.shin,
+          y: knee.y + Math.sin(leverAngle) * BONE_LENGTHS.shin,
+        };
+        toe = {
+          x: ankle.x + Math.cos(leverAngle) * 18,
+          y: ankle.y + Math.sin(leverAngle) * 18,
+        };
+      }
+
+      return {
+        joints: {
+          shoulder,
+          elbow,
+          wrist,
+          hand,
+          hip,
+          knee,
+          ankle,
+          toe,
+          neck,
+          head,
+        },
+        view: 'side',
+        gazeAngle: -Math.PI / 2,
+        effort,
+        shadow: {
+          cx: 140,
+          cy: GROUND_Y,
+          rx: 80,
+          ry: 5,
+          opacity: 0.35,
+        },
+        prop: { type: 'box', x: 70, y: GROUND_Y - benchH, width: 140, height: benchH },
+      };
+    },
+  };
+};
+
+// ==========================================
+// 12. FAMÍLIA: AQUECIMENTO E MOBILIDADE ARTICULAR
+// ==========================================
+
+export const createCatCowAnimation = (id: string, name: string): ExerciseAnimationDef => {
+  return {
+    exerciseId: id,
+    name,
+    familyId: 12,
+    familyName: 'Aquecimento e mobilidade articular',
+    view: 'side',
+    timingType: 'smooth-loop',
+    durationSeconds: 3.8,
+    primaryMuscles: ['lombar', 'abdomen'],
+    secondaryMuscles: ['trapezio'],
+    generatePose: (tNorm: number): PoseState => {
+      const phase = sineLoopPhase(tNorm);
+      const effort = 0.45 + phase * 0.2;
+
+      const kneeX = 135;
+      const kneeY = GROUND_Y - 4;
+      const ankleX = kneeX - 35;
+      const ankleY = GROUND_Y - 8;
+      const toeX = kneeX - 46;
+      const toeY = GROUND_Y - 4;
+
+      const wristX = 245;
+      const wristY = GROUND_Y - 4;
+      const hand = { x: wristX, y: GROUND_Y };
+      const wrist = { x: wristX, y: wristY };
+
+      const shoulderX = 240;
+      const shoulderY = GROUND_Y - 68;
+      const shoulder = { x: shoulderX, y: shoulderY };
+      const elbow = solveTwoBoneIK(shoulder, wrist, BONE_LENGTHS.upperArm, BONE_LENGTHS.forearm, 1);
+
+      const hipX = 145;
+      const hipY = lerp(GROUND_Y - 66, GROUND_Y - 54, phase);
+      const hip = { x: hipX, y: hipY };
+
+      const knee = { x: kneeX, y: kneeY };
+      const ankle = { x: ankleX, y: ankleY };
+      const toe = { x: toeX, y: toeY };
+
+      const headAngle = lerp(1.1, -0.4, phase);
+      const neck = {
+        x: shoulderX + Math.cos(headAngle) * 12,
+        y: shoulderY + Math.sin(headAngle) * 12,
+      };
+      const head = {
+        x: shoulderX + Math.cos(headAngle) * BONE_LENGTHS.headCenterDistance,
+        y: shoulderY + Math.sin(headAngle) * BONE_LENGTHS.headCenterDistance,
+      };
+
+      return {
+        joints: {
+          shoulder,
+          elbow,
+          wrist,
+          hand,
+          hip,
+          knee,
+          ankle,
+          toe,
+          neck,
+          head,
+        },
+        view: 'side',
+        gazeAngle: headAngle,
+        effort,
+        shadow: {
+          cx: 190,
+          cy: GROUND_Y,
+          rx: 85,
+          ry: 5,
+          opacity: 0.3,
+        },
+      };
+    },
+  };
+};
+
+export const createShoulderDislocateAnimation = (id: string, name: string): ExerciseAnimationDef => {
+  return {
+    exerciseId: id,
+    name,
+    familyId: 12,
+    familyName: 'Aquecimento e mobilidade articular',
+    view: 'side',
+    timingType: 'smooth-loop',
+    durationSeconds: 3.5,
+    primaryMuscles: ['ombros', 'peito'],
+    secondaryMuscles: ['trapezio', 'dorsais'],
+    generatePose: (tNorm: number): PoseState => {
+      const phase = sineLoopPhase(tNorm);
+      const effort = 0.4 + phase * 0.3;
+
+      const ankle = { x: 195, y: GROUND_Y - 4 };
+      const toe = { x: 210, y: GROUND_Y - 4 };
+      const knee = { x: 195, y: GROUND_Y - 56 };
+      const hip = { x: 195, y: GROUND_Y - 112 };
+      const shoulder = { x: 195, y: GROUND_Y - 178 };
+      const neck = { x: 195, y: shoulder.y - 12 };
+      const head = { x: 195, y: shoulder.y - BONE_LENGTHS.headCenterDistance };
+
+      const armAngle = lerp(0.85, -2.45, phase);
+      const armLength = BONE_LENGTHS.upperArm + BONE_LENGTHS.forearm;
+      const wrist = {
+        x: shoulder.x + Math.cos(armAngle) * armLength,
+        y: shoulder.y + Math.sin(armAngle) * armLength,
+      };
+      const elbow = {
+        x: shoulder.x + Math.cos(armAngle) * BONE_LENGTHS.upperArm,
+        y: shoulder.y + Math.sin(armAngle) * BONE_LENGTHS.upperArm,
+      };
+      const hand = { ...wrist };
+
+      return {
+        joints: {
+          shoulder,
+          elbow,
+          wrist,
+          hand,
+          hip,
+          knee,
+          ankle,
+          toe,
+          neck,
+          head,
+        },
+        view: 'side',
+        gazeAngle: 0,
+        effort,
+        shadow: {
+          cx: 195,
+          cy: GROUND_Y,
+          rx: 35,
+          ry: 4,
+          opacity: 0.32,
+        },
+        prop: {
+          type: 'doorTowel',
+          x: wrist.x + 8,
+          y: wrist.y,
+          secondaryPoint: wrist,
+        },
+      };
+    },
+  };
+};
+
+export const createJumpingJackAnimation = (id: string, name: string): ExerciseAnimationDef => {
+  return {
+    exerciseId: id,
+    name,
+    familyId: 12,
+    familyName: 'Aquecimento e mobilidade articular',
+    view: 'front',
+    timingType: 'smooth-loop',
+    durationSeconds: 1.2,
+    primaryMuscles: ['panturrilha', 'ombros'],
+    secondaryMuscles: ['quadriceps', 'gluteos'],
+    generatePose: (tNorm: number): PoseState => {
+      const phase = sineLoopPhase(tNorm);
+      const effort = 0.5 + phase * 0.35;
+
+      const hop = Math.sin(phase * Math.PI) * 8;
+
+      const hip = { x: 200, y: GROUND_Y - 110 - hop };
+      const shoulder = { x: 200, y: GROUND_Y - 176 - hop };
+      const neck = { x: 200, y: shoulder.y - 12 };
+      const head = { x: 200, y: shoulder.y - BONE_LENGTHS.headCenterDistance };
+
+      const feetSpread = lerp(12, 45, phase);
+      const ankle = { x: 200 + feetSpread, y: GROUND_Y - 4 - hop };
+      const toe = { x: 200 + feetSpread + 10, y: GROUND_Y - 4 - hop };
+      const knee = solveTwoBoneIK(hip, ankle, BONE_LENGTHS.thigh, BONE_LENGTHS.shin, 1);
+
+      const armAngle = lerp(1.1, -1.2, phase);
+      const armLen = BONE_LENGTHS.upperArm + BONE_LENGTHS.forearm;
+      const wrist = {
+        x: shoulder.x + Math.sin(armAngle) * armLen,
+        y: shoulder.y - Math.cos(armAngle) * armLen,
+      };
+      const elbow = solveTwoBoneIK(shoulder, wrist, BONE_LENGTHS.upperArm, BONE_LENGTHS.forearm, 1);
+      const hand = { ...wrist };
+
+      return {
+        joints: {
+          shoulder,
+          elbow,
+          wrist,
+          hand,
+          hip,
+          knee,
+          ankle,
+          toe,
+          neck,
+          head,
+        },
+        view: 'front',
+        gazeAngle: 0,
+        effort,
+        shadow: {
+          cx: 200,
+          cy: GROUND_Y,
+          rx: lerp(35, 55, phase),
+          ry: 4,
+          opacity: lerp(0.35, 0.2, hop / 8),
+        },
+      };
+    },
+  };
+};
+
+// ==========================================
+// 13. FAMÍLIA: ALONGAMENTOS PÓS-TREINO
+// ==========================================
+
+export type StretchType =
+  | 'pec'
+  | 'lat'
+  | 'triceps'
+  | 'hipflexor'
+  | 'quad'
+  | 'hamstring'
+  | 'calf'
+  | 'pigeon'
+  | 'childpose'
+  | 'butterfly';
+
+export const createStretchAnimation = (
+  id: string,
+  name: string,
+  stretchType: StretchType
+): ExerciseAnimationDef => {
+  const muscleMap: Record<StretchType, { primary: string[]; secondary: string[] }> = {
+    pec: { primary: ['peito'], secondary: ['ombros'] },
+    lat: { primary: ['dorsais'], secondary: ['trapezio'] },
+    triceps: { primary: ['triceps'], secondary: ['ombros'] },
+    hipflexor: { primary: ['flexores_quadril', 'quadriceps'], secondary: ['gluteos'] },
+    quad: { primary: ['quadriceps'], secondary: ['flexores_quadril'] },
+    hamstring: { primary: ['isquiotibiais'], secondary: ['lombar'] },
+    calf: { primary: ['panturrilha'], secondary: ['isquiotibiais'] },
+    pigeon: { primary: ['gluteos'], secondary: ['flexores_quadril'] },
+    childpose: { primary: ['dorsais', 'lombar'], secondary: ['ombros'] },
+    butterfly: { primary: ['adutores'], secondary: ['flexores_quadril'] },
+  };
+
+  const { primary, secondary } = muscleMap[stretchType];
+
+  return {
+    exerciseId: id,
+    name,
+    familyId: 13,
+    familyName: 'Alongamentos pós-treino',
+    view: 'side',
+    timingType: 'isometric',
+    durationSeconds: 4.0,
+    primaryMuscles: primary,
+    secondaryMuscles: secondary,
+    generatePose: (tNorm: number): PoseState => {
+      const breath = breathingDisplacement(tNorm, 1.2);
+      const effort = 0.55;
+
+      switch (stretchType) {
+        case 'pec': {
+          const wallX = 135;
+          const bodyX = 205;
+          const ankle = { x: bodyX, y: GROUND_Y - 4 };
+          const toe = { x: bodyX + 14, y: GROUND_Y - 4 };
+          const knee = { x: bodyX, y: GROUND_Y - 56 };
+          const hip = { x: bodyX, y: GROUND_Y - 112 };
+          const shoulder = { x: bodyX, y: GROUND_Y - 178 + breath };
+          const neck = { x: bodyX, y: shoulder.y - 12 };
+          const head = { x: bodyX + 2, y: shoulder.y - BONE_LENGTHS.headCenterDistance };
+
+          const hand = { x: wallX, y: shoulder.y + 4 };
+          const wrist = { x: wallX, y: shoulder.y + 4 };
+          const elbow = solveTwoBoneIK(shoulder, wrist, BONE_LENGTHS.upperArm, BONE_LENGTHS.forearm, -1);
+
+          return {
+            joints: { shoulder, elbow, wrist, hand, hip, knee, ankle, toe, neck, head },
+            view: 'side',
+            gazeAngle: 0.1,
+            effort,
+            shadow: { cx: bodyX, cy: GROUND_Y, rx: 35, ry: 4, opacity: 0.32 },
+            prop: { type: 'wall', x: wallX },
+          };
+        }
+
+        case 'lat': {
+          const barX = 220;
+          const barY = 56;
+          const hand = { x: barX, y: barY };
+          const wrist = { x: barX, y: barY + 4 };
+          const shoulder = { x: 175, y: barY + 54 + breath };
+          const elbow = solveTwoBoneIK(shoulder, wrist, BONE_LENGTHS.upperArm, BONE_LENGTHS.forearm, 1);
+
+          const hip = { x: 140, y: GROUND_Y - 110 };
+          const knee = { x: 160, y: GROUND_Y - 56 };
+          const ankle = { x: 175, y: GROUND_Y - 4 };
+          const toe = { x: 190, y: GROUND_Y - 4 };
+
+          const neck = { x: shoulder.x + 8, y: shoulder.y - 12 };
+          const head = { x: shoulder.x + 12, y: shoulder.y - BONE_LENGTHS.headCenterDistance };
+
+          return {
+            joints: { shoulder, elbow, wrist, hand, hip, knee, ankle, toe, neck, head },
+            view: 'side',
+            gazeAngle: -0.5,
+            effort,
+            shadow: { cx: 165, cy: GROUND_Y, rx: 45, ry: 4, opacity: 0.3 },
+            prop: { type: 'pullupBar', x: barX, y: barY },
+          };
+        }
+
+        case 'triceps': {
+          const bodyX = 200;
+          const ankle = { x: bodyX, y: GROUND_Y - 4 };
+          const toe = { x: bodyX + 14, y: GROUND_Y - 4 };
+          const knee = { x: bodyX, y: GROUND_Y - 56 };
+          const hip = { x: bodyX, y: GROUND_Y - 112 };
+          const shoulder = { x: bodyX, y: GROUND_Y - 178 + breath };
+          const neck = { x: bodyX, y: shoulder.y - 12 };
+          const head = { x: bodyX, y: shoulder.y - BONE_LENGTHS.headCenterDistance };
+
+          const elbow = { x: bodyX + 4, y: shoulder.y - BONE_LENGTHS.upperArm + 4 };
+          const wrist = { x: bodyX - 16, y: shoulder.y - 12 };
+          const hand = { ...wrist };
+
+          return {
+            joints: { shoulder, elbow, wrist, hand, hip, knee, ankle, toe, neck, head },
+            view: 'side',
+            gazeAngle: 0,
+            effort,
+            shadow: { cx: bodyX, cy: GROUND_Y, rx: 35, ry: 4, opacity: 0.32 },
+          };
+        }
+
+        case 'hipflexor': {
+          const frontAnkle = { x: 235, y: GROUND_Y - 4 };
+          const frontToe = { x: 250, y: GROUND_Y - 4 };
+          const rearKnee = { x: 135, y: GROUND_Y - 4 };
+          const rearAnkle = { x: 95, y: GROUND_Y - 8 };
+          const rearToe = { x: 85, y: GROUND_Y - 4 };
+
+          const hip = { x: 180, y: GROUND_Y - 58 + breath };
+          const frontKnee = { x: 230, y: GROUND_Y - 50 };
+          const shoulder = { x: 180, y: hip.y - BONE_LENGTHS.torso };
+          const neck = { x: 180, y: shoulder.y - 12 };
+          const head = { x: 180, y: shoulder.y - BONE_LENGTHS.headCenterDistance };
+
+          const wrist = { x: frontKnee.x, y: frontKnee.y - 4 };
+          const elbow = solveTwoBoneIK(shoulder, wrist, BONE_LENGTHS.upperArm, BONE_LENGTHS.forearm, 1);
+          const hand = { ...wrist };
+
+          return {
+            joints: {
+              shoulder,
+              elbow,
+              wrist,
+              hand,
+              hip,
+              knee: frontKnee,
+              ankle: frontAnkle,
+              toe: frontToe,
+              neck,
+              head,
+              backKnee: rearKnee,
+              backAnkle: rearAnkle,
+              backToe: rearToe,
+            },
+            view: 'side',
+            gazeAngle: 0.05,
+            effort,
+            shadow: { cx: 180, cy: GROUND_Y, rx: 75, ry: 5, opacity: 0.35 },
+          };
+        }
+
+        case 'childpose':
+        default: {
+          const knee = { x: 160, y: GROUND_Y - 4 };
+          const ankle = { x: 115, y: GROUND_Y - 6 };
+          const toe = { x: 100, y: GROUND_Y - 4 };
+
+          const hip = { x: 130, y: GROUND_Y - 24 };
+          const shoulder = { x: 215, y: GROUND_Y - 18 + breath };
+          const wrist = { x: 275, y: GROUND_Y - 4 };
+          const hand = { x: 275, y: GROUND_Y - 2 };
+          const elbow = solveTwoBoneIK(shoulder, wrist, BONE_LENGTHS.upperArm, BONE_LENGTHS.forearm, 1);
+
+          const neck = { x: 228, y: GROUND_Y - 14 };
+          const head = { x: 238, y: GROUND_Y - 10 };
+
+          return {
+            joints: { shoulder, elbow, wrist, hand, hip, knee, ankle, toe, neck, head },
+            view: 'side',
+            gazeAngle: 0.3,
+            effort,
+            shadow: { cx: 195, cy: GROUND_Y, rx: 80, ry: 5, opacity: 0.35 },
+          };
+        }
+      }
+    },
+  };
+};
+
+// ==========================================
+// 14. MAPA GERAL DOS 208 EXERCÍCIOS
 // ==========================================
 
 export const getAnimationDefForExercise = (exerciseId: string, exerciseName: string): ExerciseAnimationDef => {
   const id = exerciseId.toLowerCase();
 
-  // 1. Flexões (Empurrar Horizontal)
+  // 13. Alongamentos Pós-Treino
+  if (id.startsWith('alongamento-') || id === 'postura-crianca') {
+    if (id.includes('peitoral')) return createStretchAnimation(id, exerciseName, 'pec');
+    if (id.includes('dorsal')) return createStretchAnimation(id, exerciseName, 'lat');
+    if (id.includes('triceps')) return createStretchAnimation(id, exerciseName, 'triceps');
+    if (id.includes('flexores-quadril')) return createStretchAnimation(id, exerciseName, 'hipflexor');
+    if (id.includes('quadriceps')) return createStretchAnimation(id, exerciseName, 'quad');
+    if (id.includes('isquiotibiais')) return createStretchAnimation(id, exerciseName, 'hamstring');
+    if (id.includes('panturrilha')) return createStretchAnimation(id, exerciseName, 'calf');
+    if (id.includes('pombo')) return createStretchAnimation(id, exerciseName, 'pigeon');
+    if (id.includes('borboleta')) return createStretchAnimation(id, exerciseName, 'butterfly');
+    return createStretchAnimation(id, exerciseName, 'childpose');
+  }
+
+  // 12. Aquecimento e Mobilidade
+  if (
+    id.includes('gato-vaca') ||
+    id.includes('circulos-') ||
+    id.includes('passagem-ombro') ||
+    id.includes('retracao-protracao') ||
+    id.includes('rotacao-') ||
+    id.includes('greatest-stretch') ||
+    id.includes('mobilidade-') ||
+    id.includes('balanco-pernas') ||
+    id.includes('aquecimento-cardio')
+  ) {
+    if (id.includes('gato-vaca')) return createCatCowAnimation(id, exerciseName);
+    if (id.includes('passagem-ombro') || id.includes('rotacao-externa')) return createShoulderDislocateAnimation(id, exerciseName);
+    if (id.includes('aquecimento-cardio')) return createJumpingJackAnimation(id, exerciseName);
+    if (id.includes('dead-hang')) return createPullupAnimation(id, exerciseName, { isDeadHang: true });
+    if (id.includes('agachamento-profundo')) return createSquatAnimation(id, exerciseName, { isWallSit: true });
+    return createCatCowAnimation(id, exerciseName);
+  }
+
+  // 10. Pendurado e Rolamentos (Core Avançado)
+  if (id.includes('ab-wheel')) {
+    return createAbWheelAnimation(id, exerciseName, {
+      isStanding: id.includes('pe'),
+      isNegative: id.includes('negativa'),
+    });
+  }
+  if (id.includes('dragon-flag')) {
+    return createDragonFlagAnimation(id, exerciseName, {
+      isTuck: id.includes('tuck'),
+      isOneLeg: id.includes('uma-perna'),
+      isNegative: id.includes('negativa'),
+    });
+  }
+  if (
+    id === 'elevacao-joelhos-barra' ||
+    id === 'elevacao-pernas-barra' ||
+    id === 'toes-to-bar' ||
+    id === 'bar-pullover-joelhos'
+  ) {
+    return createHangingCoreAnimation(id, exerciseName, {
+      isKnees: id.includes('joelhos'),
+      isToesToBar: id.includes('toes-to-bar') || id.includes('pullover'),
+    });
+  }
+
+  // 11. Skills (Movimentos Acrobáticos e Estáticos Avançados)
+  if (
+    id.includes('lsit') ||
+    id.includes('v-sit') ||
+    id.includes('vsit') ||
+    id.includes('planche') ||
+    id.includes('front-lever') ||
+    id.includes('back-lever') ||
+    id.includes('bandeira') ||
+    id.includes('flag') ||
+    id.includes('skin-the-cat') ||
+    id.includes('german-hang') ||
+    id.includes('press-handstand') ||
+    id.includes('manna')
+  ) {
+    if (id.includes('front-lever')) return createSkillAnimation(id, exerciseName, 'frontlever');
+    if (id.includes('back-lever') || id.includes('german-hang') || id.includes('skin-the-cat')) {
+      return createSkillAnimation(id, exerciseName, 'backlever');
+    }
+    if (id.includes('planche')) return createSkillAnimation(id, exerciseName, 'planche');
+    if (id.includes('bandeira') || id.includes('flag')) return createSkillAnimation(id, exerciseName, 'flag');
+    return createSkillAnimation(id, exerciseName, 'lsit');
+  }
+
+  // 7. Cadeia Posterior e Glúteos
+  if (
+    id.includes('ponte') ||
+    id.includes('hip-thrust') ||
+    id.includes('nordic') ||
+    id.includes('good-morning') ||
+    id.includes('stiff') ||
+    id.includes('glute-kickback')
+  ) {
+    return createGluteBridgeAnimation(id, exerciseName, {
+      isUnilateral: id.includes('unilateral'),
+      isHipThrust: id.includes('hip-thrust'),
+    });
+  }
+
+  // 8. Pranchas e Isometrias de Core
+  if (
+    id.includes('prancha') ||
+    id === 'plank' ||
+    id.includes('hollow') ||
+    id.includes('superman') ||
+    id.includes('bird-dog') ||
+    id.includes('copenhagen')
+  ) {
+    return createPlankAnimation(id, exerciseName, { isSide: id.includes('lateral') || id.includes('copenhagen') });
+  }
+
+  // 9. Deitado / Flexão de Tronco
+  if (
+    id.includes('dead-bug') ||
+    id.includes('crunch') ||
+    id.includes('abdominal') ||
+    id.includes('twist') ||
+    id.includes('flutter') ||
+    id.includes('heel-touch') ||
+    id.includes('climber') ||
+    id.includes('compression') ||
+    (id.includes('elevacao') && id.includes('chao')) ||
+    (id.includes('elevacao') && id.includes('deitado'))
+  ) {
+    return createDeadBugAnimation(id, exerciseName);
+  }
+
+  // 3. Mergulhos (Dips)
+  if (id.includes('dip') || id.includes('mergulho') || id.includes('extensao-triceps')) {
+    if (id.includes('banco')) return createDipAnimation(id, exerciseName, { type: 'bench' });
+    if (id.includes('argolas')) return createDipAnimation(id, exerciseName, { type: 'rings' });
+    if (id.includes('negativa')) return createDipAnimation(id, exerciseName, { type: 'parallel', isNegative: true });
+    return createDipAnimation(id, exerciseName, { type: 'parallel' });
+  }
+
+  // 2. Empurrar Vertical
+  if (
+    id.includes('pike') ||
+    id.includes('handstand') ||
+    id.includes('hspu') ||
+    id.includes('parada-maos') ||
+    id === 'chute-parada-maos' ||
+    id.includes('wall-angels') ||
+    id.includes('elevacao-y')
+  ) {
+    if (id.includes('pike')) return createHandstandAnimation(id, exerciseName, { isPike: true });
+    if (id.includes('hspu')) return createHandstandAnimation(id, exerciseName, { isHSPU: true });
+    return createHandstandAnimation(id, exerciseName, { isWall: !id.includes('livre') });
+  }
+
+  // 1. Empurrar Horizontal (Flexões)
   if (id.includes('flexao') || id === 'pushup' || id === 'diamondpushup') {
     if (id.includes('parede')) return createPushupAnimation(id, exerciseName, { handHeight: 160, propType: 'wall' });
     if (id.includes('inclinada')) return createPushupAnimation(id, exerciseName, { handHeight: 70, propType: 'box' });
@@ -1182,23 +2082,27 @@ export const getAnimationDefForExercise = (exerciseId: string, exerciseName: str
     return createPushupAnimation(id, exerciseName);
   }
 
-  // 2. Empurrar Vertical
-  if (id.includes('pike') || id.includes('handstand') || id.includes('hspu') || id === 'chute-parada-maos') {
-    if (id.includes('pike')) return createHandstandAnimation(id, exerciseName, { isPike: true });
-    if (id.includes('hspu')) return createHandstandAnimation(id, exerciseName, { isHSPU: true });
-    return createHandstandAnimation(id, exerciseName, { isWall: !id.includes('livre') });
+  // 5. Puxar Horizontal (Remadas)
+  if (
+    id.includes('australian') ||
+    id.includes('remada') ||
+    id.includes('rosca')
+  ) {
+    return createRowAnimation(id, exerciseName, {
+      isKneesBent: id.includes('joelhos'),
+      isFeetElevated: id.includes('elevad'),
+      isTowelDoor: id.includes('toalha') || id.includes('porta') || id.includes('mochila'),
+    });
   }
 
-  // 3. Mergulhos
-  if (id.includes('dip') || id.includes('mergulho') || id.includes('extensao-triceps')) {
-    if (id.includes('banco')) return createDipAnimation(id, exerciseName, { type: 'bench' });
-    if (id.includes('argolas')) return createDipAnimation(id, exerciseName, { type: 'rings' });
-    if (id.includes('negativa')) return createDipAnimation(id, exerciseName, { type: 'parallel', isNegative: true });
-    return createDipAnimation(id, exerciseName, { type: 'parallel' });
-  }
-
-  // 4. Puxar Vertical
-  if (id.includes('pullup') || id.includes('chinup') || id.includes('barra') || id.includes('dead-hang') || id.includes('suspensao')) {
+  // 4. Puxar Vertical (Barra Fixa)
+  if (
+    id.includes('pullup') ||
+    id.includes('chinup') ||
+    id.includes('barra') ||
+    id.includes('dead-hang') ||
+    id.includes('suspensao')
+  ) {
     if (id.includes('dead-hang')) return createPullupAnimation(id, exerciseName, { isDeadHang: true });
     if (id.includes('escapular')) return createPullupAnimation(id, exerciseName, { isScapularOnly: true });
     if (id.includes('lsit')) return createPullupAnimation(id, exerciseName, { isLsitPullup: true });
@@ -1207,52 +2111,26 @@ export const getAnimationDefForExercise = (exerciseId: string, exerciseName: str
     return createPullupAnimation(id, exerciseName, { isChinup: id.includes('chinup') });
   }
 
-  // 5. Puxar Horizontal
-  if (id.includes('australian') || id.includes('remada') || id.includes('rosca')) {
-    return createRowAnimation(id, exerciseName, {
-      isKneesBent: id.includes('joelhos'),
-      isFeetElevated: id.includes('elevados'),
-      isTowelDoor: id.includes('toalha') || id.includes('porta'),
-    });
-  }
-
-  // 6. Pernas / Agachamentos
-  if (id.includes('squat') || id.includes('agachamento') || id.includes('lunge') || id.includes('afundo') || id.includes('panturrilha') || id.includes('pogo') || id.includes('step-up')) {
-    if (id.includes('pistol')) return createSquatAnimation(id, exerciseName, { isPistol: true });
-    if (id.includes('parede') || id.includes('wall-sit')) return createSquatAnimation(id, exerciseName, { isWallSit: true, propType: 'wall' });
+  // 6. Agachamentos e Pernas
+  if (
+    id.includes('squat') ||
+    id.includes('agachamento') ||
+    id.includes('lunge') ||
+    id.includes('afundo') ||
+    id.includes('panturrilha') ||
+    id.includes('pogo') ||
+    id.includes('jump')
+  ) {
+    if (id.includes('pistol') || id.includes('shrimp')) return createSquatAnimation(id, exerciseName, { isPistol: true });
+    if (id.includes('parede') || id.includes('wall-sit') || id.includes('isometrico-90')) {
+      return createSquatAnimation(id, exerciseName, { isWallSit: true, propType: 'wall' });
+    }
     if (id.includes('panturrilha')) return createSquatAnimation(id, exerciseName, { isCalfRaise: true });
     if (id.includes('sumo')) return createSquatAnimation(id, exerciseName, { isSumo: true });
     if (id.includes('cossack')) return createSquatAnimation(id, exerciseName, { isCossack: true });
     return createSquatAnimation(id, exerciseName);
   }
 
-  // 7. Cadeia Posterior
-  if (id.includes('ponte') || id.includes('hip-thrust') || id.includes('nordic') || id.includes('good-morning') || id.includes('stiff') || id.includes('leg-curl') || id.includes('quatro-apoios')) {
-    return createGluteBridgeAnimation(id, exerciseName, {
-      isUnilateral: id.includes('unilateral'),
-      isHipThrust: id.includes('hip-thrust'),
-    });
-  }
-
-  // 8. Pranchas
-  if (id.includes('prancha') || id.includes('plank') || id.includes('hollow') || id.includes('superman') || id.includes('bird-dog') || id.includes('climber')) {
-    return createPlankAnimation(id, exerciseName, { isSide: id.includes('lateral') });
-  }
-
-  // 9. Deitado (Abdominais)
-  if (id.includes('dead-bug') || id.includes('crunch') || id.includes('abdominal') || id.includes('twist') || id.includes('flutter') || id.includes('heel-touch')) {
-    return createDeadBugAnimation(id, exerciseName);
-  }
-
-  // 10. Skills
-  if (id.includes('lsit') || id.includes('v-sit') || id.includes('planche') || id.includes('front-lever') || id.includes('back-lever') || id.includes('bandeira') || id.includes('flag')) {
-    if (id.includes('front-lever')) return createSkillAnimation(id, exerciseName, 'frontlever');
-    if (id.includes('back-lever')) return createSkillAnimation(id, exerciseName, 'backlever');
-    if (id.includes('planche')) return createSkillAnimation(id, exerciseName, 'planche');
-    if (id.includes('bandeira') || id.includes('flag')) return createSkillAnimation(id, exerciseName, 'flag');
-    return createSkillAnimation(id, exerciseName, 'lsit');
-  }
-
-  // Default: Agachamento / Base biomecânica elegante
+  // Fallback: Agachamento Base
   return createSquatAnimation(id, exerciseName);
 };

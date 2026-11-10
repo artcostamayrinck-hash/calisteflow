@@ -1,6 +1,7 @@
 import type { Routine, MuscleGroup } from '../../types';
 import { EXERCISES_DATABASE } from '../../data/exercisesData';
 import { MuscleMap } from '../visuals/MuscleMap';
+import { ExerciseMedia } from '../visuals/figure/ExerciseMedia';
 import { X, Play, Clock, Dumbbell, Shield, Info, AlertTriangle } from 'lucide-react';
 import { useBodyScrollLock } from '../../utils/useBodyScrollLock';
 
@@ -149,13 +150,10 @@ export const RoutineDetailModal = ({
                     className="p-4 glass-card rounded-2xl border border-white/5 hover:border-white/15 transition flex items-center justify-between gap-3 shadow-md"
                   >
                     <div className="flex items-center gap-3.5">
-                      {ex?.videoThumbnail ? (
-                        <img
-                          src={ex.videoThumbnail}
-                          alt={ex.name}
-                          loading="lazy"
-                          className="w-10 h-10 rounded-xl object-cover bg-black/40 border border-white/10 shrink-0 shadow-md"
-                        />
+                      {ex ? (
+                        <div className="w-10 h-10 rounded-xl overflow-hidden border border-white/10 shrink-0 shadow-md bg-slate-900/60">
+                          <ExerciseMedia exercise={ex} mode="card" className="w-full h-full" />
+                        </div>
                       ) : (
                         <div className="w-8 h-8 rounded-xl bg-white/[0.06] text-slate-300 font-black text-xs flex items-center justify-center shrink-0 border border-white/10 font-mono">
                           {index + 1}
