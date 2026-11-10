@@ -44,19 +44,19 @@ let warnings = [];
 
 for (const file of partialFiles) {
   const content = fs.readFileSync(path.join(dataDir, file), 'utf8');
-  
+
   // Dividir por bloco de exercício
   const blocks = content.split(/\{\s*id:\s*'/).slice(1);
-  
+
   for (const block of blocks) {
     const id = block.split("'")[0];
     const nameMatch = block.match(/name:\s*'([^']+)'/);
     const name = nameMatch ? nameMatch[1] : id;
-    
+
     // Regressões
     const regMatch = block.match(/regressoes:\s*\[(.*?)\]/s);
     const regressions = regMatch ? [...regMatch[1].matchAll(/'([^']+)'/g)].map(m => m[1]) : [];
-    
+
     // Progressões
     const progMatch = block.match(/progressoes:\s*\[(.*?)\]/s);
     const progressions = progMatch ? [...progMatch[1].matchAll(/'([^']+)'/g)].map(m => m[1]) : [];

@@ -94,3 +94,4 @@ if (!hasError) {
 } else {
   process.exit(1);
 }
+
