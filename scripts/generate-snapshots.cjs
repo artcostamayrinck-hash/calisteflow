@@ -145,3 +145,4 @@ if (allValid) {
 } else {
   console.error('Erros encontrados:', issuesFound);
 }
+
