@@ -132,3 +132,4 @@ export const ReferenceExerciseCard: React.FC<ReferenceExerciseCardProps> = ({
     </div>
   );
 };
+
