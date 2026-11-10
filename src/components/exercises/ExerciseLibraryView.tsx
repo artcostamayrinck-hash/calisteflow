@@ -6,6 +6,7 @@ import { ExerciseVideoPlayer } from '../workout/ExerciseVideoPlayer';
 import { ExerciseMedia } from '../visuals/figure/ExerciseMedia';
 import { ExerciseGalleryModal } from '../visuals/figure/ExerciseGalleryModal';
 import { StyleComparisonGalleryModal } from '../visuals/figure/StyleComparisonGalleryModal';
+import { BiomechanicsInspectorModal } from '../visuals/figure/BiomechanicsInspectorModal';
 import { soundManager } from '../../utils/audio';
 import { useBodyScrollLock } from '../../utils/useBodyScrollLock';
 import { isFuzzyMatch } from '../../utils/fuzzySearch';
@@ -36,6 +37,7 @@ import {
   Clock,
   Flame,
   Target,
+  Compass,
 } from 'lucide-react';
 
 interface ExerciseLibraryViewProps {
@@ -262,6 +264,7 @@ export const ExerciseLibraryView = ({
   const [activeTab, setActiveTab] = useState<ModalTab>('como_fazer');
   const [showInteractiveMap, setShowInteractiveMap] = useState<boolean>(false);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState<boolean>(false);
+  const [showBiomechanicsModal, setShowBiomechanicsModal] = useState<boolean>(false);
 
   const handleToggleFavorite = (e: React.MouseEvent, exerciseId: string) => {
     e.stopPropagation();
@@ -1360,6 +1363,17 @@ export const ExerciseLibraryView = ({
               >
                 <ShieldCheck className="w-3.5 h-3.5" /> Auditoria CREF
               </button>
+              <button
+                type="button"
+                onClick={() => {
+                  soundManager.triggerHaptic([25]);
+                  setShowBiomechanicsModal(true);
+                }}
+                className="px-3 py-1.5 rounded-xl text-xs font-black transition whitespace-nowrap min-h-[40px] flex items-center gap-1.5 bg-[#00FF66]/15 border border-[#00FF66]/40 text-[#00FF66] hover:bg-[#00FF66]/25 shadow-sm active:scale-95"
+                title="Abrir análise técnica de biomecânica, keyframes e ativação muscular"
+              >
+                <Compass className="w-3.5 h-3.5" /> 📐 Biomecânica
+              </button>
             </div>
 
             {/* Conteúdo da Aba */}
@@ -1709,6 +1723,15 @@ export const ExerciseLibraryView = ({
         <StyleComparisonGalleryModal
           isOpen={showStyleGallery}
           onClose={() => setShowStyleGallery(false)}
+        />
+      )}
+
+      {/* Modal Inspetor Técnico de Biomecânica */}
+      {showBiomechanicsModal && selectedExercise && (
+        <BiomechanicsInspectorModal
+          exercise={selectedExercise}
+          isOpen={showBiomechanicsModal}
+          onClose={() => setShowBiomechanicsModal(false)}
         />
       )}
     </div>
