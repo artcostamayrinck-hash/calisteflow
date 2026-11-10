@@ -9,3 +9,4 @@ if ($commitMsg -ne "") {
 } else {
     node scripts/ship.cjs
 }
+

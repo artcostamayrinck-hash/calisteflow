@@ -16,7 +16,123 @@ import {
 import { calculateActiveMuscles } from './muscles';
 import { renderPropElement } from './props';
 import { renderFigureStyle } from './renderers';
-import { getAvatarSettings } from '../../../utils/appSettings';
+import {
+  getAvatarSettings,
+  prefersReducedMotion as checkReducedMotionSetting,
+} from '../../../utils/appSettings';
+
+interface FramedViewBox {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+const viewBoxCache = new Map<string, FramedViewBox>();
+
+export function computeFramedViewBox(animationDef: ExerciseAnimationDef): FramedViewBox {
+  const cached = viewBoxCache.get(animationDef.exerciseId);
+  if (cached) return cached;
+
+  let minX = Infinity;
+  let maxX = -Infinity;
+  let minY = Infinity;
+  let maxY = -Infinity;
+
+  const samples = [0, 0.2, 0.4, 0.5, 0.7, 0.85, 1.0];
+  for (const t of samples) {
+    try {
+      const p = animationDef.generatePose(t);
+      const j = p.joints;
+      const keyPoints = [
+        j.shoulder,
+        j.elbow,
+        j.wrist,
+        j.hand,
+        j.hip,
+        j.knee,
+        j.ankle,
+        j.toe,
+        j.head,
+      ];
+      if (j.backShoulder) keyPoints.push(j.backShoulder);
+      if (j.backElbow) keyPoints.push(j.backElbow);
+      if (j.backKnee) keyPoints.push(j.backKnee);
+      if (j.backToe) keyPoints.push(j.backToe);
+
+      for (const pt of keyPoints) {
+        if (Number.isFinite(pt.x) && Number.isFinite(pt.y)) {
+          if (pt.x < minX) minX = pt.x;
+          if (pt.x > maxX) maxX = pt.x;
+          if (pt.y < minY) minY = pt.y;
+          if (pt.y > maxY) maxY = pt.y;
+        }
+      }
+    } catch {
+      // fallback se pose falhar
+    }
+  }
+
+  if (!Number.isFinite(minX) || !Number.isFinite(maxX) || !Number.isFinite(minY) || !Number.isFinite(maxY)) {
+    const fallback = { x: 0, y: 0, width: CANVAS_WIDTH, height: CANVAS_HEIGHT };
+    viewBoxCache.set(animationDef.exerciseId, fallback);
+    return fallback;
+  }
+
+  // Padding anatômico (cabeça com cabelo, espessura dos membros e tênis)
+  minX -= 16;
+  maxX += 16;
+  minY -= 16;
+  maxY += 10;
+
+  const motionWidth = maxX - minX;
+  const motionHeight = maxY - minY;
+  const centerX = (minX + maxX) / 2;
+  const centerY = (minY + maxY) / 2;
+
+  // Ajuste de escala: a figura deve ocupar cerca de 70 a 80% (alvo ~75%) da altura do quadro,
+  // com margem de segurança de ~8% nos limites
+  let desiredHeight = motionHeight / 0.75;
+  let desiredWidth = desiredHeight * (400 / 300);
+
+  // Garante que a largura caiba com margem de 8%
+  if (desiredWidth < motionWidth / 0.84) {
+    desiredWidth = motionWidth / 0.84;
+    desiredHeight = desiredWidth * (300 / 400);
+  }
+
+  // Limita os extremos de zoom para manter naturalidade visual
+  desiredHeight = Math.max(160, Math.min(300, desiredHeight));
+  desiredWidth = desiredHeight * (400 / 300);
+
+  let viewX = centerX - desiredWidth / 2;
+  let viewY = centerY - desiredHeight / 2;
+
+  // Se o exercício ocorre no solo (GROUND_Y = 272), mantém a faixa de chão visível
+  if (maxY >= GROUND_Y - 30) {
+    const groundMargin = 16;
+    if (viewY + desiredHeight < GROUND_Y + groundMargin) {
+      viewY = GROUND_Y + groundMargin - desiredHeight;
+    }
+  }
+
+  // Se o exercício ocorre suspenso em barra alta (y <= 70), garante espaço no topo
+  if (minY <= 70) {
+    if (viewY > 6) {
+      viewY = 6;
+    }
+  }
+
+  const result: FramedViewBox = {
+    x: Math.round(viewX),
+    y: Math.round(viewY),
+    width: Math.round(desiredWidth),
+    height: Math.round(desiredHeight),
+  };
+
+  viewBoxCache.set(animationDef.exerciseId, result);
+  return result;
+}
 
 export interface ExerciseFigureProps {
   animationDef: ExerciseAnimationDef;
@@ -48,10 +164,9 @@ export const ExerciseFigure: React.FC<ExerciseFigureProps> = ({
 
   const effectivePaused = isPaused || internalPaused;
 
-  // Respeito a prefers-reduced-motion
+  // Respeito a prefers-reduced-motion e opção "Reproduzir Animações" em Ajustes
   const prefersReducedMotion = useMemo(() => {
-    if (typeof window === 'undefined') return false;
-    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    return checkReducedMotionSetting();
   }, []);
 
   const isStatic = staticFrame !== undefined || prefersReducedMotion;
@@ -182,6 +297,8 @@ export const ExerciseFigure: React.FC<ExerciseFigureProps> = ({
     y: Math.sin(gazeAngle) * 3,
   };
 
+  const viewBox = useMemo(() => computeFramedViewBox(animationDef), [animationDef]);
+
   return (
     <div
       ref={containerRef}
@@ -189,7 +306,7 @@ export const ExerciseFigure: React.FC<ExerciseFigureProps> = ({
       style={{ touchAction: 'manipulation' }}
     >
       <svg
-        viewBox={`0 0 ${CANVAS_WIDTH} ${CANVAS_HEIGHT}`}
+        viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`}
         className="w-full h-full block"
         aria-label={`Ilustração anatômica animada de ${animationDef.name}`}
         role="img"
@@ -213,28 +330,34 @@ export const ExerciseFigure: React.FC<ExerciseFigureProps> = ({
             <stop offset="100%" stopColor={FIGURE_PALETTE.skinBackBottom} />
           </linearGradient>
 
-          {/* Sombra suave dos músculos */}
+          {/* Sombra suave e contorno dos músculos */}
           <filter id="cfMuscleGlow" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="1.5" result="blur" />
+            <feGaussianBlur stdDeviation="1.6" result="blur" />
             <feComposite in="SourceGraphic" in2="blur" operator="over" />
           </filter>
         </defs>
 
-        {/* 1. Cenário de Fundo */}
-        <rect width={CANVAS_WIDTH} height={CANVAS_HEIGHT} fill="url(#cfStageBg)" />
-
-        {/* Faixa e Linha do Chão */}
+        {/* 1. Cenário de Fundo Cobrindo todo o ViewBox */}
         <rect
-          x="0"
+          x={viewBox.x - 50}
+          y={viewBox.y - 50}
+          width={viewBox.width + 100}
+          height={viewBox.height + 100}
+          fill="url(#cfStageBg)"
+        />
+
+        {/* Faixa e Linha do Chão Dinâmica */}
+        <rect
+          x={viewBox.x - 200}
           y={GROUND_Y}
-          width={CANVAS_WIDTH}
-          height={CANVAS_HEIGHT - GROUND_Y}
+          width={viewBox.width + 400}
+          height={Math.max(120, viewBox.y + viewBox.height - GROUND_Y + 100)}
           fill={STAGE_THEME.groundBar}
         />
         <line
-          x1="0"
+          x1={viewBox.x - 200}
           y1={GROUND_Y}
-          x2={CANVAS_WIDTH}
+          x2={viewBox.x + viewBox.width + 200}
           y2={GROUND_Y}
           stroke={STAGE_THEME.groundLine}
           strokeWidth="2"

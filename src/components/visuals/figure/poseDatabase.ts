@@ -381,9 +381,16 @@ export const createPullupAnimation = (
         y: shoulder.y + Math.sin(torsoAngle) * BONE_LENGTHS.torso,
       };
 
-      // Cabeça orientada para a barra
-      const neck = { x: shoulder.x, y: shoulder.y - 12 };
-      const head = { x: shoulder.x + 2, y: shoulder.y - BONE_LENGTHS.headCenterDistance };
+      // Cabeça orientada para a barra: deslocada para trás e levemente inclinada no topo para NÃO cobrir a barra nem as mãos
+      const neck = {
+        x: shoulder.x - lerp(0, 8, phase),
+        y: shoulder.y - 12,
+      };
+      const head = {
+        x: shoulder.x - lerp(0, 16, phase),
+        y: shoulder.y - lerp(BONE_LENGTHS.headCenterDistance, BONE_LENGTHS.headCenterDistance - 3, phase),
+      };
+      const gazeAngle = -Math.PI / 4 + lerp(0, 0.15, phase); // Olhar focado na barra
 
       // Pernas:
       let knee: Point2D;
@@ -420,7 +427,7 @@ export const createPullupAnimation = (
           head,
         },
         view: 'side',
-        gazeAngle: -0.4, // Olhar para cima em direção à barra
+        gazeAngle, // Olhar para cima em direção à barra
         effort,
         shadow: {
           cx: shoulder.x,
