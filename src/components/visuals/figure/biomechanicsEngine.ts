@@ -511,3 +511,4 @@ export function generateBiomechanicalAnalysis(exerciseOrId: Exercise | string): 
     ],
   };
 }
+

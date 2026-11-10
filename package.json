@@ -14,6 +14,8 @@
     "test:viewports": "node scripts/test-mobile-viewports.cjs",
     "test": "npm run test:exercises && npm run test:generator",
     "ship": "node scripts/ship.cjs",
+    "push": "node scripts/ship.cjs",
+    "sync": "node scripts/ship.cjs",
     "commit": "node scripts/ship.cjs"
   },
   "dependencies": {
