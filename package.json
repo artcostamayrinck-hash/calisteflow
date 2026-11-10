@@ -12,7 +12,7 @@
     "test:exercises": "node scripts/validate-exercises.cjs",
     "test:generator": "node scripts/test-workout-generator.cjs && node scripts/test-generator-e2e.cjs",
     "test:viewports": "node scripts/test-mobile-viewports.cjs",
-    "test:fidelity": "node scripts/test-engine-fidelity.cjs && node scripts/test-batch1-math.cjs && node scripts/generate-fidelity-snapshots.cjs && node scripts/generate-batch1-snapshots.cjs",
+    "test:fidelity": "node scripts/test-engine-fidelity.cjs && node scripts/test-batch1-math.cjs && node scripts/test-batch2-math.cjs && node scripts/generate-fidelity-snapshots.cjs && node scripts/generate-batch1-snapshots.cjs && node scripts/generate-batch2-snapshots.cjs",
     "test": "npm run test:exercises && npm run test:generator && npm run test:fidelity",
     "ship": "node scripts/ship.cjs",
     "push": "node scripts/ship.cjs",
