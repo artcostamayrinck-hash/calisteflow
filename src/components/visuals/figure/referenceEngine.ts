@@ -4,7 +4,7 @@
  * Mesmas medidas, cores, camadas, cinemática inversa (ik) e ordem de renderização.
  */
 
-import { REFERENCE_POSES_DATA, type RawPoseDef } from './referencePoseData';
+import { REFERENCE_POSES_DATA, type RawPoseDef } from './referencePoseData.ts';
 
 // Constantes fundamentais do protótipo
 export const G = 272; // Altura da linha do chão (px)
@@ -184,7 +184,7 @@ export interface ReferenceExerciseDef {
   pose: (u: number) => PoseJoints;
 }
 
-// 1. Poses canônicas do protótipo e modelos paramétricos do Lote 2
+// 1. Poses canônicas do protótipo e modelos paramétricos com Cinemática Anatômica Estrita
 export const pushPose = (
   params: number | { benchHeight?: number; feetHeight?: number; isKnee?: boolean; handsFarBack?: boolean } = 0
 ) => (u: number): PoseJoints => {
@@ -197,7 +197,7 @@ export const pushPose = (
 
   if (isKnee) {
     const K = V(85, G - 9);
-    const A = V(K.x - 22, K.y - 25);
+    const A = pol(K, Math.PI - 0.45, L.sh);
     const T = V(A.x - 10, A.y - 8);
     const Wy = G - bh - 5;
     const Lb = L.to + L.th;
@@ -215,7 +215,7 @@ export const pushPose = (
       K,
       A,
       T,
-      hd: pol(S, g + 0.08, 27),
+      hd: pol(S, g + 0.08, L.hd),
       fc: V(1, 0.1),
       far: [7, -3],
       pb: bh
@@ -242,7 +242,7 @@ export const pushPose = (
     K: pol(Fa, g, L.sh),
     A: Fa,
     T: V(Fa.x + 9, G - 1 - fh),
-    hd: pol(S, g + 0.08, 27),
+    hd: pol(S, g + 0.08, L.hd),
     fc: V(1, 0.1),
     far: [7, -3],
     pb:
@@ -261,20 +261,23 @@ export const squatPose = (params?: { isBox?: boolean; isWallSit?: boolean }) => 
   const A = V(190, G - 9);
 
   if (isWallSit) {
-    const H = V(145, G - 9 - 52);
+    const H = V(145, G - 9 - L.sh);
     const S = V(145, H.y - L.to);
-    const K = V(198, H.y);
-    const footA = V(198, G - 9);
+    const K = V(H.x + L.th, H.y);
+    const footA = V(K.x, G - 9);
     const breath = Math.sin(u * 2 * Math.PI) * 1.5;
+    const currentS = V(S.x, S.y + breath);
+    const currentH = V(H.x, H.y + breath);
+    const W = V(K.x - 14, K.y - 8 + breath);
     return {
-      S: V(S.x, S.y + breath),
-      E: V(S.x + 22, S.y + 35),
-      W: V(S.x + 35, S.y + 60),
-      H: V(H.x, H.y + breath),
+      S: currentS,
+      E: ik(currentS, W, L.ua, L.fa, 1),
+      W,
+      H: currentH,
       K,
       A: footA,
       T: V(footA.x + 18, G - 1),
-      hd: V(S.x + 2, S.y - 27 + breath),
+      hd: V(S.x, S.y - L.hd + breath),
       fc: V(1, 0.05),
       far: [5, -2],
       pb: `<path d="M130 50V${G}" stroke="#334155" stroke-width="6"/>`,
@@ -283,18 +286,19 @@ export const squatPose = (params?: { isBox?: boolean; isWallSit?: boolean }) => 
 
   const H = V(A.x - 6 - 52 * u, L2(A.y - 105, A.y - 50, u));
   const K = ik(H, A, L.th, L.sh, -1);
-  const a = 0.12 + 0.62 * u;
+  const a = 0.12 + 0.60 * u;
   const S = V(H.x + Math.sin(a) * L.to, H.y - Math.cos(a) * L.to);
-  const E = V(S.x + L.ua * 0.98, S.y + 3);
+  const armAngle = 0.08 * (1 - u);
+  const E = V(S.x + Math.cos(armAngle) * L.ua, S.y - Math.sin(armAngle) * L.ua);
   return {
     S,
     E,
-    W: V(E.x + L.fa, E.y + 1),
+    W: V(E.x + Math.cos(armAngle) * L.fa, E.y - Math.sin(armAngle) * L.fa),
     H,
     K,
     A,
     T: V(A.x + 21, G - 1),
-    hd: V(S.x + Math.sin(a * 0.6) * 27, S.y - Math.cos(a * 0.6) * 27),
+    hd: V(S.x + Math.sin(a * 0.6) * L.hd, S.y - Math.cos(a * 0.6) * L.hd),
     fc: V(1, 0.1),
     far: [5, -2],
     pb: isBox
@@ -317,7 +321,7 @@ export const pullPose = (params?: { barX?: number; barY?: number; isDeadHang?: b
 
   if (isDeadHang) {
     const S = V(bx - 14, L2(by + 71, by + 58, u));
-    const H = V(S.x - 2, S.y + L.to * 0.98);
+    const H = V(S.x, S.y + L.to);
     const K = V(H.x + 6, H.y + 55.7);
     const A = V(K.x - 44, K.y + 28);
     return {
@@ -328,7 +332,7 @@ export const pullPose = (params?: { barX?: number; barY?: number; isDeadHang?: b
       K,
       A,
       T: V(A.x - 4, A.y + 17),
-      hd: V(S.x + 5, S.y - 27),
+      hd: V(S.x, S.y - L.hd),
       fc: V(1, 0.1),
       far: [6, -2],
       pb: `<path d="M${bx} ${by}H${bx + 70}" stroke="#64748b" stroke-width="5"/><rect x="${bx + 66}" y="${
@@ -338,11 +342,11 @@ export const pullPose = (params?: { barX?: number; barY?: number; isDeadHang?: b
   }
 
   const S = V(bx - 14, L2(by + 72, by + 16, u));
-  const H = V(S.x - 2, S.y + L.to * 0.98);
+  const H = V(S.x, S.y + L.to);
 
   if (isLsit) {
-    const K = V(H.x + L.th, H.y - 2);
-    const A = V(K.x + L.sh, K.y - 2);
+    const K = V(H.x + L.th, H.y);
+    const A = V(K.x + L.sh, K.y);
     return {
       S,
       W,
@@ -351,7 +355,7 @@ export const pullPose = (params?: { barX?: number; barY?: number; isDeadHang?: b
       K,
       A,
       T: V(A.x + 14, A.y),
-      hd: V(S.x + 5, S.y - 27),
+      hd: V(S.x, S.y - L.hd),
       fc: V(1, 0.1),
       far: [6, -2],
       pb: `<path d="M${bx} ${by}H${bx + 70}" stroke="#64748b" stroke-width="5"/><rect x="${bx + 66}" y="${
@@ -370,7 +374,7 @@ export const pullPose = (params?: { barX?: number; barY?: number; isDeadHang?: b
     K,
     A,
     T: V(A.x - 4, A.y + 17),
-    hd: V(S.x + 5, S.y - 27),
+    hd: V(S.x, S.y - L.hd),
     fc: V(1, 0.1),
     far: [6, -2],
     pb: `<path d="M${bx} ${by}H${bx + 70}" stroke="#64748b" stroke-width="5"/><rect x="${bx + 66}" y="${
@@ -385,16 +389,16 @@ export const bridgePose = (u: number): PoseJoints => {
   const H = pol(S, g, L.to);
   const A = V(250, G - 9);
   const K = ik(H, A, L.th, L.sh, -1);
-  const E = V(S.x + 37, G - 9);
+  const E = V(S.x + L.ua, G - 9);
   return {
     S,
     E,
-    W: V(E.x + 33, G - 9),
+    W: V(E.x + L.fa, G - 9),
     H,
     K,
     A,
     T: V(A.x + 17, G - 2),
-    hd: V(S.x - 25, G - 14),
+    hd: V(S.x - L.hd, G - 14),
     fc: V(0.2, -1),
     far: [6, -2],
     pb: '',
@@ -408,19 +412,21 @@ export const rowPose = (params?: { barX?: number; barY?: number; isKnees?: boole
   const W = V(barX, barY + 5);
 
   if (isKnees) {
-    const A = V(260, G - 9);
-    const K = V(260, G - 9 - 48);
-    const H = V(260 - L.th * 0.9, K.y);
-    const S = V(L2(barX - 8, barX - 4, u), L2(barY + 68, barY + 16, u));
+    const A = V(255, G - 9);
+    const S = V(L2(150, 175, u), L2(barY + 65, barY + 25, u));
+    const E = ik(S, W, L.ua, L.fa, -1);
+    const torsoAngle = L2(0.25, 0.52, u);
+    const H = pol(S, -torsoAngle, L.to);
+    const K = ik(H, A, L.th, L.sh, -1);
     return {
       S,
       W,
-      E: ik(S, W, L.ua, L.fa, -1),
+      E,
       H,
       K,
       A,
       T: V(A.x + 16, G - 1),
-      hd: V(S.x - 24, S.y - 12),
+      hd: pol(S, Math.PI + torsoAngle, L.hd),
       fc: V(-0.3, -1),
       far: [6, -2],
       pb: `<path d="M${barX - 25} ${barY}H${barX + 45}" stroke="#64748b" stroke-width="5"/><rect x="${
@@ -431,12 +437,12 @@ export const rowPose = (params?: { barX?: number; barY?: number; isKnees?: boole
 
   const Fa = V(295, G - 9);
   const Lb = L.to + L.th + L.sh;
-  const angleBottom = Math.asin(Math.min(1, (G - 9 - (barY + 66)) / Lb));
-  const angleTop = Math.asin(Math.min(1, (G - 9 - (barY + 16)) / Lb));
+  const angleBottom = Math.asin(Math.min(1, (Fa.y - (barY + 65)) / Lb));
+  const angleTop = Math.asin(Math.min(1, (Fa.y - (barY + 25)) / Lb));
   const g = L2(angleBottom, angleTop, u);
-  const S = V(Fa.x - Math.cos(g) * Lb, Fa.y - Math.sin(g) * Lb);
-  const H = V(Fa.x - Math.cos(g) * (L.th + L.sh), Fa.y - Math.sin(g) * (L.th + L.sh));
-  const K = V(Fa.x - Math.cos(g) * L.sh, Fa.y - Math.sin(g) * L.sh);
+  const S = pol(Fa, Math.PI - g, Lb);
+  const H = pol(Fa, Math.PI - g, L.th + L.sh);
+  const K = pol(Fa, Math.PI - g, L.sh);
   return {
     S,
     W,
@@ -445,7 +451,7 @@ export const rowPose = (params?: { barX?: number; barY?: number; isKnees?: boole
     K,
     A: Fa,
     T: V(Fa.x + 16, G - 18),
-    hd: V(S.x - Math.cos(g) * 27, S.y - Math.sin(g) * 27),
+    hd: pol(S, Math.PI - g, L.hd),
     fc: V(-0.3, -1),
     far: [6, -2],
     pb: `<path d="M${barX - 25} ${barY}H${barX + 45}" stroke="#64748b" stroke-width="5"/><rect x="${
@@ -455,22 +461,25 @@ export const rowPose = (params?: { barX?: number; barY?: number; isKnees?: boole
 };
 
 export const plankPose = (u: number): PoseJoints => {
-  const Fa = V(60, G - 9);
-  const W = V(205, G - 9);
-  const E = V(175, G - 9);
-  const S = V(175, G - 9 - L.ua + 2);
+  const W = V(210, G - 9);
+  const E = V(W.x - L.fa, G - 9);
+  const S = V(E.x, E.y - L.ua);
   const breath = Math.sin(u * 2 * Math.PI) * 1.5;
-  const H = V(S.x - L.to + 2, S.y + 4 + breath);
-  const K = ik(H, Fa, L.th, L.sh, 1);
+  const Lb = L.to + L.th + L.sh;
+  const angle = Math.asin(Math.min(1, Math.max(0, (G - 9 - S.y) / Lb)));
+  const Fa = V(S.x - Math.cos(angle) * Lb, G - 9);
+  const H = pol(Fa, angle, L.sh + L.th);
+  H.y += breath;
+  const K = pol(Fa, angle, L.sh);
   return {
-    S,
+    S: V(S.x, S.y + breath),
     E,
     W,
     H,
     K,
     A: Fa,
-    T: V(Fa.x + 9, G - 1),
-    hd: V(S.x + 25, S.y - 2),
+    T: V(Fa.x + 12, G - 1),
+    hd: pol(S, 0.05, L.hd),
     fc: V(0.8, 0.4),
     far: [6, -2],
     pb: '',
@@ -482,8 +491,8 @@ export const dipPose = (params?: { barY?: number; isBench?: boolean }) => (u: nu
   if (isBench) {
     const benchY = 195;
     const W = V(125, benchY);
-    const S = V(150, L2(benchY - 44, benchY + 8, u));
-    const H = V(150, S.y + L.to * 0.95);
+    const S = V(150, L2(benchY - 44, benchY - 8, u));
+    const H = V(S.x, S.y + L.to);
     const A = V(235, G - 9);
     const K = ik(H, A, L.th, L.sh, -1);
     return {
@@ -494,7 +503,7 @@ export const dipPose = (params?: { barY?: number; isBench?: boolean }) => (u: nu
       K,
       A,
       T: V(A.x + 16, G - 1),
-      hd: V(S.x + 6, S.y - 26),
+      hd: V(S.x, S.y - L.hd),
       fc: V(1, 0.1),
       far: [6, -2],
       pb: `<rect x="85" y="${benchY}" width="45" height="${G - benchY}" fill="#475569"/><path d="M85 ${benchY}h45l8 -6h-45z" fill="#94a3b8"/>`,
@@ -503,10 +512,10 @@ export const dipPose = (params?: { barY?: number; isBench?: boolean }) => (u: nu
 
   const barY = params?.barY ?? 140;
   const W = V(195, barY);
-  const S = V(W.x - 4, L2(barY - L.ua - L.fa + 4, barY - 4, u));
-  const H = V(S.x - 6, S.y + L.to * 0.98);
-  const K = V(H.x + 14, H.y + 48);
-  const A = V(K.x - 28, K.y + 32);
+  const S = V(W.x - 4, L2(barY - L.ua - L.fa + 4, barY - 24, u));
+  const H = V(S.x - 4, S.y + L.to);
+  const K = pol(H, -Math.PI / 2 + 0.35, L.th);
+  const A = pol(K, -Math.PI / 2 - 0.75, L.sh);
   return {
     S,
     W,
@@ -514,8 +523,8 @@ export const dipPose = (params?: { barY?: number; isBench?: boolean }) => (u: nu
     H,
     K,
     A,
-    T: V(A.x - 4, A.y + 16),
-    hd: V(S.x + 8, S.y - 26),
+    T: V(A.x - 6, A.y + 14),
+    hd: V(S.x + 4, S.y - L.hd),
     fc: V(1, 0.1),
     far: [6, -2],
     pb: `<path d="M120 ${barY}H270" stroke="#64748b" stroke-width="5"/><rect x="135" y="${barY}" width="10" height="${
@@ -526,11 +535,12 @@ export const dipPose = (params?: { barY?: number; isBench?: boolean }) => (u: nu
 
 export const pikePose = (params?: { feetHeight?: number }) => (u: number): PoseJoints => {
   const fh = params?.feetHeight ?? 0;
-  const W = V(200, G - 5);
   const A = V(122, G - 9 - fh);
-  const H = V(155, L2(G - 96, G - 85, u));
+  const H = V(165, G - 9 - fh * 0.4 - 85);
   const K = ik(H, A, L.th, L.sh, 1);
-  const S = V(L2(182, 195, u), L2(G - 5 - 66, G - 5 - 28, u));
+  const angle = fh > 0 ? L2(-Math.PI / 2 - 0.15, -Math.PI / 2 - 0.45, u) : L2(-Math.PI / 2 - 0.35, -Math.PI / 2 - 0.65, u);
+  const S = pol(H, angle, L.to);
+  const W = V(fh > 0 ? S.x + 12 : 178, G - 5);
   return {
     S,
     W,
@@ -539,7 +549,7 @@ export const pikePose = (params?: { feetHeight?: number }) => (u: number): PoseJ
     K,
     A,
     T: V(A.x + 8, G - 1 - fh),
-    hd: V(S.x + 12, S.y + 12),
+    hd: pol(S, angle - 0.15, L.hd),
     fc: V(0.5, 1),
     far: [6, -2],
     pb: fh ? `<rect x="95" y="${G - fh}" width="45" height="${fh}" fill="#475569"/>` : '',
@@ -549,7 +559,7 @@ export const pikePose = (params?: { feetHeight?: number }) => (u: number): PoseJ
 export const handstandPose = (params?: { isWall?: boolean }) => (u: number): PoseJoints => {
   const isWall = params?.isWall ?? false;
   const W = V(195, G - 5);
-  const S = V(195, L2(G - 5 - 68, G - 5 - 26, u));
+  const S = V(195, L2(G - 5 - 68, G - 5 - 28, u));
   const H = V(195, S.y - L.to);
   const K = V(195, H.y - L.th);
   const A = V(195, K.y - L.sh);
@@ -562,7 +572,7 @@ export const handstandPose = (params?: { isWall?: boolean }) => (u: number): Pos
     K,
     A,
     T,
-    hd: V(S.x + 2, S.y + 24),
+    hd: V(S.x, S.y + L.hd),
     fc: V(1, 0),
     far: [6, 0],
     pb: isWall ? `<path d="M165 0V${G}" stroke="#334155" stroke-width="6"/>` : '',
@@ -573,15 +583,15 @@ export const pistolPose = (u: number): PoseJoints => {
   const A = V(200, G - 9);
   const H = V(L2(A.x, A.x - 38, u), L2(A.y - 105, A.y - 48, u));
   const K = ik(H, A, L.th, L.sh, -1);
-  const S = V(H.x + 14, H.y - L.to * 0.92);
-  const E = V(S.x + L.ua * 0.95, S.y - 2);
-  const W = V(E.x + L.fa * 0.95, E.y);
+  const S = pol(H, Math.PI / 2 - 0.35, L.to);
+  const E = V(S.x + L.ua, S.y);
+  const W = V(E.x + L.fa, E.y);
 
   // Perna contralateral estendida para frente
   const farH = V(H.x - 4, H.y);
   const farAngle = L2(Math.PI * 0.45, Math.PI * 0.05, u);
-  const farK = V(farH.x + Math.cos(farAngle) * L.th, farH.y + Math.sin(farAngle) * L.th);
-  const farA = V(farK.x + Math.cos(farAngle) * L.sh, farK.y + Math.sin(farAngle) * L.sh);
+  const farK = pol(farH, farAngle, L.th);
+  const farA = pol(farK, farAngle, L.sh);
   const farT = V(farA.x + 14, farA.y);
 
   return {
@@ -592,7 +602,7 @@ export const pistolPose = (u: number): PoseJoints => {
     K,
     A,
     T: V(A.x + 20, G - 1),
-    hd: V(S.x + 8, S.y - 26),
+    hd: pol(S, Math.PI / 2 - 0.2, L.hd),
     fc: V(1, 0.1),
     far: [-6, 0],
     pb: '',
@@ -609,9 +619,9 @@ export const bulgarianPose = (u: number): PoseJoints => {
   const backA = V(115, benchY);
   const H = V(175, L2(G - 9 - 88, G - 9 - 48, u));
   const K = ik(H, frontA, L.th, L.sh, -1);
-  const S = V(H.x + 2, H.y - L.to);
-  const E = V(S.x - 4, S.y + L.ua * 0.95);
-  const W = V(H.x - 2, H.y - 2);
+  const S = V(H.x, H.y - L.to);
+  const W = V(H.x + 8, H.y - 8);
+  const E = ik(S, W, L.ua, L.fa, -1);
 
   const farH = V(H.x - 4, H.y);
   const farK = ik(farH, backA, L.th, L.sh, 1);
@@ -625,7 +635,7 @@ export const bulgarianPose = (u: number): PoseJoints => {
     K,
     A: frontA,
     T: V(frontA.x + 18, G - 1),
-    hd: V(S.x + 2, S.y - 27),
+    hd: V(S.x, S.y - L.hd),
     fc: V(1, 0.05),
     far: [-8, 2],
     pb: `<rect x="75" y="${benchY}" width="45" height="48" fill="#475569"/><path d="M75 ${benchY}h45l8 -6h-45z" fill="#94a3b8"/>`,
@@ -644,10 +654,10 @@ export const calfRaisePose = (params?: { isStep?: boolean }) => (u: number): Pos
   const Ay = L2(stepY - 4, stepY - 26, u);
   const A = V(192, Ay);
   const H = V(192, A.y - L.sh - L.th);
-  const K = ik(H, A, L.th, L.sh, 1);
-  const S = V(H.x + 2, H.y - L.to);
-  const E = V(S.x - 4, S.y + L.ua * 0.95);
-  const W = V(H.x - 2, H.y - 2);
+  const K = V(192, A.y - L.sh);
+  const S = V(H.x, H.y - L.to);
+  const W = V(H.x + 4, H.y - 6);
+  const E = ik(S, W, L.ua, L.fa, -1);
 
   return {
     S,
@@ -657,7 +667,7 @@ export const calfRaisePose = (params?: { isStep?: boolean }) => (u: number): Pos
     K,
     A,
     T,
-    hd: V(S.x + 2, S.y - 27),
+    hd: V(S.x, S.y - L.hd),
     fc: V(1, 0.05),
     far: [5, -2],
     pb: isStep
@@ -671,11 +681,10 @@ export const lungePose = (u: number): PoseJoints => {
   const backA = V(125, G - 9);
   const H = V(168, L2(G - 9 - 88, G - 9 - 46, u));
   const K = ik(H, frontA, L.th, L.sh, -1);
-  const S = V(H.x + 2, H.y - L.to);
-  const E = V(S.x - 4, S.y + L.ua * 0.95);
-  const W = V(H.x - 2, H.y - 2);
+  const S = V(H.x, H.y - L.to);
+  const W = V(H.x + 8, H.y - 8);
+  const E = ik(S, W, L.ua, L.fa, -1);
 
-  // Perna de trás no plano de fundo apoiada no solo
   const farH = V(H.x - 4, H.y);
   const farK = ik(farH, backA, L.th, L.sh, 1);
   const farT = V(backA.x - 8, G - 1);
@@ -688,7 +697,7 @@ export const lungePose = (u: number): PoseJoints => {
     K,
     A: frontA,
     T: V(frontA.x + 18, G - 1),
-    hd: V(S.x + 2, S.y - 27),
+    hd: V(S.x, S.y - L.hd),
     fc: V(1, 0.05),
     far: [-8, 2],
     pb: '',
@@ -701,26 +710,24 @@ export const lungePose = (u: number): PoseJoints => {
 
 export const deadbugPose = (u: number): PoseJoints => {
   const S = V(155, G - 14);
-  const H = V(221, G - 14);
-  const hd = V(128, G - 14);
+  const H = V(S.x + L.to, G - 14);
+  const hd = V(S.x - L.hd, G - 14);
 
-  // Membros próximos (em movimento)
+  // Membros do lado próximo: Braço estende para trás, Perna fica estável em mesa a 90°
   const armExtAngle = L2(Math.PI / 2, Math.PI * 0.95, u);
-  const legExtAngle = L2(Math.PI / 2, Math.PI * 0.15, u);
-  const E = V(S.x - Math.cos(armExtAngle) * L.ua, S.y - Math.sin(armExtAngle) * L.ua);
-  const W = V(E.x - Math.cos(armExtAngle) * L.fa, E.y - Math.sin(armExtAngle) * L.fa);
-  const K = V(H.x + Math.cos(legExtAngle) * L.th, H.y - Math.sin(legExtAngle) * L.th);
-  const A = V(K.x + 10, K.y - L.sh * 0.85);
+  const E = pol(S, armExtAngle, L.ua);
+  const W = pol(E, armExtAngle, L.fa);
+  const K = pol(H, Math.PI / 2, L.th);
+  const A = pol(K, 0, L.sh);
 
-  // Membros de trás (posição isométrica de controle a 90°)
-  const farArmAngle = Math.PI / 2;
-  const farLegAngle = Math.PI / 2;
+  // Membros do lado oposto (contralateral): Braço fica estável a 90°, Perna estende para frente
   const farS = V(S.x + 5, S.y - 4);
-  const farE = V(farS.x - Math.cos(farArmAngle) * L.ua, farS.y - Math.sin(farArmAngle) * L.ua);
-  const farW = V(farE.x - Math.cos(farArmAngle) * L.fa, farE.y - Math.sin(farArmAngle) * L.fa);
   const farH = V(H.x + 5, H.y - 4);
-  const farK = V(farH.x + Math.cos(farLegAngle) * L.th, farH.y - Math.sin(farLegAngle) * L.th);
-  const farA = V(farK.x + 10, farK.y - L.sh * 0.85);
+  const farE = pol(farS, Math.PI / 2, L.ua);
+  const farW = pol(farE, Math.PI / 2, L.fa);
+  const farLegAngle = L2(Math.PI / 2, Math.PI * 0.15, u);
+  const farK = pol(farH, farLegAngle, L.th);
+  const farA = pol(farK, farLegAngle, L.sh);
 
   return {
     S,
@@ -746,15 +753,15 @@ export const deadbugPose = (u: number): PoseJoints => {
 
 export const hollowPose = (params?: { isTuck?: boolean }) => (u: number): PoseJoints => {
   const isTuck = params?.isTuck ?? false;
-  const S = V(145, G - 24);
   const H = V(210, G - 14);
-  const hd = V(122, G - 26);
-  const E = V(S.x - L.ua * 0.95, S.y - 4);
-  const W = V(E.x - L.fa * 0.95, E.y - 2);
+  const S = pol(H, Math.PI - 0.18, L.to);
+  const hd = pol(S, Math.PI - 0.22, L.hd);
+  const E = pol(S, Math.PI - 0.12, L.ua);
+  const W = pol(E, Math.PI - 0.12, L.fa);
 
   if (isTuck) {
-    const K = V(H.x - 12, H.y - 46);
-    const A = V(H.x + 10, H.y - 12);
+    const K = pol(H, Math.PI / 2 + 0.35, L.th);
+    const A = pol(K, -Math.PI / 2 + 0.95, L.sh);
     return {
       S,
       E,
@@ -771,8 +778,8 @@ export const hollowPose = (params?: { isTuck?: boolean }) => (u: number): PoseJo
   }
 
   const legAngle = L2(Math.PI * 0.12, Math.PI * 0.22, u);
-  const K = V(H.x + Math.cos(legAngle) * L.th, H.y - Math.sin(legAngle) * L.th);
-  const A = V(K.x + Math.cos(legAngle) * L.sh, K.y - Math.sin(legAngle) * L.sh);
+  const K = pol(H, legAngle, L.th);
+  const A = pol(K, legAngle, L.sh);
   return {
     S,
     E,
@@ -794,13 +801,13 @@ export const crunchPose = (params?: { isVUp?: boolean; isLegRaise?: boolean }) =
 
   if (isLegRaise) {
     const S = V(145, G - 14);
-    const H = V(211, G - 14);
-    const hd = V(120, G - 14);
-    const E = V(S.x + 35, G - 10);
-    const W = V(E.x + 30, G - 10);
+    const H = V(S.x + L.to, G - 14);
+    const hd = V(S.x - L.hd, G - 14);
+    const E = V(S.x + L.ua, G - 10);
+    const W = V(E.x + L.fa, G - 10);
     const legAngle = L2(Math.PI * 0.08, Math.PI * 0.46, u);
-    const K = V(H.x + Math.cos(legAngle) * L.th, H.y - Math.sin(legAngle) * L.th);
-    const A = V(K.x + Math.cos(legAngle) * L.sh, K.y - Math.sin(legAngle) * L.sh);
+    const K = pol(H, legAngle, L.th);
+    const A = pol(K, legAngle, L.sh);
     return {
       S,
       E,
@@ -808,7 +815,7 @@ export const crunchPose = (params?: { isVUp?: boolean; isLegRaise?: boolean }) =
       H,
       K,
       A,
-      T: V(A.x + Math.cos(legAngle) * 14, A.y - Math.sin(legAngle) * 14),
+      T: pol(A, legAngle, 14),
       hd,
       fc: V(0.1, -1),
       far: [5, -3],
@@ -819,13 +826,13 @@ export const crunchPose = (params?: { isVUp?: boolean; isLegRaise?: boolean }) =
   if (isVUp) {
     const H = V(200, G - 14);
     const trunkAngle = L2(Math.PI * 0.05, Math.PI * 0.3, u);
-    const S = V(H.x - Math.cos(trunkAngle) * L.to, H.y - Math.sin(trunkAngle) * L.to);
-    const hd = V(S.x - Math.cos(trunkAngle) * 27, S.y - Math.sin(trunkAngle) * 27);
-    const E = V(S.x + L.ua * 0.9, S.y - 12);
-    const W = V(E.x + L.fa * 0.9, E.y - 12);
+    const S = pol(H, Math.PI - trunkAngle, L.to);
+    const hd = pol(S, Math.PI - trunkAngle, L.hd);
+    const E = pol(S, trunkAngle, L.ua);
+    const W = pol(E, trunkAngle, L.fa);
     const legAngle = L2(Math.PI * 0.06, Math.PI * 0.32, u);
-    const K = V(H.x + Math.cos(legAngle) * L.th, H.y - Math.sin(legAngle) * L.th);
-    const A = V(K.x + Math.cos(legAngle) * L.sh, K.y - Math.sin(legAngle) * L.sh);
+    const K = pol(H, legAngle, L.th);
+    const A = pol(K, legAngle, L.sh);
     return {
       S,
       E,
@@ -845,10 +852,10 @@ export const crunchPose = (params?: { isVUp?: boolean; isLegRaise?: boolean }) =
   const A = V(245, G - 9);
   const K = ik(H, A, L.th, L.sh, -1);
   const trunkAngle = L2(0.02, 0.42, u);
-  const S = V(H.x - Math.cos(trunkAngle) * L.to, H.y - Math.sin(trunkAngle) * L.to);
-  const hd = V(S.x - Math.cos(trunkAngle) * 27, S.y - Math.sin(trunkAngle) * 27);
-  const E = V(S.x + 24, S.y - 14);
-  const W = V(hd.x + 12, hd.y - 6);
+  const S = pol(H, Math.PI - trunkAngle, L.to);
+  const hd = pol(S, Math.PI - trunkAngle, L.hd);
+  const W = V(hd.x + 10, hd.y - 4);
+  const E = ik(S, W, L.ua, L.fa, 1);
   return {
     S,
     E,
@@ -866,13 +873,14 @@ export const crunchPose = (params?: { isVUp?: boolean; isLegRaise?: boolean }) =
 
 export const supermanPose = (u: number): PoseJoints => {
   const H = V(200, G - 12);
-  const arch = L2(0, 18, u);
-  const S = V(145, G - 14 - arch);
-  const hd = V(120, S.y - 14);
-  const E = V(S.x - L.ua * 0.92, S.y - arch * 0.4);
-  const W = V(E.x - L.fa * 0.92, E.y - arch * 0.4);
-  const K = V(252, G - 12 - arch * 0.7);
-  const A = V(K.x + L.sh * 0.95, G - 10 - arch);
+  const arch = L2(0.04, 0.26, u);
+  const S = pol(H, Math.PI - arch, L.to);
+  const hd = pol(S, Math.PI - arch - 0.08, L.hd);
+  const E = pol(S, Math.PI - arch - 0.06, L.ua);
+  const W = pol(E, Math.PI - arch - 0.06, L.fa);
+  const legAngle = L2(0.04, 0.22, u);
+  const K = pol(H, -legAngle, L.th);
+  const A = pol(K, -legAngle, L.sh);
   return {
     S,
     E,
@@ -890,26 +898,26 @@ export const supermanPose = (u: number): PoseJoints => {
 
 export const birdDogPose = (u: number): PoseJoints => {
   const Ksup = V(215, G - 9);
-  const Wsup = V(145, G - 5);
-  const S = V(145, G - 5 - 46);
-  const H = V(215, S.y + 2);
-  const hd = V(S.x - 24, S.y - 8);
+  const farH = pol(Ksup, Math.PI / 2, L.th);
+  const H = farH;
+  const farK = Ksup;
+  const farA = V(farK.x + L.sh, G - 9);
+  const farT = V(farA.x + 12, G - 1);
 
-  const armExt = L2(0.2, 0.98, u);
-  const E = V(S.x - L.ua * armExt, S.y);
-  const W = V(E.x - L.fa * armExt, E.y);
-
-  const legExt = L2(0.3, 0.98, u);
-  const K = V(H.x + L.th * legExt, H.y);
-  const A = V(K.x + L.sh * legExt, K.y);
-
+  const S = V(H.x - L.to, H.y);
   const farS = S;
+  const Wsup = V(S.x, G - 5);
   const farE = ik(farS, Wsup, L.ua, L.fa, 1);
   const farW = Wsup;
-  const farH = H;
-  const farK = Ksup;
-  const farA = V(Ksup.x - 22, G - 9);
-  const farT = V(farA.x - 10, G - 1);
+
+  const ease = 0.5 - 0.5 * Math.cos(u * Math.PI);
+  const armExt = L2(Math.PI - 0.65, Math.PI, ease);
+  const E = pol(S, armExt, L.ua);
+  const W = pol(E, armExt, L.fa);
+
+  const legExt = L2(-0.45, 0, ease);
+  const K = pol(H, legExt, L.th);
+  const A = pol(K, legExt, L.sh);
 
   return {
     S,
@@ -919,7 +927,7 @@ export const birdDogPose = (u: number): PoseJoints => {
     K,
     A,
     T: V(A.x + 14, A.y + 2),
-    hd,
+    hd: pol(S, Math.PI - 0.2, L.hd),
     fc: V(-1, 0.1),
     far: [6, -2],
     pb: '',
@@ -935,42 +943,44 @@ export const birdDogPose = (u: number): PoseJoints => {
 
 export const sidePlankPose = (params?: { isKnee?: boolean; isDip?: boolean }) => (u: number): PoseJoints => {
   const isKnee = params?.isKnee ?? false;
-  const E = V(190, G - 9);
-  const S = V(190, G - 9 - L.ua + 2);
-  const W = V(220, G - 9);
-  const dip = params?.isDip ? Math.sin(u * Math.PI) * 16 : 0;
+  const E = V(180, G - 9);
+  const W = V(E.x + L.fa, G - 9);
+  const S = V(E.x, E.y - L.ua);
+  const dip = params?.isDip ? Math.sin(u * Math.PI) * 14 : 0;
+  const Lb = isKnee ? L.to + L.th : L.to + L.th + L.sh;
+  const angle = Math.asin(Math.min(1, Math.max(0, (G - 9 - (S.y + dip)) / Lb)));
 
   if (isKnee) {
-    const K = V(95, G - 9);
-    const H = V(L2(150, 150, u), S.y + 14 + dip);
-    const A = V(K.x - 20, K.y - 20);
+    const K = V(S.x - Math.cos(angle) * Lb, G - 9);
+    const H = pol(K, angle, L.th);
+    const A = pol(K, Math.PI - 0.45, L.sh);
     return {
-      S,
+      S: V(S.x, S.y + dip),
       E,
       W,
       H,
       K,
       A,
       T: V(A.x - 8, A.y - 8),
-      hd: V(S.x + 22, S.y - 12),
+      hd: pol(S, -angle, L.hd),
       fc: V(0.8, 0.2),
       far: [4, -2],
       pb: '',
     };
   }
 
-  const A = V(75, G - 9);
-  const H = V(145, S.y + 12 + dip);
-  const K = ik(H, A, L.th, L.sh, 1);
+  const Fa = V(S.x - Math.cos(angle) * Lb, G - 9);
+  const H = pol(Fa, angle, L.sh + L.th);
+  const K = pol(Fa, angle, L.sh);
   return {
-    S,
+    S: V(S.x, S.y + dip),
     E,
     W,
     H,
     K,
-    A,
-    T: V(A.x + 10, G - 1),
-    hd: V(S.x + 22, S.y - 12),
+    A: Fa,
+    T: V(Fa.x + 10, G - 1),
+    hd: pol(S, -angle, L.hd),
     fc: V(0.8, 0.2),
     far: [4, -2],
     pb: '',
@@ -984,12 +994,12 @@ export const hangingCorePose = (params?: { isToesToBar?: boolean; isKnees?: bool
   const by = 34;
   const W = V(bx, by + 5);
   const S = V(bx - 14, by + 71);
-  const H = V(S.x - 2, S.y + L.to * 0.98);
+  const H = V(S.x, S.y + L.to);
 
   if (isToesToBar) {
-    const legAngle = L2(Math.PI * 0.05, Math.PI * 0.72, u);
-    const K = V(H.x + Math.sin(legAngle) * L.th, H.y - Math.cos(legAngle) * L.th);
-    const A = V(K.x + Math.sin(legAngle) * L.sh, K.y - Math.cos(legAngle) * L.sh);
+    const legAngle = L2(0, Math.PI * 0.58, u);
+    const K = pol(H, -Math.PI / 2 + legAngle, L.th);
+    const A = pol(K, -Math.PI / 2 + legAngle, L.sh);
     return {
       S,
       W,
@@ -998,7 +1008,7 @@ export const hangingCorePose = (params?: { isToesToBar?: boolean; isKnees?: bool
       K,
       A,
       T: V(A.x + 10, A.y - 10),
-      hd: V(S.x + 5, S.y - 27),
+      hd: V(S.x, S.y - L.hd),
       fc: V(1, 0.1),
       far: [6, -2],
       pb: `<path d="M${bx - 30} ${by}H${bx + 40}" stroke="#64748b" stroke-width="5"/><rect x="${bx + 36}" y="${
@@ -1008,9 +1018,9 @@ export const hangingCorePose = (params?: { isToesToBar?: boolean; isKnees?: bool
   }
 
   if (isKnees) {
-    const kneeAngle = L2(0, Math.PI * 0.52, u);
-    const K = V(H.x + Math.sin(kneeAngle) * L.th, H.y + Math.cos(kneeAngle) * L.th);
-    const A = V(K.x - 12, K.y + L.sh * 0.85);
+    const kneeAngle = L2(0, Math.PI * 0.48, u);
+    const K = pol(H, -Math.PI / 2 + kneeAngle, L.th);
+    const A = pol(K, -Math.PI / 2, L.sh);
     return {
       S,
       W,
@@ -1019,7 +1029,7 @@ export const hangingCorePose = (params?: { isToesToBar?: boolean; isKnees?: bool
       K,
       A,
       T: V(A.x + 4, A.y + 14),
-      hd: V(S.x + 5, S.y - 27),
+      hd: V(S.x, S.y - L.hd),
       fc: V(1, 0.1),
       far: [6, -2],
       pb: `<path d="M${bx - 30} ${by}H${bx + 40}" stroke="#64748b" stroke-width="5"/><rect x="${bx + 36}" y="${
@@ -1028,9 +1038,9 @@ export const hangingCorePose = (params?: { isToesToBar?: boolean; isKnees?: bool
     };
   }
 
-  const legAngle = L2(0, Math.PI * 0.5, u);
-  const K = V(H.x + Math.sin(legAngle) * L.th, H.y + Math.cos(legAngle) * L.th);
-  const A = V(K.x + Math.sin(legAngle) * L.sh, K.y + Math.cos(legAngle) * L.sh);
+  const legAngle = L2(0, Math.PI * 0.46, u);
+  const K = pol(H, -Math.PI / 2 + legAngle, L.th);
+  const A = pol(K, -Math.PI / 2 + legAngle, L.sh);
   return {
     S,
     W,
@@ -1039,7 +1049,7 @@ export const hangingCorePose = (params?: { isToesToBar?: boolean; isKnees?: bool
     K,
     A,
     T: V(A.x + 14, A.y),
-    hd: V(S.x + 5, S.y - 27),
+    hd: V(S.x, S.y - L.hd),
     fc: V(1, 0.1),
     far: [6, -2],
     pb: `<path d="M${bx - 30} ${by}H${bx + 40}" stroke="#64748b" stroke-width="5"/><rect x="${bx + 36}" y="${
@@ -1050,13 +1060,13 @@ export const hangingCorePose = (params?: { isToesToBar?: boolean; isKnees?: bool
 
 export const dragonFlagPose = (u: number): PoseJoints => {
   const S = V(140, G - 16);
-  const hd = V(115, G - 16);
+  const hd = V(S.x - L.hd, S.y);
   const W = V(100, G - 24);
   const E = ik(S, W, L.ua, L.fa, -1);
   const angle = L2(Math.PI * 0.08, Math.PI * 0.35, u);
-  const H = V(S.x + Math.cos(angle) * L.to, S.y - Math.sin(angle) * L.to);
-  const K = V(H.x + Math.cos(angle) * L.th, H.y - Math.sin(angle) * L.th);
-  const A = V(K.x + Math.cos(angle) * L.sh, K.y - Math.sin(angle) * L.sh);
+  const H = pol(S, angle, L.to);
+  const K = pol(H, angle, L.th);
+  const A = pol(K, angle, L.sh);
   return {
     S,
     E,
@@ -1076,9 +1086,11 @@ export const dragonFlagPose = (u: number): PoseJoints => {
 
 export const abWheelPose = (u: number): PoseJoints => {
   const K = V(85, G - 9);
-  const A = V(K.x - 22, K.y - 20);
-  const H = V(L2(105, 145, u), L2(G - 9 - 48, G - 9 - 22, u));
-  const S = V(L2(148, 208, u), L2(G - 9 - 48, G - 9 - 22, u));
+  const A = pol(K, Math.PI - 0.4, L.sh);
+  const thighAngle = L2(1.25, 0.45, u);
+  const H = pol(K, thighAngle, L.th);
+  const torsoAngle = L2(0.18, 0.06, u);
+  const S = pol(H, torsoAngle, L.to);
   const W = V(L2(152, 268, u), G - 12);
   return {
     S,
@@ -1088,7 +1100,7 @@ export const abWheelPose = (u: number): PoseJoints => {
     K,
     A,
     T: V(A.x - 8, A.y - 8),
-    hd: V(S.x + 18, S.y - 14),
+    hd: pol(S, torsoAngle + 0.05, L.hd),
     fc: V(0.9, 0.4),
     far: [6, -2],
     pb: `<circle cx="${f(W.x)}" cy="${G - 12}" r="12" fill="#334155"/><circle cx="${f(
@@ -1100,13 +1112,14 @@ export const abWheelPose = (u: number): PoseJoints => {
 export const mountainClimberPose = (u: number): PoseJoints => {
   const W = V(205, G - 5);
   const S = V(205, G - 5 - 66);
-  const H = V(148, 215);
+  const H = pol(S, Math.PI + 0.28, L.to);
   const farH = V(H.x - 4, H.y);
   const farA = V(65, G - 9);
   const farK = ik(farH, farA, L.th, L.sh, 1);
   const cycle = Math.sin(u * 2 * Math.PI) * 0.5 + 0.5;
-  const K = V(L2(155, 185, cycle), L2(230, 248, cycle));
-  const A = V(K.x - 14, K.y + 24);
+  const legAngle = L2(-0.35, -0.95, cycle);
+  const K = pol(H, legAngle, L.th);
+  const A = pol(K, legAngle - 0.4, L.sh);
   return {
     S,
     W,
@@ -1115,7 +1128,7 @@ export const mountainClimberPose = (u: number): PoseJoints => {
     K,
     A,
     T: V(A.x + 8, A.y + 6),
-    hd: V(S.x + 24, S.y - 8),
+    hd: pol(S, 0.2, L.hd),
     fc: V(0.8, 0.4),
     far: [6, -2],
     pb: '',
@@ -1128,12 +1141,12 @@ export const mountainClimberPose = (u: number): PoseJoints => {
 
 export const nordicCurlPose = (u: number): PoseJoints => {
   const K = V(135, G - 9);
-  const A = V(K.x - L.sh * 0.9, G - 9);
+  const A = V(K.x - L.sh, G - 9);
   const angle = L2(Math.PI * 0.48, Math.PI * 0.14, u);
-  const H = V(K.x + Math.cos(angle) * L.th, K.y - Math.sin(angle) * L.th);
-  const S = V(H.x + Math.cos(angle) * L.to, H.y - Math.sin(angle) * L.to);
-  const E = V(S.x + 12, S.y + 24);
-  const W = V(E.x + 12, E.y + 22);
+  const H = pol(K, angle, L.th);
+  const S = pol(H, angle, L.to);
+  const W = pol(S, angle - 0.55, 48);
+  const E = ik(S, W, L.ua, L.fa, 1);
   return {
     S,
     E,
@@ -1142,21 +1155,21 @@ export const nordicCurlPose = (u: number): PoseJoints => {
     K,
     A,
     T: V(A.x - 8, G - 1),
-    hd: V(S.x + Math.cos(angle) * 27, S.y - Math.sin(angle) * 27),
+    hd: pol(S, angle, L.hd),
     fc: V(1, -0.2),
     far: [6, -2],
-    pb: `<rect x="${K.x - L.sh * 0.9 - 15}" y="${G - 14}" width="25" height="14" fill="#334155"/>`,
+    pb: `<rect x="${K.x - L.sh - 15}" y="${G - 14}" width="25" height="14" fill="#334155"/>`,
   };
 };
 
 export const catCowPose = (u: number): PoseJoints => {
   const t = Math.sin(u * Math.PI * 2);
-  const H = V(225, G - 58 + t * 7);
-  const S = V(148, G - 58 + t * 5);
+  const K = V(225, G - 9);
+  const A = V(K.x + L.sh, G - 9);
+  const H = pol(K, Math.PI / 2 + t * 0.08, L.th);
+  const S = pol(H, Math.PI + t * 0.05, L.to);
   const W = V(148, G - 5);
   const E = ik(S, W, L.ua, L.fa, -1);
-  const K = V(225, G - 9);
-  const A = V(265, G - 9);
   return {
     S,
     E,
@@ -1165,7 +1178,7 @@ export const catCowPose = (u: number): PoseJoints => {
     K,
     A,
     T: V(A.x + 12, G - 5),
-    hd: V(S.x - 25, S.y - 10 + t * 6),
+    hd: pol(S, Math.PI - 0.35 + t * 0.15, L.hd),
     fc: V(-1, t * 0.5),
     far: [4, -3],
     pb: `<line x1="140" y1="${G}" x2="275" y2="${G}" stroke="#1f3b5c" stroke-width="2"/>`,
@@ -1174,10 +1187,11 @@ export const catCowPose = (u: number): PoseJoints => {
 
 export const standingMobilityPose = (u: number): PoseJoints => {
   const A = V(180, G - 12);
-  const K = V(180, G - 62);
-  const H = V(180, G - 116);
-  const S = V(180, G - 180);
-  const W = V(180 + Math.cos(u * Math.PI * 2) * 45, S.y + Math.sin(u * Math.PI * 2) * 45);
+  const K = V(A.x, A.y - L.sh);
+  const H = V(K.x, K.y - L.th);
+  const S = V(H.x, H.y - L.to);
+  const theta = L2(-Math.PI / 4, Math.PI / 2, u);
+  const W = pol(S, theta, 42);
   const E = ik(S, W, L.ua, L.fa, 1);
   return {
     S,
@@ -1187,7 +1201,7 @@ export const standingMobilityPose = (u: number): PoseJoints => {
     K,
     A,
     T: V(A.x + 14, G - 5),
-    hd: V(S.x, S.y - 27),
+    hd: V(S.x, S.y - L.hd),
     fc: V(1, 0),
     far: [5, -2],
     pb: '',
@@ -1196,11 +1210,11 @@ export const standingMobilityPose = (u: number): PoseJoints => {
 
 export const deepSquatHoldPose = (u: number): PoseJoints => {
   const t = 0.5 + 0.5 * Math.sin(u * Math.PI * 2);
-  const A = V(155, G - 12);
-  const K = V(205, G - 42);
-  const H = V(165, G - 38 + t * 5);
-  const S = V(160, G - 98 + t * 4);
-  const W = V(225, G - 102);
+  const A = V(165, G - 12);
+  const H = V(175, G - 45 + t * 4);
+  const K = ik(H, A, L.th, L.sh, -1);
+  const S = pol(H, Math.PI / 2 + 0.15, L.to);
+  const W = V(S.x + 24, S.y + 40);
   const E = ik(S, W, L.ua, L.fa, -1);
   return {
     S,
@@ -1210,7 +1224,7 @@ export const deepSquatHoldPose = (u: number): PoseJoints => {
     K,
     A,
     T: V(A.x + 15, G - 5),
-    hd: V(S.x + 10, S.y - 25),
+    hd: pol(S, Math.PI / 2 + 0.1, L.hd),
     fc: V(1, 0),
     far: [6, -2],
     pb: `<line x1="225" y1="${G - 160}" x2="225" y2="${G}" stroke="#334155" stroke-width="4"/>`,
@@ -1220,15 +1234,18 @@ export const deepSquatHoldPose = (u: number): PoseJoints => {
 export const worldGreatestStretchPose = (u: number): PoseJoints => {
   const t = 0.5 + 0.5 * Math.sin(u * Math.PI * 2);
   const frontA = V(220, G - 12);
-  const frontK = V(212, G - 55);
-  const H = V(155, G - 48);
-  const backK = V(115, G - 20);
+  const H = V(160, G - 42);
+  const frontK = ik(H, frontA, L.th, L.sh, -1);
   const backA = V(70, G - 12);
-  const S = V(170, G - 85);
-  const W = V(170 + t * 25, G - 95 - t * 45);
+  const farH = V(H.x - 4, H.y);
+  const farK = ik(farH, backA, L.th, L.sh, 1);
+  const S = pol(H, 0.45, L.to);
+  const farW = V(205, G - 5);
+  const farS = V(S.x + 4, S.y - 2);
+  const farE = ik(farS, farW, L.ua, L.fa, -1);
+  const reachAngle = L2(0.4, 1.4, t);
+  const W = pol(S, reachAngle, 62);
   const E = ik(S, W, L.ua, L.fa, 1);
-  const farW = V(195, G - 5);
-  const farE = ik(V(S.x + 4, S.y - 2), farW, L.ua, L.fa, -1);
   return {
     S,
     E,
@@ -1237,14 +1254,14 @@ export const worldGreatestStretchPose = (u: number): PoseJoints => {
     K: frontK,
     A: frontA,
     T: V(frontA.x + 12, G - 5),
-    farS: V(S.x + 4, S.y - 2),
+    farS,
     farE,
     farW,
-    farH: V(H.x - 4, H.y),
-    farK: backK,
+    farH,
+    farK,
     farA: backA,
     farT: V(backA.x - 12, G - 5),
-    hd: V(S.x + 8, S.y - 25),
+    hd: pol(S, 0.35, L.hd),
     fc: V(1, -0.4),
     far: [4, -2],
     pb: '',
@@ -1252,13 +1269,14 @@ export const worldGreatestStretchPose = (u: number): PoseJoints => {
 };
 
 export const seatedHipMobilityPose = (u: number): PoseJoints => {
-  const t = 0.5 + 0.5 * Math.sin(u * Math.PI * 2);
-  const H = V(190, G - 16);
-  const S = V(185, G - 76 + t * 4);
-  const W = V(168, G - 15);
+  const breath = (0.5 + 0.5 * Math.sin(u * Math.PI * 2)) * 3;
+  const H = V(190, G - 16 + breath);
+  const S = pol(H, Math.PI / 2 + 0.1, L.to);
+  const hd = pol(S, Math.PI / 2 + 0.05, L.hd);
+  const W = V(H.x - 14, G - 15);
   const E = ik(S, W, L.ua, L.fa, -1);
-  const K = V(235, G - 14);
-  const A = V(205, G - 8);
+  const K = pol(H, -0.2, L.th);
+  const A = pol(K, -Math.PI / 2 - 0.2, L.sh);
   return {
     S,
     E,
@@ -1267,7 +1285,7 @@ export const seatedHipMobilityPose = (u: number): PoseJoints => {
     K,
     A,
     T: V(A.x - 10, G - 6),
-    hd: V(S.x + 6, S.y - 26),
+    hd,
     fc: V(1, 0),
     far: [6, -2],
     pb: '',
@@ -1275,12 +1293,11 @@ export const seatedHipMobilityPose = (u: number): PoseJoints => {
 };
 
 export const childPose = (_u: number): PoseJoints => {
-  const t = 0.5 + 0.5 * Math.sin(_u * Math.PI * 2);
-  const H = V(240, G - 26 + t * 2);
   const K = V(195, G - 9);
-  const A = V(238, G - 9);
-  const S = V(160, G - 25 + t * 2);
-  const W = V(105, G - 5);
+  const A = V(K.x + L.sh, G - 9);
+  const H = pol(K, Math.PI - 0.25, L.th);
+  const S = pol(H, Math.PI - 0.05, L.to);
+  const W = V(S.x - 65, G - 5);
   const E = ik(S, W, L.ua, L.fa, -1);
   return {
     S,
@@ -1290,7 +1307,7 @@ export const childPose = (_u: number): PoseJoints => {
     K,
     A,
     T: V(A.x + 10, G - 7),
-    hd: V(S.x - 18, S.y - 5),
+    hd: pol(S, Math.PI - 0.1, L.hd),
     fc: V(-1, 0.2),
     far: [4, -2],
     pb: '',
@@ -1300,9 +1317,9 @@ export const childPose = (_u: number): PoseJoints => {
 export const standingStretchPose = (params?: { type?: string }) => (_u: number): PoseJoints => {
   const type = params?.type ?? 'quad';
   let A = V(175, G - 12);
-  let K = V(175, G - 62);
-  let H = V(175, G - 116);
-  let S = V(175, G - 180);
+  let K = V(A.x, A.y - L.sh);
+  let H = V(K.x, K.y - L.th);
+  let S = V(H.x, H.y - L.to);
   let W: Vec2;
   let E: Vec2;
   let legK = K;
@@ -1310,29 +1327,44 @@ export const standingStretchPose = (params?: { type?: string }) => (_u: number):
   let legT = V(A.x + 14, G - 5);
 
   if (type === 'quad') {
-    legK = V(175, G - 62);
-    legA = V(160, G - 118);
-    legT = V(155, G - 130);
-    W = V(162, G - 120);
+    legK = pol(H, -Math.PI / 2 - 0.70, L.th);
+    legA = pol(legK, Math.PI / 2 - 0.05, L.sh);
+    legT = pol(legA, Math.PI / 2 - 0.05, 14);
+    W = legA;
     E = ik(S, W, L.ua, L.fa, -1);
   } else if (type === 'triceps') {
-    W = V(180, S.y - 12);
-    E = V(182, S.y - 35);
+    E = pol(S, Math.PI / 2 + 0.2, L.ua);
+    W = pol(E, -Math.PI / 2 + 0.75, L.fa);
   } else if (type === 'lat') {
-    W = V(225, G - 145);
+    W = V(S.x + 35, S.y - 60);
     E = ik(S, W, L.ua, L.fa, 1);
   } else if (type === 'calf') {
+    H = V(180, G - 100);
+    S = V(H.x, H.y - L.to);
     W = V(220, G - 140);
     E = ik(S, W, L.ua, L.fa, 1);
-    legA = V(145, G - 12);
+    legA = V(135, G - 12);
     legK = ik(H, legA, L.th, L.sh, 1);
   } else if (type === 'hamstring') {
-    H = V(155, G - 105);
-    S = V(185, G - 145);
-    legA = V(210, G - 12);
-    legK = ik(H, legA, L.th, L.sh, -1);
-    W = V(195, G - 85);
+    const hingeH = V(165, G - 9 - L.sh);
+    legA = V(215, G - 12);
+    legK = ik(hingeH, legA, L.th, L.sh, -1);
+    S = pol(hingeH, 0.45, L.to);
+    W = pol(S, -Math.PI / 2 + 0.35, 60);
     E = ik(S, W, L.ua, L.fa, 1);
+    return {
+      S,
+      E,
+      W,
+      H: hingeH,
+      K: legK,
+      A: legA,
+      T: legT,
+      hd: pol(S, 0.45, L.hd),
+      fc: V(1, 0),
+      far: [5, -2],
+      pb: '',
+    };
   } else {
     W = V(type === 'chest' ? 135 : 195, S.y + 10);
     E = ik(S, W, L.ua, L.fa, 1);
@@ -1346,7 +1378,7 @@ export const standingStretchPose = (params?: { type?: string }) => (_u: number):
     K: legK,
     A: legA,
     T: legT,
-    hd: V(S.x, S.y - 27),
+    hd: V(S.x, S.y - L.hd),
     fc: V(1, 0),
     far: [5, -2],
     pb:
@@ -1359,33 +1391,44 @@ export const standingStretchPose = (params?: { type?: string }) => (_u: number):
 export const lsitSkillPose = (params?: { type?: string }) => (_u: number): PoseJoints => {
   const type = params?.type ?? 'full';
   const W = V(180, G - 5);
-  const S = V(180, G - 74);
+  const S = V(180, G - 5 - 68);
   const E = ik(S, W, L.ua, L.fa, 1);
-  const H = V(180, G - 38);
+  const H = V(180, S.y + L.to);
   let K: Vec2;
   let A: Vec2;
   let T: Vec2;
 
   if (type === 'tuck') {
-    K = V(218, G - 60);
-    A = V(208, G - 38);
-    T = V(216, G - 32);
+    K = pol(H, 0.65, L.th);
+    A = pol(K, -Math.PI / 2 + 0.35, L.sh);
+    T = V(A.x + 12, A.y);
   } else if (type === 'vsit') {
-    A = V(242, G - 110);
+    const vS = pol(H, Math.PI - 0.85, L.to);
+    const vE = ik(vS, W, L.ua, L.fa, 1);
+    A = pol(H, 0.9, L.th + L.sh);
     K = ik(H, A, L.th, L.sh, -1);
-    T = V(252, G - 118);
-    S.x = 160;
-    S.y = G - 68;
-    E.x = 170;
-    E.y = G - 36;
+    T = V(A.x + 12, A.y - 6);
+    return {
+      S: vS,
+      E: vE,
+      W,
+      H,
+      K,
+      A,
+      T,
+      hd: pol(vS, Math.PI - 0.85, L.hd),
+      fc: V(1, -0.1),
+      far: [4, -2],
+      pb: `<rect x="165" y="${G - 8}" width="30" height="8" rx="3" fill="#334155"/>`,
+    };
   } else if (type === 'one-leg') {
-    K = V(232, G - 48);
-    A = V(275, G - 42);
-    T = V(288, G - 38);
+    K = V(H.x + L.th, H.y);
+    A = V(K.x + L.sh, K.y);
+    T = V(A.x + 14, A.y);
   } else {
-    K = V(235, G - 40);
-    A = V(285, G - 40);
-    T = V(298, G - 36);
+    K = V(H.x + L.th, H.y);
+    A = V(K.x + L.sh, K.y);
+    T = V(A.x + 14, A.y);
   }
 
   return {
@@ -1396,7 +1439,7 @@ export const lsitSkillPose = (params?: { type?: string }) => (_u: number): PoseJ
     K,
     A,
     T,
-    hd: V(S.x + 8, S.y - 26),
+    hd: V(S.x, S.y - L.hd),
     fc: V(1, -0.1),
     far: [4, -2],
     pb: `<rect x="165" y="${G - 8}" width="30" height="8" rx="3" fill="#334155"/>`,
@@ -1407,11 +1450,11 @@ export const armBalancePose = (params?: { type?: string }) => (_u: number): Pose
   const type = params?.type ?? 'crow';
   const W = V(210, G - 5);
   const S = V(235, G - 54);
-  const E = type === 'crane' ? ik(S, W, L.ua, L.fa, -1) : V(222, G - 28);
-  const H = V(175, G - 74);
-  const K = V(215, G - 46);
-  const A = V(165, G - 48);
-  const T = V(155, G - 52);
+  const E = type === 'crane' ? ik(S, W, L.ua, L.fa, -1) : ik(S, W, L.ua, L.fa, 1);
+  const H = pol(S, Math.PI - 0.35, L.to);
+  const K = pol(H, -0.4, L.th);
+  const A = pol(K, -Math.PI / 2 + 0.25, L.sh);
+  const T = V(A.x - 12, A.y);
 
   return {
     S,
@@ -1421,7 +1464,7 @@ export const armBalancePose = (params?: { type?: string }) => (_u: number): Pose
     K,
     A,
     T,
-    hd: V(S.x + 22, S.y - 12),
+    hd: pol(S, 0.35, L.hd),
     fc: V(1, 0.4),
     far: [4, -2],
     pb: '',
@@ -1433,7 +1476,7 @@ export const plancheSkillPose = (params?: { type?: string }) => (_u: number): Po
   const W = V(195, G - 5);
   const S = V(238, G - 60);
   const E = ik(S, W, L.ua, L.fa, -1);
-  const H = V(174, G - 60);
+  const H = pol(S, Math.PI, L.to);
   let K: Vec2;
   let A: Vec2;
   let T: Vec2;
@@ -1441,20 +1484,19 @@ export const plancheSkillPose = (params?: { type?: string }) => (_u: number): Po
   if (type === 'lean') {
     A = V(85, G - 12);
     K = ik(H, A, L.th, L.sh, -1);
-    T = V(75, G - 5);
+    T = V(A.x - 10, G - 5);
   } else if (type === 'tuck') {
-    H.y = G - 68;
-    K = V(198, G - 58);
-    A = V(178, G - 38);
-    T = V(170, G - 34);
+    K = pol(H, -0.65, L.th);
+    A = pol(K, Math.PI - 1.15, L.sh);
+    T = V(A.x - 10, A.y);
   } else if (type === 'adv-tuck') {
-    K = V(174, G - 22);
-    A = V(132, G - 22);
-    T = V(122, G - 18);
+    K = pol(H, -Math.PI / 2, L.th);
+    A = pol(K, Math.PI, L.sh);
+    T = V(A.x - 12, A.y);
   } else {
-    K = V(120, G - 60);
-    A = V(70, G - 60);
-    T = V(58, G - 58);
+    K = pol(H, Math.PI, L.th);
+    A = pol(K, Math.PI, L.sh);
+    T = V(A.x - 14, A.y);
   }
 
   return {
@@ -1465,7 +1507,7 @@ export const plancheSkillPose = (params?: { type?: string }) => (_u: number): Po
     K,
     A,
     T,
-    hd: V(S.x + 25, S.y - 10),
+    hd: pol(S, 0.2, L.hd),
     fc: V(1, 0.1),
     far: [4, -2],
     pb: '',
@@ -1475,25 +1517,25 @@ export const plancheSkillPose = (params?: { type?: string }) => (_u: number): Po
 export const frontLeverSkillPose = (params?: { type?: string }) => (_u: number): PoseJoints => {
   const type = params?.type ?? 'full';
   const W = V(235, G - 175);
-  const S = V(172, G - 160);
+  const S = V(W.x - 63, W.y + 15);
   const E = ik(S, W, L.ua, L.fa, 1);
-  const H = V(236, G - 156);
+  const H = pol(S, 0, L.to);
   let K: Vec2;
   let A: Vec2;
   let T: Vec2;
 
   if (type === 'tuck') {
-    K = V(212, G - 185);
-    A = V(236, G - 180);
-    T = V(244, G - 188);
+    K = pol(H, Math.PI / 2 + 0.35, L.th);
+    A = pol(K, -Math.PI / 2 + 0.95, L.sh);
+    T = V(A.x + 12, A.y - 6);
   } else if (type === 'adv-tuck') {
-    K = V(236, G - 198);
-    A = V(280, G - 198);
-    T = V(290, G - 204);
+    K = pol(H, Math.PI / 2, L.th);
+    A = pol(K, 0, L.sh);
+    T = V(A.x + 12, A.y);
   } else {
-    K = V(290, G - 156);
-    A = V(340, G - 156);
-    T = V(352, G - 162);
+    K = pol(H, 0, L.th);
+    A = pol(K, 0, L.sh);
+    T = V(A.x + 14, A.y);
   }
 
   return {
@@ -1504,7 +1546,7 @@ export const frontLeverSkillPose = (params?: { type?: string }) => (_u: number):
     K,
     A,
     T,
-    hd: V(S.x - 22, S.y - 12),
+    hd: pol(S, Math.PI - 0.3, L.hd),
     fc: V(-1, -0.3),
     far: [4, -2],
     pb: `<line x1="235" y1="${G - 210}" x2="235" y2="${
@@ -1516,25 +1558,25 @@ export const frontLeverSkillPose = (params?: { type?: string }) => (_u: number):
 export const backLeverSkillPose = (params?: { type?: string }) => (_u: number): PoseJoints => {
   const type = params?.type ?? 'full';
   const W = V(215, G - 175);
-  const S = V(255, G - 150);
+  const S = V(W.x + 40, W.y + 25);
   const E = ik(S, W, L.ua, L.fa, -1);
-  const H = V(190, G - 150);
+  const H = pol(S, Math.PI, L.to);
   let K: Vec2;
   let A: Vec2;
   let T: Vec2;
 
   if (type === 'tuck') {
-    K = V(205, G - 125);
-    A = V(190, G - 132);
-    T = V(182, G - 136);
+    K = pol(H, -Math.PI / 2 - 0.35, L.th);
+    A = pol(K, Math.PI / 2 + 0.35, L.sh);
+    T = V(A.x - 12, A.y);
   } else if (type === 'adv-tuck') {
-    K = V(190, G - 110);
-    A = V(148, G - 110);
-    T = V(138, G - 114);
+    K = pol(H, -Math.PI / 2, L.th);
+    A = pol(K, Math.PI, L.sh);
+    T = V(A.x - 12, A.y);
   } else {
-    K = V(136, G - 150);
-    A = V(86, G - 150);
-    T = V(74, G - 146);
+    K = pol(H, Math.PI, L.th);
+    A = pol(K, Math.PI, L.sh);
+    T = V(A.x - 14, A.y);
   }
 
   return {
@@ -1545,7 +1587,7 @@ export const backLeverSkillPose = (params?: { type?: string }) => (_u: number): 
     K,
     A,
     T,
-    hd: V(S.x + 22, S.y - 12),
+    hd: pol(S, 0.3, L.hd),
     fc: V(1, 0.3),
     far: [4, -2],
     pb: `<line x1="215" y1="${G - 210}" x2="215" y2="${
@@ -1556,11 +1598,11 @@ export const backLeverSkillPose = (params?: { type?: string }) => (_u: number): 
 
 export const skinTheCatPose = (_u: number): PoseJoints => {
   const W = V(200, G - 180);
-  const S = V(200, G - 120);
+  const S = V(W.x, W.y + 58);
   const E = ik(S, W, L.ua, L.fa, 1);
-  const H = V(200, G - 70);
-  const K = V(220, G - 95);
-  const A = V(205, G - 115);
+  const H = pol(S, -Math.PI / 2, L.to);
+  const K = pol(H, -0.65, L.th);
+  const A = pol(K, Math.PI - 1.15, L.sh);
   return {
     S,
     E,
@@ -1569,7 +1611,7 @@ export const skinTheCatPose = (_u: number): PoseJoints => {
     K,
     A,
     T: V(A.x + 10, A.y - 4),
-    hd: V(S.x, S.y + 25),
+    hd: pol(S, Math.PI / 2, L.hd),
     fc: V(1, 0),
     far: [4, -2],
     pb: `<line x1="200" y1="${G - 210}" x2="200" y2="${G - 180}" stroke="#1f3b5c" stroke-width="4"/>`,
@@ -1582,19 +1624,22 @@ export const humanFlagSkillPose = (params?: { type?: string }) => (_u: number): 
   const upperW = V(140, G - 160);
   const S = V(180, G - 128);
   const E = ik(S, lowerW, L.ua, L.fa, 1);
-  const H = V(244, G - 128);
+  const farS = S;
+  const farE = ik(farS, upperW, L.ua, L.fa, -1);
+  const farW = upperW;
+  const H = pol(S, 0, L.to);
   let K: Vec2;
   let A: Vec2;
   let T: Vec2;
 
   if (type === 'tuck') {
-    K = V(230, G - 158);
-    A = V(252, G - 152);
-    T = V(260, G - 158);
+    K = pol(H, Math.PI / 2 - 0.35, L.th);
+    A = pol(K, -Math.PI / 2 + 0.35, L.sh);
+    T = V(A.x + 12, A.y - 6);
   } else {
-    K = V(298, G - 128);
-    A = V(348, G - 128);
-    T = V(360, G - 134);
+    K = pol(H, 0, L.th);
+    A = pol(K, 0, L.sh);
+    T = V(A.x + 14, A.y);
   }
 
   return {
@@ -1605,10 +1650,10 @@ export const humanFlagSkillPose = (params?: { type?: string }) => (_u: number): 
     K,
     A,
     T,
-    farW: upperW,
-    farE: ik(V(S.x, S.y), upperW, L.ua, L.fa, -1),
-    farS: V(S.x, S.y),
-    hd: V(S.x - 24, S.y),
+    farW,
+    farE,
+    farS,
+    hd: pol(S, Math.PI, L.hd),
     fc: V(-1, 0),
     far: [3, -2],
     pb: `<line x1="140" y1="${G - 220}" x2="140" y2="${G}" stroke="#334155" stroke-width="5"/>`,
@@ -1617,11 +1662,11 @@ export const humanFlagSkillPose = (params?: { type?: string }) => (_u: number): 
 
 export const kickUpHandstandPose = (_u: number): PoseJoints => {
   const W = V(210, G - 5);
-  const S = V(210, G - 70);
+  const S = V(W.x, G - 5 - 65);
   const E = ik(S, W, L.ua, L.fa, 1);
-  const H = V(195, G - 125);
-  const K = V(215, G - 170);
-  const A = V(230, G - 215);
+  const H = pol(S, -Math.PI / 2, L.to);
+  const K = pol(H, -Math.PI / 2 - 0.25, L.th);
+  const A = pol(K, -Math.PI / 2 - 0.25, L.sh);
   return {
     S,
     E,
@@ -1630,7 +1675,7 @@ export const kickUpHandstandPose = (_u: number): PoseJoints => {
     K,
     A,
     T: V(A.x + 8, A.y - 12),
-    hd: V(S.x, S.y - 25),
+    hd: pol(S, Math.PI / 2, L.hd),
     fc: V(1, 0),
     far: [4, -2],
     pb: '',
