@@ -160,7 +160,22 @@ export interface ReferenceExerciseDef {
     | 'dragon_flag'
     | 'ab_wheel'
     | 'mountain_climber'
-    | 'nordic_curl';
+    | 'nordic_curl'
+    | 'cat_cow'
+    | 'standing_mobility'
+    | 'deep_squat_hold'
+    | 'world_greatest_stretch'
+    | 'seated_hip_mobility'
+    | 'child_pose'
+    | 'standing_stretch'
+    | 'lsit_skill'
+    | 'arm_balance'
+    | 'planche_skill'
+    | 'front_lever_skill'
+    | 'back_lever_skill'
+    | 'skin_the_cat'
+    | 'human_flag'
+    | 'kick_up_handstand';
   params?: Record<string, any>;
   far?: [number, number];
   durationSeconds?: number;
@@ -1134,6 +1149,494 @@ export const nordicCurlPose = (u: number): PoseJoints => {
   };
 };
 
+export const catCowPose = (u: number): PoseJoints => {
+  const t = Math.sin(u * Math.PI * 2);
+  const H = V(225, G - 58 + t * 7);
+  const S = V(148, G - 58 + t * 5);
+  const W = V(148, G - 5);
+  const E = ik(S, W, L.ua, L.fa, -1);
+  const K = V(225, G - 9);
+  const A = V(265, G - 9);
+  return {
+    S,
+    E,
+    W,
+    H,
+    K,
+    A,
+    T: V(A.x + 12, G - 5),
+    hd: V(S.x - 25, S.y - 10 + t * 6),
+    fc: V(-1, t * 0.5),
+    far: [4, -3],
+    pb: `<line x1="140" y1="${G}" x2="275" y2="${G}" stroke="#1f3b5c" stroke-width="2"/>`,
+  };
+};
+
+export const standingMobilityPose = (u: number): PoseJoints => {
+  const A = V(180, G - 12);
+  const K = V(180, G - 62);
+  const H = V(180, G - 116);
+  const S = V(180, G - 180);
+  const W = V(180 + Math.cos(u * Math.PI * 2) * 45, S.y + Math.sin(u * Math.PI * 2) * 45);
+  const E = ik(S, W, L.ua, L.fa, 1);
+  return {
+    S,
+    E,
+    W,
+    H,
+    K,
+    A,
+    T: V(A.x + 14, G - 5),
+    hd: V(S.x, S.y - 27),
+    fc: V(1, 0),
+    far: [5, -2],
+    pb: '',
+  };
+};
+
+export const deepSquatHoldPose = (u: number): PoseJoints => {
+  const t = 0.5 + 0.5 * Math.sin(u * Math.PI * 2);
+  const A = V(155, G - 12);
+  const K = V(205, G - 42);
+  const H = V(165, G - 38 + t * 5);
+  const S = V(160, G - 98 + t * 4);
+  const W = V(225, G - 102);
+  const E = ik(S, W, L.ua, L.fa, -1);
+  return {
+    S,
+    E,
+    W,
+    H,
+    K,
+    A,
+    T: V(A.x + 15, G - 5),
+    hd: V(S.x + 10, S.y - 25),
+    fc: V(1, 0),
+    far: [6, -2],
+    pb: `<line x1="225" y1="${G - 160}" x2="225" y2="${G}" stroke="#334155" stroke-width="4"/>`,
+  };
+};
+
+export const worldGreatestStretchPose = (u: number): PoseJoints => {
+  const t = 0.5 + 0.5 * Math.sin(u * Math.PI * 2);
+  const frontA = V(220, G - 12);
+  const frontK = V(212, G - 55);
+  const H = V(155, G - 48);
+  const backK = V(115, G - 20);
+  const backA = V(70, G - 12);
+  const S = V(170, G - 85);
+  const W = V(170 + t * 25, G - 95 - t * 45);
+  const E = ik(S, W, L.ua, L.fa, 1);
+  const farW = V(195, G - 5);
+  const farE = ik(V(S.x + 4, S.y - 2), farW, L.ua, L.fa, -1);
+  return {
+    S,
+    E,
+    W,
+    H,
+    K: frontK,
+    A: frontA,
+    T: V(frontA.x + 12, G - 5),
+    farS: V(S.x + 4, S.y - 2),
+    farE,
+    farW,
+    farH: V(H.x - 4, H.y),
+    farK: backK,
+    farA: backA,
+    farT: V(backA.x - 12, G - 5),
+    hd: V(S.x + 8, S.y - 25),
+    fc: V(1, -0.4),
+    far: [4, -2],
+    pb: '',
+  };
+};
+
+export const seatedHipMobilityPose = (u: number): PoseJoints => {
+  const t = 0.5 + 0.5 * Math.sin(u * Math.PI * 2);
+  const H = V(190, G - 16);
+  const S = V(185, G - 76 + t * 4);
+  const W = V(168, G - 15);
+  const E = ik(S, W, L.ua, L.fa, -1);
+  const K = V(235, G - 14);
+  const A = V(205, G - 8);
+  return {
+    S,
+    E,
+    W,
+    H,
+    K,
+    A,
+    T: V(A.x - 10, G - 6),
+    hd: V(S.x + 6, S.y - 26),
+    fc: V(1, 0),
+    far: [6, -2],
+    pb: '',
+  };
+};
+
+export const childPose = (_u: number): PoseJoints => {
+  const t = 0.5 + 0.5 * Math.sin(_u * Math.PI * 2);
+  const H = V(240, G - 26 + t * 2);
+  const K = V(195, G - 9);
+  const A = V(238, G - 9);
+  const S = V(160, G - 25 + t * 2);
+  const W = V(105, G - 5);
+  const E = ik(S, W, L.ua, L.fa, -1);
+  return {
+    S,
+    E,
+    W,
+    H,
+    K,
+    A,
+    T: V(A.x + 10, G - 7),
+    hd: V(S.x - 18, S.y - 5),
+    fc: V(-1, 0.2),
+    far: [4, -2],
+    pb: '',
+  };
+};
+
+export const standingStretchPose = (params?: { type?: string }) => (_u: number): PoseJoints => {
+  const type = params?.type ?? 'quad';
+  let A = V(175, G - 12);
+  let K = V(175, G - 62);
+  let H = V(175, G - 116);
+  let S = V(175, G - 180);
+  let W: Vec2;
+  let E: Vec2;
+  let legK = K;
+  let legA = A;
+  let legT = V(A.x + 14, G - 5);
+
+  if (type === 'quad') {
+    legK = V(175, G - 62);
+    legA = V(160, G - 118);
+    legT = V(155, G - 130);
+    W = V(162, G - 120);
+    E = ik(S, W, L.ua, L.fa, -1);
+  } else if (type === 'triceps') {
+    W = V(180, S.y - 12);
+    E = V(182, S.y - 35);
+  } else if (type === 'lat') {
+    W = V(225, G - 145);
+    E = ik(S, W, L.ua, L.fa, 1);
+  } else if (type === 'calf') {
+    W = V(220, G - 140);
+    E = ik(S, W, L.ua, L.fa, 1);
+    legA = V(145, G - 12);
+    legK = ik(H, legA, L.th, L.sh, 1);
+  } else if (type === 'hamstring') {
+    H = V(155, G - 105);
+    S = V(185, G - 145);
+    legA = V(210, G - 12);
+    legK = ik(H, legA, L.th, L.sh, -1);
+    W = V(195, G - 85);
+    E = ik(S, W, L.ua, L.fa, 1);
+  } else {
+    W = V(type === 'chest' ? 135 : 195, S.y + 10);
+    E = ik(S, W, L.ua, L.fa, 1);
+  }
+
+  return {
+    S,
+    E,
+    W,
+    H,
+    K: legK,
+    A: legA,
+    T: legT,
+    hd: V(S.x, S.y - 27),
+    fc: V(1, 0),
+    far: [5, -2],
+    pb:
+      type === 'calf' || type === 'chest'
+        ? `<line x1="225" y1="${G - 200}" x2="225" y2="${G}" stroke="#334155" stroke-width="4"/>`
+        : '',
+  };
+};
+
+export const lsitSkillPose = (params?: { type?: string }) => (_u: number): PoseJoints => {
+  const type = params?.type ?? 'full';
+  const W = V(180, G - 5);
+  const S = V(180, G - 74);
+  const E = ik(S, W, L.ua, L.fa, 1);
+  const H = V(180, G - 38);
+  let K: Vec2;
+  let A: Vec2;
+  let T: Vec2;
+
+  if (type === 'tuck') {
+    K = V(218, G - 60);
+    A = V(208, G - 38);
+    T = V(216, G - 32);
+  } else if (type === 'vsit') {
+    A = V(242, G - 110);
+    K = ik(H, A, L.th, L.sh, -1);
+    T = V(252, G - 118);
+    S.x = 160;
+    S.y = G - 68;
+    E.x = 170;
+    E.y = G - 36;
+  } else if (type === 'one-leg') {
+    K = V(232, G - 48);
+    A = V(275, G - 42);
+    T = V(288, G - 38);
+  } else {
+    K = V(235, G - 40);
+    A = V(285, G - 40);
+    T = V(298, G - 36);
+  }
+
+  return {
+    S,
+    E,
+    W,
+    H,
+    K,
+    A,
+    T,
+    hd: V(S.x + 8, S.y - 26),
+    fc: V(1, -0.1),
+    far: [4, -2],
+    pb: `<rect x="165" y="${G - 8}" width="30" height="8" rx="3" fill="#334155"/>`,
+  };
+};
+
+export const armBalancePose = (params?: { type?: string }) => (_u: number): PoseJoints => {
+  const type = params?.type ?? 'crow';
+  const W = V(210, G - 5);
+  const S = V(235, G - 54);
+  const E = type === 'crane' ? ik(S, W, L.ua, L.fa, -1) : V(222, G - 28);
+  const H = V(175, G - 74);
+  const K = V(215, G - 46);
+  const A = V(165, G - 48);
+  const T = V(155, G - 52);
+
+  return {
+    S,
+    E,
+    W,
+    H,
+    K,
+    A,
+    T,
+    hd: V(S.x + 22, S.y - 12),
+    fc: V(1, 0.4),
+    far: [4, -2],
+    pb: '',
+  };
+};
+
+export const plancheSkillPose = (params?: { type?: string }) => (_u: number): PoseJoints => {
+  const type = params?.type ?? 'full';
+  const W = V(195, G - 5);
+  const S = V(238, G - 60);
+  const E = ik(S, W, L.ua, L.fa, -1);
+  const H = V(174, G - 60);
+  let K: Vec2;
+  let A: Vec2;
+  let T: Vec2;
+
+  if (type === 'lean') {
+    A = V(85, G - 12);
+    K = ik(H, A, L.th, L.sh, -1);
+    T = V(75, G - 5);
+  } else if (type === 'tuck') {
+    H.y = G - 68;
+    K = V(198, G - 58);
+    A = V(178, G - 38);
+    T = V(170, G - 34);
+  } else if (type === 'adv-tuck') {
+    K = V(174, G - 22);
+    A = V(132, G - 22);
+    T = V(122, G - 18);
+  } else {
+    K = V(120, G - 60);
+    A = V(70, G - 60);
+    T = V(58, G - 58);
+  }
+
+  return {
+    S,
+    E,
+    W,
+    H,
+    K,
+    A,
+    T,
+    hd: V(S.x + 25, S.y - 10),
+    fc: V(1, 0.1),
+    far: [4, -2],
+    pb: '',
+  };
+};
+
+export const frontLeverSkillPose = (params?: { type?: string }) => (_u: number): PoseJoints => {
+  const type = params?.type ?? 'full';
+  const W = V(235, G - 175);
+  const S = V(172, G - 160);
+  const E = ik(S, W, L.ua, L.fa, 1);
+  const H = V(236, G - 156);
+  let K: Vec2;
+  let A: Vec2;
+  let T: Vec2;
+
+  if (type === 'tuck') {
+    K = V(212, G - 185);
+    A = V(236, G - 180);
+    T = V(244, G - 188);
+  } else if (type === 'adv-tuck') {
+    K = V(236, G - 198);
+    A = V(280, G - 198);
+    T = V(290, G - 204);
+  } else {
+    K = V(290, G - 156);
+    A = V(340, G - 156);
+    T = V(352, G - 162);
+  }
+
+  return {
+    S,
+    E,
+    W,
+    H,
+    K,
+    A,
+    T,
+    hd: V(S.x - 22, S.y - 12),
+    fc: V(-1, -0.3),
+    far: [4, -2],
+    pb: `<line x1="235" y1="${G - 210}" x2="235" y2="${
+      G - 175
+    }" stroke="#1f3b5c" stroke-width="4"/><circle cx="235" cy="${G - 175}" r="5" fill="#334155"/>`,
+  };
+};
+
+export const backLeverSkillPose = (params?: { type?: string }) => (_u: number): PoseJoints => {
+  const type = params?.type ?? 'full';
+  const W = V(215, G - 175);
+  const S = V(255, G - 150);
+  const E = ik(S, W, L.ua, L.fa, -1);
+  const H = V(190, G - 150);
+  let K: Vec2;
+  let A: Vec2;
+  let T: Vec2;
+
+  if (type === 'tuck') {
+    K = V(205, G - 125);
+    A = V(190, G - 132);
+    T = V(182, G - 136);
+  } else if (type === 'adv-tuck') {
+    K = V(190, G - 110);
+    A = V(148, G - 110);
+    T = V(138, G - 114);
+  } else {
+    K = V(136, G - 150);
+    A = V(86, G - 150);
+    T = V(74, G - 146);
+  }
+
+  return {
+    S,
+    E,
+    W,
+    H,
+    K,
+    A,
+    T,
+    hd: V(S.x + 22, S.y - 12),
+    fc: V(1, 0.3),
+    far: [4, -2],
+    pb: `<line x1="215" y1="${G - 210}" x2="215" y2="${
+      G - 175
+    }" stroke="#1f3b5c" stroke-width="4"/><circle cx="215" cy="${G - 175}" r="5" fill="#334155"/>`,
+  };
+};
+
+export const skinTheCatPose = (_u: number): PoseJoints => {
+  const W = V(200, G - 180);
+  const S = V(200, G - 120);
+  const E = ik(S, W, L.ua, L.fa, 1);
+  const H = V(200, G - 70);
+  const K = V(220, G - 95);
+  const A = V(205, G - 115);
+  return {
+    S,
+    E,
+    W,
+    H,
+    K,
+    A,
+    T: V(A.x + 10, A.y - 4),
+    hd: V(S.x, S.y + 25),
+    fc: V(1, 0),
+    far: [4, -2],
+    pb: `<line x1="200" y1="${G - 210}" x2="200" y2="${G - 180}" stroke="#1f3b5c" stroke-width="4"/>`,
+  };
+};
+
+export const humanFlagSkillPose = (params?: { type?: string }) => (_u: number): PoseJoints => {
+  const type = params?.type ?? 'full';
+  const lowerW = V(140, G - 95);
+  const upperW = V(140, G - 160);
+  const S = V(180, G - 128);
+  const E = ik(S, lowerW, L.ua, L.fa, 1);
+  const H = V(244, G - 128);
+  let K: Vec2;
+  let A: Vec2;
+  let T: Vec2;
+
+  if (type === 'tuck') {
+    K = V(230, G - 158);
+    A = V(252, G - 152);
+    T = V(260, G - 158);
+  } else {
+    K = V(298, G - 128);
+    A = V(348, G - 128);
+    T = V(360, G - 134);
+  }
+
+  return {
+    S,
+    E,
+    W: lowerW,
+    H,
+    K,
+    A,
+    T,
+    farW: upperW,
+    farE: ik(V(S.x, S.y), upperW, L.ua, L.fa, -1),
+    farS: V(S.x, S.y),
+    hd: V(S.x - 24, S.y),
+    fc: V(-1, 0),
+    far: [3, -2],
+    pb: `<line x1="140" y1="${G - 220}" x2="140" y2="${G}" stroke="#334155" stroke-width="5"/>`,
+  };
+};
+
+export const kickUpHandstandPose = (_u: number): PoseJoints => {
+  const W = V(210, G - 5);
+  const S = V(210, G - 70);
+  const E = ik(S, W, L.ua, L.fa, 1);
+  const H = V(195, G - 125);
+  const K = V(215, G - 170);
+  const A = V(230, G - 215);
+  return {
+    S,
+    E,
+    W,
+    H,
+    K,
+    A,
+    T: V(A.x + 8, A.y - 12),
+    hd: V(S.x, S.y - 25),
+    fc: V(1, 0),
+    far: [4, -2],
+    pb: '',
+  };
+};
+
 // Map de modelos instanciáveis a partir dos dados JSON
 const MODEL_FACTORIES: Record<string, (params?: any) => (u: number) => PoseJoints> = {
   pull: (params?: any) => pullPose(params),
@@ -1160,6 +1663,21 @@ const MODEL_FACTORIES: Record<string, (params?: any) => (u: number) => PoseJoint
   ab_wheel: () => abWheelPose,
   mountain_climber: () => mountainClimberPose,
   nordic_curl: () => nordicCurlPose,
+  cat_cow: () => catCowPose,
+  standing_mobility: () => standingMobilityPose,
+  deep_squat_hold: () => deepSquatHoldPose,
+  world_greatest_stretch: () => worldGreatestStretchPose,
+  seated_hip_mobility: () => seatedHipMobilityPose,
+  child_pose: () => childPose,
+  standing_stretch: (params?: any) => standingStretchPose(params),
+  lsit_skill: (params?: any) => lsitSkillPose(params),
+  arm_balance: (params?: any) => armBalancePose(params),
+  planche_skill: (params?: any) => plancheSkillPose(params),
+  front_lever_skill: (params?: any) => frontLeverSkillPose(params),
+  back_lever_skill: (params?: any) => backLeverSkillPose(params),
+  skin_the_cat: () => skinTheCatPose,
+  human_flag: (params?: any) => humanFlagSkillPose(params),
+  kick_up_handstand: () => kickUpHandstandPose,
 };
 
 /**
@@ -1520,7 +2038,269 @@ export function getReferenceExerciseDef(id: string): ReferenceExerciseDef {
     };
   }
 
-  // 14. Puxadas e Barras Fixas (Padrão canônico)
+  // 14. Skills Avançadas (Lote 5)
+  if (lowerId.includes('bandeira-humana')) {
+    const isTuck = lowerId.includes('tuck');
+    return {
+      id,
+      name: isTuck ? 'Bandeira Humana Tuck' : 'Bandeira Humana Completa',
+      model: 'human_flag',
+      params: { type: isTuck ? 'tuck' : 'full' },
+      durationSeconds: 3.8,
+      muscles: REFERENCE_POSES_DATA['bandeira-humana'].muscles,
+      mus: REFERENCE_POSES_DATA['bandeira-humana'].muscles,
+      pose: humanFlagSkillPose({ type: isTuck ? 'tuck' : 'full' }),
+    };
+  }
+
+  if (lowerId.includes('skin-the-cat')) {
+    return {
+      id,
+      name: 'Skin the Cat',
+      model: 'skin_the_cat',
+      durationSeconds: 4.0,
+      muscles: REFERENCE_POSES_DATA['skin-the-cat'].muscles,
+      mus: REFERENCE_POSES_DATA['skin-the-cat'].muscles,
+      pose: skinTheCatPose,
+    };
+  }
+
+  if (lowerId.includes('front-lever') || lowerId === 'frontlever') {
+    const type = lowerId.includes('tuck') ? (lowerId.includes('adv') ? 'adv-tuck' : 'tuck') : 'full';
+    return {
+      id,
+      name: 'Front Lever',
+      model: 'front_lever_skill',
+      params: { type },
+      durationSeconds: 3.8,
+      muscles: REFERENCE_POSES_DATA.frontlever.muscles,
+      mus: REFERENCE_POSES_DATA.frontlever.muscles,
+      pose: frontLeverSkillPose({ type }),
+    };
+  }
+
+  if (lowerId.includes('back-lever') || lowerId === 'backlever') {
+    const type = lowerId.includes('tuck') ? (lowerId.includes('adv') ? 'adv-tuck' : 'tuck') : 'full';
+    return {
+      id,
+      name: 'Back Lever',
+      model: 'back_lever_skill',
+      params: { type },
+      durationSeconds: 3.8,
+      muscles: REFERENCE_POSES_DATA['back-lever'].muscles,
+      mus: REFERENCE_POSES_DATA['back-lever'].muscles,
+      pose: backLeverSkillPose({ type }),
+    };
+  }
+
+  if (lowerId.includes('planche') && !lowerId.includes('pseudo') && !lowerId.includes('front') && !lowerId.includes('back')) {
+    const type = lowerId.includes('lean') ? 'lean' : lowerId.includes('adv-tuck') ? 'adv-tuck' : lowerId.includes('tuck') ? 'tuck' : 'full';
+    return {
+      id,
+      name: 'Planche',
+      model: 'planche_skill',
+      params: { type },
+      durationSeconds: 3.8,
+      muscles: REFERENCE_POSES_DATA.planche.muscles,
+      mus: REFERENCE_POSES_DATA.planche.muscles,
+      pose: plancheSkillPose({ type }),
+    };
+  }
+
+  if (lowerId.includes('crow') || lowerId.includes('crane') || lowerId.includes('corvo') || lowerId.includes('garca')) {
+    const isCrane = lowerId.includes('crane') || lowerId.includes('garca');
+    return {
+      id,
+      name: isCrane ? 'Crane Pose' : 'Crow Pose',
+      model: 'arm_balance',
+      params: { type: isCrane ? 'crane' : 'crow' },
+      durationSeconds: 3.6,
+      muscles: REFERENCE_POSES_DATA['crow-pose'].muscles,
+      mus: REFERENCE_POSES_DATA['crow-pose'].muscles,
+      pose: armBalancePose({ type: isCrane ? 'crane' : 'crow' }),
+    };
+  }
+
+  if (lowerId.includes('chute-parada-maos')) {
+    return {
+      id,
+      name: 'Chute para Parada de Mãos',
+      model: 'kick_up_handstand',
+      durationSeconds: 3.6,
+      muscles: REFERENCE_POSES_DATA['chute-parada-maos'].muscles,
+      mus: REFERENCE_POSES_DATA['chute-parada-maos'].muscles,
+      pose: kickUpHandstandPose,
+    };
+  }
+
+  if (lowerId.includes('vsit') || lowerId.includes('v-sit')) {
+    return {
+      id,
+      name: 'V-Sit',
+      model: 'lsit_skill',
+      params: { type: 'vsit' },
+      durationSeconds: 3.8,
+      muscles: REFERENCE_POSES_DATA.vsit.muscles,
+      mus: REFERENCE_POSES_DATA.vsit.muscles,
+      pose: lsitSkillPose({ type: 'vsit' }),
+    };
+  }
+
+  if (lowerId.includes('lsit') || lowerId.includes('l-sit')) {
+    if (!lowerId.includes('pullup') && !lowerId.includes('barra')) {
+      const type = lowerId.includes('tuck') ? 'tuck' : lowerId.includes('uma-perna') ? 'one-leg' : 'full';
+      return {
+        id,
+        name: 'L-Sit',
+        model: 'lsit_skill',
+        params: { type },
+        durationSeconds: 3.6,
+        muscles: REFERENCE_POSES_DATA.lsit.muscles,
+        mus: REFERENCE_POSES_DATA.lsit.muscles,
+        pose: lsitSkillPose({ type }),
+      };
+    }
+  }
+
+  // 15. Aquecimento e Alongamento (Lote 4)
+  if (lowerId.includes('gato') || lowerId.includes('retracao-protracao') || lowerId.includes('flexao-extensao-punho') || lowerId.includes('rotacao-toracica')) {
+    return {
+      id,
+      name: 'Mobilidade em Quatro Apoios',
+      model: 'cat_cow',
+      durationSeconds: 3.6,
+      muscles: REFERENCE_POSES_DATA['gato-vaca'].muscles,
+      mus: REFERENCE_POSES_DATA['gato-vaca'].muscles,
+      pose: catCowPose,
+    };
+  }
+
+  if (lowerId.includes('greatest') || lowerId.includes('flexores-quadril')) {
+    return {
+      id,
+      name: 'Alongamento Dinâmico de Quadril',
+      model: 'world_greatest_stretch',
+      durationSeconds: 4.0,
+      muscles: REFERENCE_POSES_DATA['greatest-stretch'].muscles,
+      mus: REFERENCE_POSES_DATA['greatest-stretch'].muscles,
+      pose: worldGreatestStretchPose,
+    };
+  }
+
+  if (lowerId.includes('9090') || lowerId.includes('pombo') || lowerId.includes('borboleta')) {
+    return {
+      id,
+      name: 'Mobilidade de Quadril no Solo',
+      model: 'seated_hip_mobility',
+      durationSeconds: 3.8,
+      muscles: REFERENCE_POSES_DATA['rotacao-quadril-9090'].muscles,
+      mus: REFERENCE_POSES_DATA['rotacao-quadril-9090'].muscles,
+      pose: seatedHipMobilityPose,
+    };
+  }
+
+  if (lowerId.includes('crianca')) {
+    return {
+      id,
+      name: 'Postura da Criança',
+      model: 'child_pose',
+      durationSeconds: 4.0,
+      muscles: REFERENCE_POSES_DATA['postura-crianca'].muscles,
+      mus: REFERENCE_POSES_DATA['postura-crianca'].muscles,
+      pose: childPose,
+    };
+  }
+
+  if (lowerId.includes('agachamento-profundo') || lowerId.includes('mobilidade-tornozelo')) {
+    return {
+      id,
+      name: 'Mobilidade de Agachamento Profundo',
+      model: 'deep_squat_hold',
+      durationSeconds: 4.0,
+      muscles: REFERENCE_POSES_DATA['agachamento-profundo-assistido'].muscles,
+      mus: REFERENCE_POSES_DATA['agachamento-profundo-assistido'].muscles,
+      pose: deepSquatHoldPose,
+    };
+  }
+
+  if (lowerId.includes('quadriceps')) {
+    return {
+      id,
+      name: 'Alongamento de Quadríceps',
+      model: 'standing_stretch',
+      params: { type: 'quad' },
+      durationSeconds: 3.6,
+      muscles: REFERENCE_POSES_DATA['alongamento-quadriceps'].muscles,
+      mus: REFERENCE_POSES_DATA['alongamento-quadriceps'].muscles,
+      pose: standingStretchPose({ type: 'quad' }),
+    };
+  }
+
+  if (lowerId.includes('triceps')) {
+    return {
+      id,
+      name: 'Alongamento de Tríceps',
+      model: 'standing_stretch',
+      params: { type: 'triceps' },
+      durationSeconds: 3.6,
+      muscles: REFERENCE_POSES_DATA['alongamento-triceps-acima'].muscles,
+      mus: REFERENCE_POSES_DATA['alongamento-triceps-acima'].muscles,
+      pose: standingStretchPose({ type: 'triceps' }),
+    };
+  }
+
+  if (lowerId.includes('dorsal')) {
+    return {
+      id,
+      name: 'Alongamento de Dorsal',
+      model: 'standing_stretch',
+      params: { type: 'lat' },
+      durationSeconds: 3.8,
+      muscles: REFERENCE_POSES_DATA['alongamento-dorsal-barra'].muscles,
+      mus: REFERENCE_POSES_DATA['alongamento-dorsal-barra'].muscles,
+      pose: standingStretchPose({ type: 'lat' }),
+    };
+  }
+
+  if (lowerId.includes('isquiotibiais')) {
+    return {
+      id,
+      name: 'Alongamento de Isquiotibiais',
+      model: 'standing_stretch',
+      params: { type: 'hamstring' },
+      durationSeconds: 3.8,
+      muscles: REFERENCE_POSES_DATA['alongamento-isquiotibiais'].muscles,
+      mus: REFERENCE_POSES_DATA['alongamento-isquiotibiais'].muscles,
+      pose: standingStretchPose({ type: 'hamstring' }),
+    };
+  }
+
+  if (lowerId.includes('peitoral')) {
+    return {
+      id,
+      name: 'Alongamento de Peitoral',
+      model: 'standing_stretch',
+      params: { type: 'chest' },
+      durationSeconds: 3.6,
+      muscles: REFERENCE_POSES_DATA['alongamento-peitoral-parede'].muscles,
+      mus: REFERENCE_POSES_DATA['alongamento-peitoral-parede'].muscles,
+      pose: standingStretchPose({ type: 'chest' }),
+    };
+  }
+
+  if (lowerId.includes('circulo') || lowerId.includes('rotacao') || lowerId.includes('mobilidade') || lowerId.includes('aquecimento') || lowerId.includes('passagem') || lowerId.includes('angels') || lowerId.includes('balanco')) {
+    return {
+      id,
+      name: 'Mobilidade Ativa',
+      model: 'standing_mobility',
+      durationSeconds: 3.2,
+      muscles: REFERENCE_POSES_DATA['circulos-ombro'].muscles,
+      mus: REFERENCE_POSES_DATA['circulos-ombro'].muscles,
+      pose: standingMobilityPose,
+    };
+  }
+
+  // 16. Puxadas e Barras Fixas (Padrão canônico)
   const isDeadHang = lowerId.includes('dead-hang') || lowerId.includes('suspensao');
   const isLsit = lowerId.includes('lsit') || lowerId.includes('l-sit');
   return {

@@ -3,6 +3,7 @@ import type { Exercise } from '../../types';
 import type { FigureStyle } from './figure/types';
 import { Play, Pause, AlertTriangle, Wind, ChevronDown, Layers } from 'lucide-react';
 import { ExerciseFigure } from './figure/ExerciseFigure';
+import { ReferenceFigure } from './figure/ReferenceFigure';
 import { getAnimationDefForExercise } from './figure/poseDatabase';
 
 interface ExercisePostureVisualProps {
@@ -41,20 +42,30 @@ export const ExercisePostureVisual: React.FC<ExercisePostureVisualProps> = ({
 
   const activeStep = exercise.executionSteps[currentStepIndex] || exercise.executionSteps[0];
 
-  // Ilustração dinâmica em SVG anatômico com cinemática inversa (IK)
+  // Ilustração dinâmica em SVG anatômico do protótipo aprovado com cinemática inversa (IK)
   const renderGraphicIllustration = () => {
-    const animDef = getAnimationDefForExercise(exercise.id, exercise.name);
-    const stepCount = exercise.executionSteps.length;
-    const staticNormTime = stepCount > 1 ? currentStepIndex / (stepCount - 1) : 0.5;
+    if (localStyle && localStyle !== 'anatomical') {
+      const animDef = getAnimationDefForExercise(exercise.id, exercise.name);
+      const stepCount = exercise.executionSteps.length;
+      const staticNormTime = stepCount > 1 ? currentStepIndex / (stepCount - 1) : 0.5;
+
+      return (
+        <ExerciseFigure
+          animationDef={animDef}
+          isPaused={!isPlaying}
+          staticFrame={isPlaying ? undefined : staticNormTime}
+          showControls={false}
+          className="w-full h-full"
+          style={localStyle}
+        />
+      );
+    }
 
     return (
-      <ExerciseFigure
-        animationDef={animDef}
+      <ReferenceFigure
+        exerciseId={exercise.id}
         isPaused={!isPlaying}
-        staticFrame={isPlaying ? undefined : staticNormTime}
-        showControls={false}
         className="w-full h-full"
-        style={localStyle}
       />
     );
   };

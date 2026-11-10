@@ -20,6 +20,7 @@ const L = { ua: 38, fa: 34, th: 56, sh: 52, to: 66 };
 const P = 'p', Q = 's';
 const V = (x, y) => ({ x, y });
 const f = n => n.toFixed(1);
+const lp = (a, b, t) => V(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t);
 const L2 = (a, b, t) => a + (b - a) * t;
 
 function ik(A, B, l1, l2, bd) {

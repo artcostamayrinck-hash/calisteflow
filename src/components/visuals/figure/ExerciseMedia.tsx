@@ -10,6 +10,7 @@ import type { FigureStyle, AvatarSettings } from './types';
 import { MUSCLE_LABELS } from '../../../data/exercisesData';
 import { getAnimationDefForExercise } from './poseDatabase';
 import { ExerciseFigure } from './ExerciseFigure';
+import { ReferenceFigure } from './ReferenceFigure';
 import { Play, Pause, Maximize2, X } from 'lucide-react';
 import { useBodyScrollLock } from '../../../utils/useBodyScrollLock';
 import { getAvatarSettings } from '../../../utils/appSettings';
@@ -53,11 +54,9 @@ export const ExerciseMedia: React.FC<ExerciseMediaProps> = ({
     if (globalAvatar.preferredStyle && globalAvatar.preferredStyle !== 'anatomical') {
       return globalAvatar.preferredStyle;
     }
-    // Contextos de uso padrão conforme especificação:
-    if (mode === 'card' || mode === 'compact') return 'mannequin'; // Manequim neutro em listas
-    if (mode === 'workout') return 'silhouette';                  // Silhueta sólida em treino ativo
-    return 'anatomical';                                          // Anatômico simplificado em detalhes
-  }, [selectedStyle, style, mode]);
+    // Padrão canônico rigoroso: estilo anatômico do protótipo de referência
+    return 'anatomical';
+  }, [selectedStyle, style]);
 
   const toggleSlowMo = () => {
     setPlaybackRate(prev => (prev === 1.0 ? 0.5 : 1.0));
@@ -82,14 +81,22 @@ export const ExerciseMedia: React.FC<ExerciseMediaProps> = ({
       <div
         className={`relative w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden bg-slate-950 border border-white/10 shrink-0 shadow-md ${className}`}
       >
-        <ExerciseFigure
-          animationDef={animDef}
-          staticFrame={0.45} // Poster estático no ápice do movimento para economizar processamento na rolagem de lista
-          showControls={false}
-          className="w-full h-full object-cover"
-          style={activeStyle}
-          avatarSettings={avatarSettings}
-        />
+        {activeStyle === 'anatomical' ? (
+          <ReferenceFigure
+            exerciseId={exercise.id}
+            staticFrame={0.5} // Poster estático no ápice do movimento para economizar processamento na rolagem de lista
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <ExerciseFigure
+            animationDef={animDef}
+            staticFrame={0.45}
+            showControls={false}
+            className="w-full h-full object-cover"
+            style={activeStyle}
+            avatarSettings={avatarSettings}
+          />
+        )}
       </div>
     );
   }
@@ -99,15 +106,24 @@ export const ExerciseMedia: React.FC<ExerciseMediaProps> = ({
       <div className={`w-full flex flex-col items-center select-none ${className}`}>
         {/* Palco Principal de Animação com Controles */}
         <div className="relative w-full rounded-3xl overflow-hidden border border-white/10 shadow-2xl bg-slate-950">
-          <ExerciseFigure
-            animationDef={animDef}
-            isPaused={userPaused}
-            playbackRate={playbackRate}
-            showControls={false}
-            className="w-full h-auto aspect-[4/3] sm:aspect-[16/10]"
-            style={activeStyle}
-            avatarSettings={avatarSettings}
-          />
+          {activeStyle === 'anatomical' ? (
+            <ReferenceFigure
+              exerciseId={exercise.id}
+              isPaused={userPaused}
+              playbackRate={playbackRate}
+              className="w-full h-auto aspect-[4/3] sm:aspect-[16/10]"
+            />
+          ) : (
+            <ExerciseFigure
+              animationDef={animDef}
+              isPaused={userPaused}
+              playbackRate={playbackRate}
+              showControls={false}
+              className="w-full h-auto aspect-[4/3] sm:aspect-[16/10]"
+              style={activeStyle}
+              avatarSettings={avatarSettings}
+            />
+          )}
 
           {/* Barra Flutuante Superior de Controles */}
           <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between pointer-events-none">
@@ -276,15 +292,24 @@ export const ExerciseMedia: React.FC<ExerciseMediaProps> = ({
               </div>
 
               <div className="w-full rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
-                <ExerciseFigure
-                  animationDef={animDef}
-                  isPaused={userPaused}
-                  playbackRate={playbackRate}
-                  showControls={true}
-                  className="w-full h-auto"
-                  style={activeStyle}
-                  avatarSettings={avatarSettings}
-                />
+                {activeStyle === 'anatomical' ? (
+                  <ReferenceFigure
+                    exerciseId={exercise.id}
+                    isPaused={userPaused}
+                    playbackRate={playbackRate}
+                    className="w-full h-auto"
+                  />
+                ) : (
+                  <ExerciseFigure
+                    animationDef={animDef}
+                    isPaused={userPaused}
+                    playbackRate={playbackRate}
+                    showControls={true}
+                    className="w-full h-auto"
+                    style={activeStyle}
+                    avatarSettings={avatarSettings}
+                  />
+                )}
               </div>
 
               {/* Informações de Execução e Respiração */}
