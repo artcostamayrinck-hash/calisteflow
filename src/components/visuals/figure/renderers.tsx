@@ -1,11 +1,10 @@
 /**
  * Renderizadores de Estilo de Figura para CalisteFlow
- * Suporta os 5 estilos:
+ * Suporta os 4 estilos visuais:
  * 1. Manequim Neutro
  * 2. Anatômico Simplificado
  * 3. Silhueta Sólida
  * 4. Contorno (Neon 2px)
- * 5. Raio-X (X-Ray)
  */
 
 import React from 'react';
@@ -265,134 +264,6 @@ export const renderFigureStyle = ({
               strokeWidth="1.5"
               strokeDasharray="4 2"
               opacity={m.opacity * 0.9}
-            />
-          ))}
-        </g>
-      </g>
-    );
-  }
-
-  // ==========================================
-  // ESTILO 5: RAIO-X (X-RAY)
-  // ==========================================
-  if (style === 'xray') {
-    const { boneFill, boneMarrow, jointSphere, vertebrae, glow } = STYLE_THEMES.xray;
-
-    // Segmentos da coluna vertebral alinhada (7 vértebras simuladas do ombro ao quadril)
-    const vertebraeDots: Point2D[] = [];
-    for (let i = 1; i <= 7; i++) {
-      const t = i / 8;
-      vertebraeDots.push({
-        x: joints.shoulder.x + (joints.hip.x - joints.shoulder.x) * t,
-        y: joints.shoulder.y + (joints.hip.y - joints.shoulder.y) * t,
-      });
-    }
-
-    const renderBone = (start: Point2D, end: Point2D, rStart: number, rEnd: number) => (
-      <g key={`bone-${start.x}-${start.y}-${end.x}`}>
-        <path d={createTaperedLimbPath(start, end, rStart, rEnd)} fill={boneFill} />
-        {/* Canal medular interno */}
-        <line
-          x1={start.x + (end.x - start.x) * 0.15}
-          y1={start.y + (end.y - start.y) * 0.15}
-          x2={end.x - (end.x - start.x) * 0.15}
-          y2={end.y - (end.y - start.y) * 0.15}
-          stroke={boneMarrow}
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          opacity="0.8"
-        />
-      </g>
-    );
-
-    return (
-      <g id="style-xray">
-        {/* Halo radiográfico de fundo */}
-        <ellipse
-          cx={(joints.shoulder.x + joints.hip.x) / 2}
-          cy={(joints.shoulder.y + joints.hip.y) / 2}
-          rx="60"
-          ry="75"
-          fill={glow}
-          opacity="0.08"
-        />
-
-        {/* Esqueleto - Lado Oposto */}
-        <g id="xray-back" opacity="0.45">
-          {renderBone(backHip, backKnee, 14, 11)}
-          {renderBone(backKnee, backAnkle, 10, 7)}
-          {renderBone(backShoulder, backElbow, 9, 7)}
-          {renderBone(backElbow, backWrist, 7, 5)}
-        </g>
-
-        {/* Coluna Vertebral & Caixa Torácica Radiográfica */}
-        <g id="xray-spine">
-          {/* Caixa torácica translúcida */}
-          <ellipse
-            cx={joints.shoulder.x + (joints.hip.x - joints.shoulder.x) * 0.35}
-            cy={joints.shoulder.y + (joints.hip.y - joints.shoulder.y) * 0.35}
-            rx={widths.torso.start * 0.45}
-            ry={widths.torso.start * 0.6}
-            fill="none"
-            stroke="rgba(255,255,255,0.25)"
-            strokeWidth="1.5"
-            strokeDasharray="6 3"
-          />
-          {/* Vértebras empilhadas */}
-          {vertebraeDots.map((pt, idx) => (
-            <ellipse
-              key={`vert-${idx}`}
-              cx={pt.x}
-              cy={pt.y}
-              rx={widths.torso.midWaist ? widths.torso.midWaist * 0.28 : 5}
-              ry="2"
-              fill={vertebrae}
-              opacity="0.9"
-            />
-          ))}
-        </g>
-
-        {/* Crânio Radiográfico */}
-        <g id="xray-skull">
-          <circle cx={joints.head.x} cy={joints.head.y} r={widths.headRadius - 1} fill={boneFill} />
-          {/* Órbita ocular e cavidade temporal */}
-          <circle cx={joints.head.x + gazeOffset.x * 2.5 + 2} cy={joints.head.y + gazeOffset.y * 1.5 - 1} r="2.5" fill="#0A1222" opacity="0.75" />
-          <ellipse cx={joints.head.x + 3} cy={joints.head.y + 6} rx="4" ry="2" fill="rgba(255,255,255,0.7)" />
-        </g>
-
-        {/* Esqueleto - Lado Próximo */}
-        <g id="xray-near">
-          {renderBone(joints.hip, joints.knee, 16, 12)}
-          {renderBone(joints.knee, joints.ankle, 11, 8)}
-          {renderBone(joints.ankle, joints.toe, 6, 4)}
-
-          {renderBone(joints.shoulder, joints.elbow, 10, 8)}
-          {renderBone(joints.elbow, joints.wrist, 8, 6)}
-          <circle cx={joints.hand.x} cy={joints.hand.y} r="3.5" fill={boneFill} />
-        </g>
-
-        {/* Côndilos e Cápsulas Articulares Esféricas */}
-        <g id="xray-joint-capsules">
-          <circle cx={joints.shoulder.x} cy={joints.shoulder.y} r="5" fill={jointSphere} />
-          <circle cx={joints.elbow.x} cy={joints.elbow.y} r="4.2" fill={jointSphere} />
-          <circle cx={joints.wrist.x} cy={joints.wrist.y} r="3.2" fill={jointSphere} />
-          <circle cx={joints.hip.x} cy={joints.hip.y} r="6.0" fill={jointSphere} />
-          <circle cx={joints.knee.x} cy={joints.knee.y} r="5.0" fill={jointSphere} />
-          <circle cx={joints.ankle.x} cy={joints.ankle.y} r="4.0" fill={jointSphere} />
-        </g>
-
-        {/* Músculos destacados como vetores translúcidos de tensão */}
-        <g id="xray-muscles">
-          {activeMuscles.map(m => (
-            <ellipse
-              key={m.muscleId}
-              cx={m.cx}
-              cy={m.cy}
-              rx={m.rx * 0.85}
-              ry={m.ry * 0.8}
-              transform={`rotate(${m.angleDeg} ${m.cx} ${m.cy})`}
-              fill={m.color}
-              opacity={m.opacity * 0.85}
             />
           ))}
         </g>

@@ -1,11 +1,10 @@
 /**
- * Galeria Interativa de Comparação dos 5 Estilos de Figura e Variações de Avatar
- * Permite visualizar simultaneamente a mesma pose (ex: Flexão Inclinada) nos 5 estilos:
+ * Galeria Interativa de Comparação dos 4 Estilos de Figura e Variações de Avatar
+ * Permite visualizar simultaneamente a mesma pose (ex: Flexão Inclinada) nos 4 estilos:
  * 1. Manequim Neutro
  * 2. Anatômico Simplificado
  * 3. Silhueta Sólida
  * 4. Contorno (Neon 2px)
- * 5. Raio-X (X-Ray)
  * Com controles ao vivo de modelo (masculino/feminino/neutro), biotipo, tom de pele, roupa, cabelo e modo daltônico.
  */
 
@@ -129,14 +128,6 @@ export const StyleComparisonGalleryModal: React.FC<StyleComparisonGalleryModalPr
       tag: 'Wireframe',
       desc: 'Traço vetorizado de 2 px com nós luminosos nas juntas. Cumpre rigorosamente contraste AA mesmo em 120 px.',
       recommendedFor: 'Visual moderno e elegante com consumo visual ultraleve.',
-    },
-    {
-      id: 'xray',
-      title: 'Raio-X (X-Ray)',
-      subtitle: 'Alinhamento Ósseo & Coluna',
-      tag: 'Biomecânico',
-      desc: 'Estrutura esquelética translúcida com canal medular, vértebras alinhadas na espinha, côndilos articulares e vetores de tensão.',
-      recommendedFor: 'Checagem de alinhamento articular, coluna neutra e bloqueio de juntas.',
     },
   ];
 

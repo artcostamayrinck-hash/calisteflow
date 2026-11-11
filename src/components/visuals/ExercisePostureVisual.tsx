@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { Exercise } from '../../types';
 import type { FigureStyle } from './figure/types';
-import { Play, Pause, AlertTriangle, Wind, ChevronDown, Layers } from 'lucide-react';
+import { Play, Pause, AlertTriangle, Wind, ChevronDown } from 'lucide-react';
 import { ExerciseFigure } from './figure/ExerciseFigure';
 import { ReferenceFigure } from './figure/ReferenceFigure';
 import { getAnimationDefForExercise } from './figure/poseDatabase';
@@ -79,19 +79,6 @@ export const ExercisePostureVisual: React.FC<ExercisePostureVisualProps> = ({
       {/* Visual Canvas Stage (Fixed 16:9 aspect-ratio, contain) */}
       <div className="relative w-full aspect-[16/9] bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-2 overflow-hidden">
         {renderGraphicIllustration()}
-
-        {/* Quick Style Switcher (Anatômico / Raio-X para checagem de alinhamento) */}
-        <button
-          type="button"
-          onClick={() => setLocalStyle(prev => (prev === 'xray' ? 'anatomical' : 'xray'))}
-          className="absolute top-2.5 left-2.5 px-2 py-1 rounded-lg bg-slate-950/80 backdrop-blur-md border border-slate-700/80 text-[10px] font-bold text-slate-300 hover:text-white hover:bg-slate-800 transition active:scale-95 flex items-center gap-1.5 z-10"
-          title="Alternar entre visão anatômica e Raio-X de alinhamento"
-        >
-          <Layers className="w-3 h-3 text-cyan-400" />
-          <span className={localStyle === 'xray' ? 'text-cyan-300 font-extrabold' : 'text-slate-300'}>
-            {localStyle === 'xray' ? '🦴 Raio-X' : 'Visão Anatômica'}
-          </span>
-        </button>
 
         {/* Play/Pause Animation Button */}
         <button

@@ -189,7 +189,6 @@ export const ExerciseMedia: React.FC<ExerciseMediaProps> = ({
                 { id: 'mannequin', label: 'Manequim' },
                 { id: 'silhouette', label: 'Silhueta' },
                 { id: 'outline', label: 'Contorno' },
-                { id: 'xray', label: 'Raio-X' },
               ] as { id: FigureStyle; label: string }[]
             ).map(st => (
               <button
@@ -272,7 +271,6 @@ export const ExerciseMedia: React.FC<ExerciseMediaProps> = ({
                       { id: 'mannequin', label: 'Manequim' },
                       { id: 'silhouette', label: 'Silhueta' },
                       { id: 'outline', label: 'Contorno' },
-                      { id: 'xray', label: 'Raio-X' },
                     ] as { id: FigureStyle; label: string }[]
                   ).map(st => (
                     <button

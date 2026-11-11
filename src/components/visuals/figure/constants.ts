@@ -192,13 +192,6 @@ export const STYLE_THEMES = {
     strokeBack: '#0EA5E9',
     backOpacity: 0.45,
   },
-  xray: {
-    boneFill: 'rgba(241, 245, 249, 0.85)',
-    boneMarrow: '#94A3B8',
-    jointSphere: 'rgba(56, 189, 248, 0.7)',
-    vertebrae: '#FFFFFF',
-    glow: '#38BDF8',
-  },
 };
 
 // Calcula espessuras escaladas conforme gênero e biotipo

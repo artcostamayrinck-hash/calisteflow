@@ -277,7 +277,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   <div>
                     <span className="text-xs font-bold block text-slate-100">Avatar & Estilos de Figura</span>
                     <span className="text-[10px] text-cyan-300/80">
-                      5 estilos (Manequim, Anatômico, Silhueta, Contorno, Raio-X), biotipo e cores
+                      4 estilos (Manequim, Anatômico, Silhueta, Contorno), biotipo e cores
                     </span>
                   </div>
                 </div>

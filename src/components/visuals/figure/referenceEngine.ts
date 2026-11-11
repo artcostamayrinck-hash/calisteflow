@@ -186,79 +186,145 @@ export interface ReferenceExerciseDef {
 
 // 1. Poses canônicas do protótipo e modelos paramétricos com Cinemática Anatômica Estrita
 export const pushPose = (
-  params: number | { benchHeight?: number; feetHeight?: number; isKnee?: boolean; handsFarBack?: boolean } = 0
+  params:
+    | number
+    | {
+        benchHeight?: number;
+        feetHeight?: number;
+        isKnee?: boolean;
+        handsFarBack?: boolean;
+        isDiamond?: boolean;
+        isWide?: boolean;
+        isArcher?: boolean;
+        isExplosive?: boolean;
+        isScapular?: boolean;
+        isHindu?: boolean;
+        isUnilateral?: boolean;
+        isFingertip?: boolean;
+      } = 0
 ) => (u: number): PoseJoints => {
-  const bh = typeof params === 'number' ? params : params?.benchHeight ?? 0;
-  const fh = typeof params === 'object' ? params?.feetHeight ?? 0 : 0;
-  const isKnee = typeof params === 'object' ? params?.isKnee ?? false : false;
-  const handsFarBack = typeof params === 'object' ? params?.handsFarBack ?? false : false;
-  const handOffset = handsFarBack ? -16 : 0;
-  const topH = handsFarBack ? 62 : 71;
+  const p = typeof params === 'number' ? { benchHeight: params } : params || {};
+  const bh = p.benchHeight ?? 0;
+  const fh = p.feetHeight ?? 0;
+  const isKnee = p.isKnee ?? false;
+  const handsFarBack = p.handsFarBack ?? false;
+  const isDiamond = p.isDiamond ?? false;
+  const isWide = p.isWide ?? false;
+  const isArcher = p.isArcher ?? false;
+  const isExplosive = p.isExplosive ?? false;
+  const isScapular = p.isScapular ?? false;
+  const isHindu = p.isHindu ?? false;
 
-  if (isKnee) {
-    const K = V(85, G - 9);
-    const A = pol(K, Math.PI - 0.45, L.sh);
-    const T = V(A.x - 10, A.y - 8);
-    const Wy = G - bh - 5;
-    const Lb = L.to + L.th;
-    const as = (y: number) => Math.asin(Math.min(1, Math.max(-1, (K.y - y) / Lb)));
-    const tU = as(Wy - 66);
-    const g = L2(tU, as(Wy - 28), u);
-    const S = pol(K, g, Lb);
-    const W = V(pol(K, tU, Lb).x + handOffset, Wy);
-    const H = pol(K, g, L.th);
-    return {
-      S,
-      W,
-      E: ik(S, W, L.ua, L.fa, 1),
-      H,
-      K,
-      A,
-      T,
-      hd: pol(S, g + 0.08, L.hd),
-      fc: V(1, 0.1),
-      far: [7, -3],
-      pb: bh
-        ? `<rect x="${f(W.x - 20)}" y="${G - bh}" width="84" height="${bh}" fill="#475569"/><path d="M${f(
-            W.x - 20
-          )} ${G - bh}h84l12 -9h-84z" fill="#94a3b8"/>`
-        : '',
-    };
+  const Fa = isKnee ? V(85, G - 9) : V(60, G - 9 - fh);
+  const Wy = G - bh - 5;
+  const Lb = isKnee ? L.to + L.th : L.sh + L.th + L.to;
+  const as = (y: number) => Math.asin(Math.min(1, Math.max(-1, (Fa.y - y) / Lb)));
+
+  const topH = handsFarBack ? 62 : 68;
+  const tU = as(Wy - topH);
+
+  let g: number;
+  if (isScapular) {
+    g = as(Wy - 66) + 0.025 * Math.sin(u * Math.PI);
+  } else if (isHindu) {
+    const swoop = Math.sin(u * Math.PI) * 14;
+    g = L2(as(Wy - 68), as(Wy - 32), u) - (swoop / Lb);
+  } else {
+    g = L2(tU, as(Wy - 30), u);
   }
 
-  const Fa = V(60, G - 9 - fh);
-  const Wy = G - bh - 5;
-  const Lb = L.sh + L.th + L.to;
-  const as = (y: number) => Math.asin(Math.min(1, Math.max(-1, (Fa.y - y) / Lb)));
-  const tU = as(Wy - topH);
-  const g = L2(tU, as(Wy - 30), u);
   const S = pol(Fa, g, Lb);
-  const W = V(pol(Fa, tU, Lb).x + handOffset, Wy);
+  const handOffset = handsFarBack ? -16 : isDiamond ? -6 : isWide ? 10 : isArcher ? 12 : 0;
+  let currentWy = Wy;
+  if (isExplosive && u > 0.82) {
+    currentWy -= (u - 0.82) * 35;
+  }
+
+  const W = V(pol(Fa, tU, Lb).x + handOffset, currentWy);
+  const E = ik(S, W, L.ua, L.fa, 1);
+  const H = pol(Fa, g, isKnee ? L.th : L.sh + L.th);
+  const K = isKnee ? Fa : pol(Fa, g, L.sh);
+  const A = isKnee ? pol(K, Math.PI - 0.45, L.sh) : Fa;
+  const hd = pol(S, g + 0.08, L.hd);
+
+  let pb = '';
+  if (bh) {
+    pb += `<rect x="${f(W.x - 20)}" y="${G - bh}" width="84" height="${bh}" fill="#475569"/><path d="M${f(
+      W.x - 20
+    )} ${G - bh}h84l12 -9h-84z" fill="#94a3b8"/>`;
+  }
+  if (fh) {
+    pb += `<rect x="35" y="${G - fh}" width="40" height="${fh}" fill="#475569"/>`;
+  }
+  if (isDiamond) {
+    pb += `<polygon points="${f(W.x - 4)},${G - 9} ${f(W.x + 4)},${G - 9} ${f(W.x)},${G - 14} ${f(W.x)},${G - 4}" fill="#38bdf8" opacity="0.6"/>`;
+  }
+
   return {
     S,
     W,
-    E: ik(S, W, L.ua, L.fa, 1),
-    H: pol(Fa, g, L.sh + L.th),
-    K: pol(Fa, g, L.sh),
-    A: Fa,
-    T: V(Fa.x + 9, G - 1 - fh),
-    hd: pol(S, g + 0.08, L.hd),
+    E,
+    H,
+    K,
+    A,
+    T: isKnee ? V(A.x - 10, A.y - 8) : V(Fa.x + 9, G - 1 - fh),
+    hd,
     fc: V(1, 0.1),
     far: [7, -3],
-    pb:
-      (bh
-        ? `<rect x="${f(W.x - 20)}" y="${G - bh}" width="84" height="${bh}" fill="#475569"/><path d="M${f(
-            W.x - 20
-          )} ${G - bh}h84l12 -9h-84z" fill="#94a3b8"/>`
-        : '') +
-      (fh ? `<rect x="35" y="${G - fh}" width="40" height="${fh}" fill="#475569"/>` : ''),
+    pb,
   };
 };
 
-export const squatPose = (params?: { isBox?: boolean; isWallSit?: boolean }) => (u: number): PoseJoints => {
+export const squatPose = (params?: {
+  isBox?: boolean;
+  isWallSit?: boolean;
+  isSumo?: boolean;
+  isJump?: boolean;
+  isCossack?: boolean;
+  isShrimp?: boolean;
+  isAssisted?: boolean;
+}) => (u: number): PoseJoints => {
   const isBox = params?.isBox ?? false;
   const isWallSit = params?.isWallSit ?? false;
-  const A = V(190, G - 9);
+  const isSumo = params?.isSumo ?? false;
+  const isJump = params?.isJump ?? false;
+  const isCossack = params?.isCossack ?? false;
+
+  if (isCossack) {
+    const Asup = V(155, G - 9);
+    const Aopp = V(245, G - 9);
+    const Hx = L2(200, 155, u);
+    const Hy = L2(G - 9 - 94, G - 9 - 48, u);
+    const H = V(Hx, Hy);
+    const K = ik(H, Asup, L.th, L.sh, -1);
+    const S = V(H.x + 4, H.y - L.to);
+    const hd = V(S.x, S.y - L.hd);
+    const W = V(S.x + 45, S.y + 15);
+    const E = ik(S, W, L.ua, L.fa, 1);
+    const farK = ik(H, Aopp, L.th, L.sh, 1);
+    return {
+      S,
+      E,
+      W,
+      H,
+      K,
+      A: Asup,
+      T: V(Asup.x + 20, G - 1),
+      hd,
+      fc: V(1, 0.1),
+      far: [5, -2],
+      pb: '',
+      farH: H,
+      farK,
+      farA: Aopp,
+    };
+  }
+
+  let Ay = G - 9;
+  if (isJump && u > 0.82) {
+    Ay -= (u - 0.82) * 45;
+  }
+  const A = V(190, Ay);
 
   if (isWallSit) {
     const H = V(145, G - 9 - L.sh);
@@ -284,9 +350,10 @@ export const squatPose = (params?: { isBox?: boolean; isWallSit?: boolean }) => 
     };
   }
 
-  const H = V(A.x - 6 - 52 * u, L2(A.y - 105, A.y - 50, u));
+  const depthFactor = isSumo ? 0.9 : 1.0;
+  const H = V(A.x - 6 - 52 * u * depthFactor, L2(A.y - 105, A.y - 50, u));
   const K = ik(H, A, L.th, L.sh, -1);
-  const a = 0.12 + 0.60 * u;
+  const a = isSumo ? 0.08 + 0.35 * u : 0.12 + 0.60 * u;
   const S = V(H.x + Math.sin(a) * L.to, H.y - Math.cos(a) * L.to);
   const armAngle = 0.08 * (1 - u);
   const E = V(S.x + Math.cos(armAngle) * L.ua, S.y - Math.sin(armAngle) * L.ua);
@@ -309,21 +376,51 @@ export const squatPose = (params?: { isBox?: boolean; isWallSit?: boolean }) => 
   };
 };
 
-export const pullPose = (params?: { barX?: number; barY?: number; isDeadHang?: boolean; isLsit?: boolean } | number) => (
-  u: number
-): PoseJoints => {
+export const pullPose = (
+  params?:
+    | {
+        barX?: number;
+        barY?: number;
+        isDeadHang?: boolean;
+        isLsit?: boolean;
+        isChinup?: boolean;
+        isWide?: boolean;
+        isArcher?: boolean;
+        isExplosive?: boolean;
+        isMuscleUp?: boolean;
+        isNeutral?: boolean;
+        isTowel?: boolean;
+        isScapular?: boolean;
+      }
+    | number
+) => (u: number): PoseJoints => {
   const pObj = typeof params === 'object' ? params : undefined;
-  const bx = pObj?.barX ?? 215;
-  const by = pObj?.barY ?? 34;
   const isDeadHang = pObj?.isDeadHang ?? false;
   const isLsit = pObj?.isLsit ?? false;
+  const isChinup = pObj?.isChinup ?? false;
+  const isWide = pObj?.isWide ?? false;
+  const isArcher = pObj?.isArcher ?? false;
+  const isExplosive = pObj?.isExplosive ?? false;
+  const isMuscleUp = pObj?.isMuscleUp ?? false;
+  const isTowel = pObj?.isTowel ?? false;
+  const isScapular = pObj?.isScapular ?? false;
+
+  const bx = isWide ? 228 : pObj?.barX ?? 215;
+  const by = pObj?.barY ?? 34;
   const W = V(bx, by + 5);
 
   if (isDeadHang) {
-    const S = V(bx - 14, L2(by + 71, by + 58, u));
+    const Sy = isScapular ? L2(by + 70, by + 58, u) : by + 70;
+    const S = V(bx - 14, Sy);
     const H = V(S.x, S.y + L.to);
     const K = V(H.x + 6, H.y + 55.7);
     const A = V(K.x - 44, K.y + 28);
+    let pb = `<path d="M${bx} ${by}H${bx + 70}" stroke="#64748b" stroke-width="5"/><rect x="${bx + 66}" y="${
+      by - 8
+    }" width="10" height="${G - by + 8}" fill="#334155"/><circle cx="${bx}" cy="${by}" r="5" fill="#cbd5e1"/>`;
+    if (isTowel) {
+      pb += `<rect x="${bx - 3}" y="${by + 4}" width="6" height="28" fill="#e2e8f0" rx="2"/>`;
+    }
     return {
       S,
       W,
@@ -335,37 +432,45 @@ export const pullPose = (params?: { barX?: number; barY?: number; isDeadHang?: b
       hd: V(S.x, S.y - L.hd),
       fc: V(1, 0.1),
       far: [6, -2],
-      pb: `<path d="M${bx} ${by}H${bx + 70}" stroke="#64748b" stroke-width="5"/><rect x="${bx + 66}" y="${
-        by - 8
-      }" width="10" height="${G - by + 8}" fill="#334155"/><circle cx="${bx}" cy="${by}" r="5" fill="#cbd5e1"/>`,
+      pb,
     };
   }
 
-  const S = V(bx - 14, L2(by + 72, by + 16, u));
+  let topSy = by + 16;
+  if (isChinup) topSy = by + 14;
+  if (isExplosive) topSy = by + 14;
+  if (isMuscleUp) topSy = L2(by + 70, by - 24, u);
+
+  const Sy = isMuscleUp ? topSy : L2(by + 70, topSy, u);
+  let Sx = isArcher ? L2(bx - 14, bx + 16, u) : bx - 14;
+  if (isMuscleUp) {
+    const forwardLean = Math.sin(Math.max(0, Math.min(1, (u - 0.4) / 0.5)) * Math.PI) * 12;
+    Sx = bx - 14 - forwardLean;
+  }
+  const S = V(Sx, Sy);
   const H = V(S.x, S.y + L.to);
 
+  let K: Vec2;
+  let A: Vec2;
+  let T: Vec2;
+
   if (isLsit) {
-    const K = V(H.x + L.th, H.y);
-    const A = V(K.x + L.sh, K.y);
-    return {
-      S,
-      W,
-      E: ik(S, W, L.ua, L.fa, 1),
-      H,
-      K,
-      A,
-      T: V(A.x + 14, A.y),
-      hd: V(S.x, S.y - L.hd),
-      fc: V(1, 0.1),
-      far: [6, -2],
-      pb: `<path d="M${bx} ${by}H${bx + 70}" stroke="#64748b" stroke-width="5"/><rect x="${bx + 66}" y="${
-        by - 8
-      }" width="10" height="${G - by + 8}" fill="#334155"/><circle cx="${bx}" cy="${by}" r="5" fill="#cbd5e1"/>`,
-    };
+    K = V(H.x + L.th, H.y);
+    A = V(K.x + L.sh, K.y);
+    T = V(A.x + 14, A.y);
+  } else {
+    K = V(H.x + 6, H.y + 55.7);
+    A = V(K.x - 44, K.y + 28);
+    T = V(A.x - 4, A.y + 17);
   }
 
-  const K = V(H.x + 6, H.y + 55.7);
-  const A = V(K.x - 44, K.y + 28);
+  let pb = `<path d="M${bx} ${by}H${bx + 70}" stroke="#64748b" stroke-width="5"/><rect x="${bx + 66}" y="${
+    by - 8
+  }" width="10" height="${G - by + 8}" fill="#334155"/><circle cx="${bx}" cy="${by}" r="5" fill="#cbd5e1"/>`;
+  if (isTowel) {
+    pb += `<rect x="${bx - 3}" y="${by + 4}" width="6" height="28" fill="#e2e8f0" rx="2"/>`;
+  }
+
   return {
     S,
     W,
@@ -373,13 +478,11 @@ export const pullPose = (params?: { barX?: number; barY?: number; isDeadHang?: b
     H,
     K,
     A,
-    T: V(A.x - 4, A.y + 17),
+    T,
     hd: V(S.x, S.y - L.hd),
     fc: V(1, 0.1),
     far: [6, -2],
-    pb: `<path d="M${bx} ${by}H${bx + 70}" stroke="#64748b" stroke-width="5"/><rect x="${bx + 66}" y="${
-      by - 8
-    }" width="10" height="${G - by + 8}" fill="#334155"/><circle cx="${bx}" cy="${by}" r="5" fill="#cbd5e1"/>`,
+    pb,
   };
 };
 
@@ -460,25 +563,58 @@ export const rowPose = (params?: { barX?: number; barY?: number; isKnees?: boole
   };
 };
 
-export const plankPose = (u: number): PoseJoints => {
-  const W = V(210, G - 9);
-  const E = V(W.x - L.fa, G - 9);
-  const S = V(E.x, E.y - L.ua);
+export const plankPose = (
+  params?: {
+    isKnee?: boolean;
+    isHigh?: boolean;
+    isShoulderTap?: boolean;
+    isSaw?: boolean;
+  }
+) => (u: number): PoseJoints => {
+  const isKnee = params?.isKnee ?? false;
+  const isHigh = params?.isHigh ?? false;
+  const isShoulderTap = params?.isShoulderTap ?? false;
+  const isSaw = params?.isSaw ?? false;
+
+  const Wy = G - 9;
+  const Wx = 210;
+  let W = V(Wx, Wy);
+  let E: Vec2;
+  let S: Vec2;
+
+  if (isHigh) {
+    S = V(Wx - 10, Wy - 68);
+    W = V(Wx, Wy);
+    if (isShoulderTap) {
+      const tapProgress = Math.sin(u * Math.PI);
+      const targetW = pol(S, 0.45, 18);
+      W = V(L2(Wx, targetW.x, tapProgress), L2(Wy, targetW.y, tapProgress));
+    }
+    E = ik(S, W, L.ua, L.fa, 1);
+  } else {
+    W = V(Wx, Wy);
+    E = V(W.x - L.fa, Wy);
+    const sawAngle = isSaw ? Math.sin(u * 2 * Math.PI) * 0.16 : 0;
+    S = pol(E, Math.PI / 2 - sawAngle, L.ua);
+  }
+
   const breath = Math.sin(u * 2 * Math.PI) * 1.5;
-  const Lb = L.to + L.th + L.sh;
-  const angle = Math.asin(Math.min(1, Math.max(0, (G - 9 - S.y) / Lb)));
+  const currentSy = S.y + breath;
+  const Lb = isKnee ? L.to + L.th : L.to + L.th + L.sh;
+  const angle = Math.asin(Math.min(1, Math.max(0, (G - 9 - currentSy) / Lb)));
   const Fa = V(S.x - Math.cos(angle) * Lb, G - 9);
-  const H = pol(Fa, angle, L.sh + L.th);
-  H.y += breath;
-  const K = pol(Fa, angle, L.sh);
+  const H = pol(Fa, angle, isKnee ? L.th : L.sh + L.th);
+  const K = isKnee ? Fa : pol(Fa, angle, L.sh);
+  const A = isKnee ? pol(K, Math.PI - 0.45, L.sh) : Fa;
+
   return {
-    S: V(S.x, S.y + breath),
+    S: V(S.x, currentSy),
     E,
     W,
     H,
     K,
-    A: Fa,
-    T: V(Fa.x + 12, G - 1),
+    A,
+    T: isKnee ? V(A.x - 8, A.y - 8) : V(Fa.x + 12, G - 1),
     hd: pol(S, 0.05, L.hd),
     fc: V(0.8, 0.4),
     far: [6, -2],
@@ -486,15 +622,28 @@ export const plankPose = (u: number): PoseJoints => {
   };
 };
 
-export const dipPose = (params?: { barY?: number; isBench?: boolean }) => (u: number): PoseJoints => {
+export const dipPose = (params?: {
+  barY?: number;
+  isBench?: boolean;
+  isRings?: boolean;
+  isFeetElevated?: boolean;
+}) => (u: number): PoseJoints => {
   const isBench = params?.isBench ?? false;
+  const isRings = params?.isRings ?? false;
+  const isFeetElevated = params?.isFeetElevated ?? false;
+
   if (isBench) {
     const benchY = 195;
     const W = V(125, benchY);
     const S = V(150, L2(benchY - 44, benchY - 8, u));
     const H = V(S.x, S.y + L.to);
-    const A = V(235, G - 9);
+    const footH = isFeetElevated ? 35 : 0;
+    const A = V(235, G - 9 - footH);
     const K = ik(H, A, L.th, L.sh, -1);
+    let pb = `<rect x="85" y="${benchY}" width="45" height="${G - benchY}" fill="#475569"/><path d="M85 ${benchY}h45l8 -6h-45z" fill="#94a3b8"/>`;
+    if (isFeetElevated) {
+      pb += `<rect x="220" y="${G - 35}" width="40" height="35" fill="#475569"/>`;
+    }
     return {
       S,
       W,
@@ -506,7 +655,7 @@ export const dipPose = (params?: { barY?: number; isBench?: boolean }) => (u: nu
       hd: V(S.x, S.y - L.hd),
       fc: V(1, 0.1),
       far: [6, -2],
-      pb: `<rect x="85" y="${benchY}" width="45" height="${G - benchY}" fill="#475569"/><path d="M85 ${benchY}h45l8 -6h-45z" fill="#94a3b8"/>`,
+      pb,
     };
   }
 
@@ -516,6 +665,16 @@ export const dipPose = (params?: { barY?: number; isBench?: boolean }) => (u: nu
   const H = V(S.x - 4, S.y + L.to);
   const K = pol(H, -Math.PI / 2 + 0.35, L.th);
   const A = pol(K, -Math.PI / 2 - 0.75, L.sh);
+
+  let pb = '';
+  if (isRings) {
+    pb = `<line x1="${W.x}" y1="0" x2="${W.x}" y2="${barY}" stroke="#64748b" stroke-width="2"/><circle cx="${W.x}" cy="${barY}" r="9" fill="none" stroke="#cbd5e1" stroke-width="3"/>`;
+  } else {
+    pb = `<path d="M120 ${barY}H270" stroke="#64748b" stroke-width="5"/><rect x="135" y="${barY}" width="10" height="${
+      G - barY
+    }" fill="#334155"/><rect x="255" y="${barY}" width="10" height="${G - barY}" fill="#334155"/>`;
+  }
+
   return {
     S,
     W,
@@ -527,9 +686,7 @@ export const dipPose = (params?: { barY?: number; isBench?: boolean }) => (u: nu
     hd: V(S.x + 4, S.y - L.hd),
     fc: V(1, 0.1),
     far: [6, -2],
-    pb: `<path d="M120 ${barY}H270" stroke="#64748b" stroke-width="5"/><rect x="135" y="${barY}" width="10" height="${
-      G - barY
-    }" fill="#334155"/><rect x="255" y="${barY}" width="10" height="${G - barY}" fill="#334155"/>`,
+    pb,
   };
 };
 
@@ -556,10 +713,11 @@ export const pikePose = (params?: { feetHeight?: number }) => (u: number): PoseJ
   };
 };
 
-export const handstandPose = (params?: { isWall?: boolean }) => (u: number): PoseJoints => {
+export const handstandPose = (params?: { isWall?: boolean; isHSPU?: boolean }) => (u: number): PoseJoints => {
   const isWall = params?.isWall ?? false;
+  const isHSPU = params?.isHSPU ?? false;
   const W = V(195, G - 5);
-  const S = V(195, L2(G - 5 - 68, G - 5 - 28, u));
+  const S = V(195, isHSPU ? L2(G - 5 - 68, G - 5 - 28, u) : L2(G - 5 - 68, G - 5 - 66, u));
   const H = V(195, S.y - L.to);
   const K = V(195, H.y - L.th);
   const A = V(195, K.y - L.sh);
@@ -941,46 +1099,124 @@ export const birdDogPose = (u: number): PoseJoints => {
   };
 };
 
-export const sidePlankPose = (params?: { isKnee?: boolean; isDip?: boolean }) => (u: number): PoseJoints => {
+export const sidePlankPose = (params?: {
+  isKnee?: boolean;
+  isDip?: boolean;
+  isCopenhagen?: boolean;
+  isStar?: boolean;
+}) => (u: number): PoseJoints => {
   const isKnee = params?.isKnee ?? false;
+  const isCopenhagen = params?.isCopenhagen ?? false;
+  const isStar = params?.isStar ?? false;
   const E = V(180, G - 9);
   const W = V(E.x + L.fa, G - 9);
   const S = V(E.x, E.y - L.ua);
   const dip = params?.isDip ? Math.sin(u * Math.PI) * 14 : 0;
-  const Lb = isKnee ? L.to + L.th : L.to + L.th + L.sh;
-  const angle = Math.asin(Math.min(1, Math.max(0, (G - 9 - (S.y + dip)) / Lb)));
+
+  if (isCopenhagen) {
+    const benchH = 38;
+    const benchY = G - benchH;
+    const footY = benchY - 9;
+    const dY = footY - S.y;
+    const D = 173.5 - dip * 0.4;
+    const dX = Math.sqrt(Math.max(1, D * D - dY * dY));
+    const Fa = V(S.x - dX, footY);
+    const H = ik(S, Fa, L.to, L.th + L.sh, -1);
+    const K = ik(H, Fa, L.th, L.sh, -1);
+    const pb = `<rect x="70" y="${benchY}" width="55" height="${benchH}" fill="#475569"/><path d="M70 ${benchY}h55l8 -6h-55z" fill="#94a3b8"/>`;
+    const farH = V(H.x - 3, H.y + 4);
+    const farAngle = Math.atan2(Fa.y - H.y, Fa.x - H.x);
+    const farK = pol(farH, farAngle + 0.35, L.th);
+    const farA = pol(farK, farAngle + 0.6, L.sh);
+    const farT = V(farA.x + 8, farA.y);
+    return {
+      S,
+      E,
+      W,
+      H,
+      K,
+      A: Fa,
+      T: V(Fa.x + 10, benchY - 1),
+      hd: pol(S, -0.2, L.hd),
+      fc: V(0.8, 0.2),
+      far: [4, -2],
+      pb,
+      farH,
+      farK,
+      farA,
+      farT,
+    };
+  }
 
   if (isKnee) {
-    const K = V(S.x - Math.cos(angle) * Lb, G - 9);
-    const H = pol(K, angle, L.th);
+    const dY = G - 9 - S.y;
+    const D = L.to + L.th - 0.5 - dip * 0.4;
+    const dX = Math.sqrt(Math.max(1, D * D - dY * dY));
+    const K = V(S.x - dX, G - 9);
+    const H = ik(S, K, L.to, L.th, -1);
     const A = pol(K, Math.PI - 0.45, L.sh);
     return {
-      S: V(S.x, S.y + dip),
+      S,
       E,
       W,
       H,
       K,
       A,
       T: V(A.x - 8, A.y - 8),
-      hd: pol(S, -angle, L.hd),
+      hd: pol(S, -0.2, L.hd),
       fc: V(0.8, 0.2),
       far: [4, -2],
       pb: '',
     };
   }
 
-  const Fa = V(S.x - Math.cos(angle) * Lb, G - 9);
-  const H = pol(Fa, angle, L.sh + L.th);
-  const K = pol(Fa, angle, L.sh);
+  const dY = G - 9 - S.y;
+  const D = 173.5 - dip * 0.4;
+  const dX = Math.sqrt(Math.max(1, D * D - dY * dY));
+  const Fa = V(S.x - dX, G - 9);
+  const H = ik(S, Fa, L.to, L.th + L.sh, -1);
+  const K = ik(H, Fa, L.th, L.sh, -1);
+
+  if (isStar) {
+    const farH = V(H.x - 3, H.y - 4);
+    const angle = Math.atan2(Fa.y - H.y, Fa.x - H.x);
+    const farK = pol(farH, angle - 0.45, L.th);
+    const farA = pol(farK, angle - 0.45, L.sh);
+    const farT = V(farA.x + 10, farA.y - 4);
+    const farS = V(S.x - 2, S.y - 6);
+    const farW = pol(farS, -Math.PI / 2 - 0.2, L.ua + L.fa);
+    const farE = ik(farS, farW, L.ua, L.fa, 1);
+    return {
+      S,
+      E,
+      W,
+      H,
+      K,
+      A: Fa,
+      T: V(Fa.x + 10, G - 1),
+      hd: pol(S, -0.2, L.hd),
+      fc: V(0.8, 0.2),
+      far: [4, -2],
+      pb: '',
+      farS,
+      farE,
+      farW,
+      farH,
+      farK,
+      farA,
+      farT,
+    };
+  }
+
   return {
-    S: V(S.x, S.y + dip),
+    S,
     E,
     W,
     H,
     K,
     A: Fa,
     T: V(Fa.x + 10, G - 1),
-    hd: pol(S, -angle, L.hd),
+    hd: pol(S, -0.2, L.hd),
     fc: V(0.8, 0.2),
     far: [4, -2],
     pb: '',
@@ -1689,7 +1925,7 @@ const MODEL_FACTORIES: Record<string, (params?: any) => (u: number) => PoseJoint
   squat: (params?: any) => squatPose(params),
   bridge: () => bridgePose,
   row: (params?: any) => rowPose(params),
-  plank: () => plankPose,
+  plank: (params?: any) => plankPose(params),
   dip: (params?: any) => dipPose(params),
   lunge: () => lungePose,
   deadbug: () => deadbugPose,
@@ -1878,16 +2114,39 @@ export function getReferenceExerciseDef(id: string): ReferenceExerciseDef {
     };
   }
 
-  // 10. Prancha Frontal
+  // 10. Prancha Lateral ou Copenhagen
+  if (lowerId.includes('lateral') || lowerId.includes('copenhagen')) {
+    const isKnee = lowerId.includes('joelho');
+    const isDip = lowerId.includes('elevacao') || lowerId.includes('dip');
+    const isCopenhagen = lowerId.includes('copenhagen');
+    const isStar = lowerId.includes('estrela') || lowerId.includes('star');
+    return {
+      id,
+      name: isCopenhagen ? 'Prancha Copenhagen' : 'Prancha Lateral',
+      model: 'side_plank',
+      params: { isKnee, isDip, isCopenhagen, isStar },
+      durationSeconds: 3.4,
+      muscles: REFERENCE_POSES_DATA['prancha-lateral']?.muscles || ['obliquos', 'core_profundo'],
+      mus: REFERENCE_POSES_DATA['prancha-lateral']?.muscles || ['obliquos', 'core_profundo'],
+      pose: sidePlankPose({ isKnee, isDip, isCopenhagen, isStar }),
+    };
+  }
+
+  // 10b. Prancha Frontal
   if (lowerId.includes('prancha') || lowerId.includes('plank')) {
+    const isHigh = lowerId.includes('alta') || lowerId.includes('high');
+    const isKnee = lowerId.includes('joelho');
+    const isShoulderTap = lowerId.includes('toque') || lowerId.includes('tap');
+    const isSaw = lowerId.includes('serra') || lowerId.includes('saw');
     return {
       id,
       name: 'Prancha Frontal',
       model: 'plank',
+      params: { isHigh, isKnee, isShoulderTap, isSaw },
       durationSeconds: 3.4,
       muscles: REFERENCE_POSES_DATA.plank.muscles,
       mus: REFERENCE_POSES_DATA.plank.muscles,
-      pose: plankPose,
+      pose: plankPose({ isHigh, isKnee, isShoulderTap, isSaw }),
     };
   }
 

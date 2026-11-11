@@ -119,10 +119,9 @@ export const BiomechanicsInspectorModal: React.FC<BiomechanicsInspectorModalProp
             <div className="absolute top-2.5 right-2.5 flex items-center gap-1 bg-slate-950/80 backdrop-blur-md border border-white/10 p-1 rounded-xl">
               {(
                 [
-                  { id: 'silhouette', label: 'Silhueta' },
-                  { id: 'xray', label: 'Raio-X' },
                   { id: 'anatomical', label: 'Anatômico' },
                   { id: 'mannequin', label: 'Manequim' },
+                  { id: 'silhouette', label: 'Silhueta' },
                 ] as { id: FigureStyle; label: string }[]
               ).map(st => (
                 <button

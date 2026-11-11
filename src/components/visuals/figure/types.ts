@@ -103,8 +103,7 @@ export type FigureStyle =
   | 'mannequin'   // 1. Manequim neutro (cinza-azulado, articulações marcadas, sem rosto)
   | 'anatomical'  // 2. Anatômico simplificado (pele, bermuda/roupa, músculos destacados)
   | 'silhouette'  // 3. Silhueta sólida (uma cor de alto contraste para miniaturas e treino)
-  | 'outline'     // 4. Contorno (traço ciano neon de 2px sobre fundo escuro)
-  | 'xray';       // 5. Raio-X (ossos translúcidos e articulações para alinhamento)
+  | 'outline';    // 4. Contorno (traço ciano neon de 2px sobre fundo escuro)
 
 export type AvatarGender = 'masculino' | 'feminino' | 'neutro';
 export type AvatarBiotype = 'magro' | 'medio' | 'atletico' | 'maior';
