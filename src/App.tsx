@@ -15,6 +15,7 @@ import {
   clearActiveWorkoutBackup,
   syncHistoryFromIndexedDB,
 } from './utils/storage';
+import { completeProgramSession } from './utils/gamificationStorage';
 import { idbStorage } from './utils/indexedDb';
 import { trackEvent } from './utils/analytics';
 import { HomeView } from './components/home/HomeView';
@@ -270,6 +271,17 @@ export function App() {
     const updatedHistory = saveWorkoutSession(finalSession);
     setHistory(updatedHistory);
     setSummarySession(null);
+
+    // Se o treino finalizado pertencia a um programa ativo, marca a sessão como concluída
+    if (finalSession.routineId && finalSession.routineId.startsWith('prog-')) {
+      const parts = finalSession.routineId.replace('prog-', '').split('-');
+      if (parts.length >= 2) {
+        const programId = parts[0];
+        const sessionId = parts.slice(1).join('-');
+        completeProgramSession(programId, sessionId, finalSession.id);
+      }
+    }
+
     // Vibrate + chime to celebrate
     triggerRecordVibrate();
     setActiveTab('home');

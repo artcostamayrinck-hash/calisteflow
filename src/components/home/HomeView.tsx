@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import type { Routine, WorkoutStats, WeeklyPlan } from '../../types';
-import { convertDayPlanToRoutine, getActiveWorkoutBackup, clearActiveWorkoutBackup } from '../../utils/storage';
+import { convertDayPlanToRoutine, getActiveWorkoutBackup, clearActiveWorkoutBackup, getPersonalRecords } from '../../utils/storage';
+import { calculateUserGamificationProfile } from '../../utils/gamificationStorage';
 import { soundManager } from '../../utils/audio';
 import { getAppSettings, saveAppSettings, prefersReducedMotion } from '../../utils/appSettings';
 import type { AppSettings } from '../../utils/appSettings';
@@ -33,7 +34,7 @@ import {
 import { GuidedJourneyCard } from '../retention/GuidedJourneyCard';
 import { StrengthRadarModal } from '../assessment/StrengthRadarModal';
 import { StyleComparisonGalleryModal } from '../visuals/figure/StyleComparisonGalleryModal';
-import { SkillTreeModal } from '../skills/SkillTreeModal';
+import { ProgressionHubModal } from '../progression/ProgressionHubModal';
 import { InstallGuideModal } from '../pwa/InstallGuideModal';
 import { BackupRestoreModal } from '../pwa/BackupRestoreModal';
 import { ThemeSelector } from '../layout/ThemeSelector';
@@ -108,6 +109,12 @@ export const HomeView: React.FC<HomeViewProps> = ({
   const [showStrengthRadar, setShowStrengthRadar] = useState(false);
   const [showSkillTree, setShowSkillTree] = useState(false);
   const [showInstallGuide, setShowInstallGuide] = useState(false);
+
+  // Fase 4: Perfil de Gamificação (Níveis, XP, Conquistas)
+  const userGamifProfile = useMemo(
+    () => calculateUserGamificationProfile(history, stats, getPersonalRecords()),
+    [history, stats]
+  );
 
   // D10: Detecção de Treino Perdido de Ontem
   const [dismissedReschedule, setDismissedReschedule] = useState(false);
@@ -257,6 +264,22 @@ export const HomeView: React.FC<HomeViewProps> = ({
                     treinar?
                   </span>
                 </h1>
+                <button
+                  type="button"
+                  onClick={() => {
+                    soundManager.triggerHaptic([20]);
+                    setShowSkillTree(true);
+                  }}
+                  className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-purple-500/15 hover:bg-purple-500/25 border border-purple-500/30 text-purple-300 transition cursor-pointer active:scale-95"
+                  aria-label="Ver nível e conquistas"
+                >
+                  <span className="w-4 h-4 rounded-md bg-purple-500 text-white font-black text-[10px] flex items-center justify-center">
+                    {userGamifProfile.level}
+                  </span>
+                  <span className="text-[11px] font-bold text-slate-200">{userGamifProfile.levelTitle}</span>
+                  <span className="text-[10px] font-mono text-purple-400 font-bold">• {userGamifProfile.totalXp} XP</span>
+                  <ChevronRight className="w-3 h-3 text-purple-400" />
+                </button>
               </div>
             </div>
 
@@ -1038,13 +1061,13 @@ export const HomeView: React.FC<HomeViewProps> = ({
             </div>
             <div>
               <span className="text-[10px] uppercase font-bold tracking-wider text-purple-400 block">
-                Trilhas Lendárias
+                Evolução & Gamificação
               </span>
               <p className="font-bold text-xs sm:text-sm text-slate-100 mt-0.5">
-                Árvore de Skills
+                Árvore de Skills & Conquistas
               </p>
               <p className="text-[10px] text-slate-400 mt-1">
-                Barra, Muscle-up, Planche e mais
+                8 categorias de skills, programas e desafios
               </p>
             </div>
           </button>
@@ -1194,9 +1217,17 @@ export const HomeView: React.FC<HomeViewProps> = ({
       {/* D13, D14, D18: Modais Interativos */}
       {showStrengthRadar && <StrengthRadarModal onClose={() => setShowStrengthRadar(false)} />}
       {showSkillTree && (
-        <SkillTreeModal
+        <ProgressionHubModal
+          isOpen={showSkillTree}
           onClose={() => setShowSkillTree(false)}
-          onOpenExerciseDetails={() => onNavigateTo('exercises')}
+          stats={stats}
+          history={history}
+          personalRecords={getPersonalRecords()}
+          onStartRoutine={onStartRoutine}
+          onOpenExerciseDetails={() => {
+            setShowSkillTree(false);
+            onNavigateTo('exercises');
+          }}
         />
       )}
       {showInstallGuide && <InstallGuideModal onClose={() => setShowInstallGuide(false)} />}

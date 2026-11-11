@@ -332,6 +332,9 @@ export interface AdaptiveProgressionSuggestion {
   dismissed?: boolean;
 }
 
+export * from './gamification';
+
+
 export type WorkoutBlockType = 'warmup' | 'main' | 'isometric_core' | 'cooldown';
 
 export interface PlannedExercise {
