@@ -27,6 +27,8 @@ import {
   X,
   Database,
   LayoutGrid,
+  UserCheck,
+  Wand2,
 } from 'lucide-react';
 import { GuidedJourneyCard } from '../retention/GuidedJourneyCard';
 import { StrengthRadarModal } from '../assessment/StrengthRadarModal';
@@ -40,6 +42,8 @@ import {
   getDashboardConfig,
   type DashboardModuleConfig,
 } from './DashboardCustomizerModal';
+import { TrainingProfileModal } from '../profile/TrainingProfileModal';
+import { WorkoutGeneratorModal } from '../workout/WorkoutGeneratorModal';
 import type { WorkoutSession, ActiveWorkoutBackup } from '../../types';
 
 interface HomeViewProps {
@@ -95,6 +99,10 @@ export const HomeView: React.FC<HomeViewProps> = ({
   const [dashboardConfig, setDashboardConfig] = useState<DashboardModuleConfig>(getDashboardConfig);
   const [showCustomizerModal, setShowCustomizerModal] = useState(false);
   const [activeBackup, setActiveBackup] = useState<ActiveWorkoutBackup | null>(() => getActiveWorkoutBackup());
+
+  // Fase 2: Perfil do Praticante & Gerador Inteligente
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showGeneratorModal, setShowGeneratorModal] = useState(false);
 
   // D13, D14, D18: Modais de Avaliação, Skills e Instalação PWA
   const [showStrengthRadar, setShowStrengthRadar] = useState(false);
@@ -288,6 +296,48 @@ export const HomeView: React.FC<HomeViewProps> = ({
                     <span className="text-xs font-bold block text-slate-100">Avatar & Estilos de Figura</span>
                     <span className="text-[10px] text-cyan-300/80">
                       4 estilos (Manequim, Anatômico, Silhueta, Contorno), biotipo e cores
+                    </span>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-cyan-400 shrink-0" />
+              </button>
+
+              {/* Acesso Rápido: Perfil do Praticante */}
+              <button
+                type="button"
+                onClick={() => {
+                  soundManager.triggerHaptic([20]);
+                  setShowProfileModal(true);
+                }}
+                className="w-full flex items-center justify-between p-3 rounded-xl border border-emerald-500/30 bg-gradient-to-r from-emerald-500/15 to-teal-500/10 hover:from-emerald-500/20 hover:to-teal-500/15 text-emerald-300 transition active:scale-98 shadow-sm"
+              >
+                <div className="flex items-center gap-2.5 text-left">
+                  <UserCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <div>
+                    <span className="text-xs font-bold block text-slate-100">Meu Perfil de Treino</span>
+                    <span className="text-[10px] text-emerald-300/80">
+                      Nível, metas, equipamentos, tempo e preferências
+                    </span>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-emerald-400 shrink-0" />
+              </button>
+
+              {/* Acesso Rápido: Gerador de Treinos */}
+              <button
+                type="button"
+                onClick={() => {
+                  soundManager.triggerHaptic([20]);
+                  setShowGeneratorModal(true);
+                }}
+                className="w-full flex items-center justify-between p-3 rounded-xl border border-blue-500/30 bg-gradient-to-r from-blue-500/15 to-cyan-500/10 hover:from-blue-500/20 hover:to-cyan-500/15 text-blue-300 transition active:scale-98 shadow-sm"
+              >
+                <div className="flex items-center gap-2.5 text-left">
+                  <Wand2 className="w-4 h-4 text-cyan-400 shrink-0" />
+                  <div>
+                    <span className="text-xs font-bold block text-slate-100">Gerador Sob Demanda</span>
+                    <span className="text-[10px] text-blue-300/80">
+                      Sessões personalizadas considerando histórico recente
                     </span>
                   </div>
                 </div>
@@ -709,6 +759,69 @@ export const HomeView: React.FC<HomeViewProps> = ({
         </div>
       </div>
 
+      {/* ── CALISTEFLOW 2.0: SISTEMA DE TREINAMENTO INTELIGENTE ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" style={{ direction: 'ltr' }}>
+        <button
+          type="button"
+          onClick={() => {
+            soundManager.triggerHaptic([30]);
+            setShowGeneratorModal(true);
+          }}
+          className="p-4 sm:p-5 rounded-3xl glass-card border border-cyan-500/25 hover:border-cyan-500/50 bg-gradient-to-br from-cyan-500/10 via-slate-900/60 to-blue-500/5 text-left flex flex-col justify-between space-y-3 transition active:scale-98 shadow-lg shadow-cyan-950/20 group cursor-pointer"
+        >
+          <div className="flex items-center justify-between">
+            <div className="w-10 h-10 rounded-2xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-300 shrink-0 group-hover:scale-110 transition">
+              <Wand2 className="w-5 h-5" />
+            </div>
+            <span className="text-[10px] uppercase font-black tracking-wider px-2.5 py-1 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+              Personalizado
+            </span>
+          </div>
+          <div>
+            <h3 className="font-black text-sm sm:text-base text-slate-100 group-hover:text-cyan-200 transition">
+              Gerador Inteligente
+            </h3>
+            <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
+              Crie treinos de Força, Hipertrofia, Resistência ou Skills considerando seu nível e fadiga recente.
+            </p>
+          </div>
+          <div className="flex items-center gap-1.5 text-xs font-black text-cyan-400 pt-1">
+            <span>Gerar Treino Agora</span>
+            <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition" />
+          </div>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            soundManager.triggerHaptic([30]);
+            setShowProfileModal(true);
+          }}
+          className="p-4 sm:p-5 rounded-3xl glass-card border border-emerald-500/25 hover:border-emerald-500/50 bg-gradient-to-br from-emerald-500/10 via-slate-900/60 to-teal-500/5 text-left flex flex-col justify-between space-y-3 transition active:scale-98 shadow-lg shadow-emerald-950/20 group cursor-pointer"
+        >
+          <div className="flex items-center justify-between">
+            <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-300 shrink-0 group-hover:scale-110 transition">
+              <UserCheck className="w-5 h-5" />
+            </div>
+            <span className="text-[10px] uppercase font-black tracking-wider px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+              Perfil
+            </span>
+          </div>
+          <div>
+            <h3 className="font-black text-sm sm:text-base text-slate-100 group-hover:text-emerald-200 transition">
+              Perfil do Praticante
+            </h3>
+            <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
+              Ajuste seus equipamentos, tempo disponível, limitações articulares e preferências de descanso.
+            </p>
+          </div>
+          <div className="flex items-center gap-1.5 text-xs font-black text-emerald-400 pt-1">
+            <span>Configurar Meu Perfil</span>
+            <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition" />
+          </div>
+        </button>
+      </div>
+
       {/* ── GUIDED JOURNEY & RETENTION MILESTONES (G2) ── */}
       {dashboardConfig.weeklyGoals && (
         <GuidedJourneyCard
@@ -1104,6 +1217,17 @@ export const HomeView: React.FC<HomeViewProps> = ({
         onClose={() => setShowCustomizerModal(false)}
         config={dashboardConfig}
         onChange={setDashboardConfig}
+      />
+      {/* Fase 2: Perfil do Praticante & Gerador Inteligente */}
+      <TrainingProfileModal
+        isOpen={showProfileModal}
+        onClose={() => setShowProfileModal(false)}
+      />
+      <WorkoutGeneratorModal
+        isOpen={showGeneratorModal}
+        onClose={() => setShowGeneratorModal(false)}
+        onStartRoutine={onStartRoutine}
+        history={history}
       />
     </div>
   );

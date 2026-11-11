@@ -39,6 +39,7 @@ import {
   RotateCcw,
   Award,
   Info,
+  Activity,
 } from 'lucide-react';
 
 interface OnboardingModalProps {
@@ -69,7 +70,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ onComplete, on
   const [daysSelected, setDaysSelected] = useState<number[]>(
     draft?.profile?.daysSelected || [1, 3, 5]
   );
-  const [durationMinutes, setDurationMinutes] = useState<20 | 30 | 45 | 60>(
+  const [durationMinutes, setDurationMinutes] = useState<15 | 20 | 30 | 45 | 60>(
     draft?.profile?.durationMinutes || 45
   );
   const [focusMode, setFocusMode] = useState<'auto' | 'custom'>(
@@ -251,6 +252,12 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ onComplete, on
       desc: 'Handstand, Muscle-Up, Front Lever, Planche e alavancas isométricas.',
       icon: Sparkles,
       color: 'from-purple-500 to-pink-600',
+    },
+    condicionamento: {
+      label: 'Condicionamento Físico',
+      desc: 'Capacidade aeróbica integrada, agilidade e circuitos de alta densidade.',
+      icon: Activity,
+      color: 'from-cyan-500 to-blue-600',
     },
     perda_gordura: {
       label: 'Perder Gordura / Definição',

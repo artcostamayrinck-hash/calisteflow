@@ -289,24 +289,47 @@ export type EquipmentType =
   | 'cadeira'
   | 'toalha';
 
-export type FitnessGoal = 'forca' | 'hipertrofia' | 'resistencia' | 'skills' | 'perda_gordura' | 'mobilidade';
+export type FitnessGoal = 'forca' | 'hipertrofia' | 'resistencia' | 'skills' | 'perda_gordura' | 'condicionamento' | 'mobilidade';
 
 export type JointLimitation = 'punho' | 'ombro' | 'joelho' | 'lombar';
 
+export interface UserTrainingPreferences {
+  focusStyle?: 'equilibrado' | 'superiores' | 'inferiores' | 'skills_isometria';
+  preferredRestSeconds?: number;
+  includeWarmup?: boolean;
+  includeStretching?: boolean;
+}
+
 export interface UserOnboardingProfile {
   goal: FitnessGoal;
+  secondaryGoals?: FitnessGoal[];
   level: ExerciseDifficulty | 'Nunca treinei';
   pushupsCount?: number;
   pullupsCount?: number;
   equipments: EquipmentType[];
   daysSelected: number[]; // 0-6
-  durationMinutes: 20 | 30 | 45 | 60;
+  durationMinutes: 15 | 20 | 30 | 45 | 60;
   focusMode: 'auto' | 'custom';
   dayFocusMap?: Record<number, BodyFocus[]>;
   limitations: JointLimitation[];
+  preferences?: UserTrainingPreferences;
   preferredTime?: string;
   notificationsEnabled?: boolean;
   completedAt?: string;
+  updatedAt?: string;
+}
+
+export interface AdaptiveProgressionSuggestion {
+  id: string;
+  fromExerciseId: string;
+  fromExerciseName: string;
+  toExerciseId: string;
+  toExerciseName: string;
+  reason: string;
+  metric: string; // Ex: "12 reps x 3 sessões (RPE moderado)"
+  suggestedAt: string;
+  accepted?: boolean;
+  dismissed?: boolean;
 }
 
 export type WorkoutBlockType = 'warmup' | 'main' | 'isometric_core' | 'cooldown';
@@ -336,7 +359,7 @@ export interface WeeklyDayPlan {
   isActive: boolean; // Treino ativo ou descanso
   name: string; // Ex: "Push Intenso", "Pernas & Core"
   focuses: BodyFocus[];
-  targetDurationMinutes: 20 | 30 | 45 | 60;
+  targetDurationMinutes: 15 | 20 | 30 | 45 | 60;
   goal: FitnessGoal;
   timeReminder?: string; // Ex: "07:30"
   blocks: WorkoutBlock[];

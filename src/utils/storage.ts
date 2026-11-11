@@ -11,10 +11,12 @@ import type {
   PersonalRecord,
   StrengthAssessment,
   SkillStatus,
+  AdaptiveProgressionSuggestion,
 } from '../types';
 import type { AppSettings } from './appSettings';
 import { getAppSettings, saveAppSettings } from './appSettings';
 import { DEFAULT_ROUTINES } from '../data/routinesData';
+import { EXERCISES_DATABASE, getExerciseById } from '../data/exercisesData';
 import { createPresetWeeklyPlan } from './workoutGenerator';
 import { idbStorage } from './indexedDb';
 
@@ -35,6 +37,7 @@ const STORAGE_KEYS = {
   PERSONAL_RECORDS: 'calistheflow_prs_v1',
   STRENGTH_ASSESSMENTS: 'calistheflow_strength_assessments_v1',
   SKILL_TREE_PROGRESS: 'calistheflow_skill_tree_progress_v1',
+  ADAPTIVE_PROGRESSIONS: 'calistheflow_adaptive_progressions_v1',
 };
 
 export const getStoredRoutines = (): Routine[] => {
@@ -633,6 +636,111 @@ export const checkAndRecordPR = (
       },
     };
   }
+};
+
+// ================= ADAPTIVE PROGRESSIONS (FASE 2 - SEÇÃO 8) =================
+export const getAdaptiveProgressionDecisions = (): Record<string, { accepted?: boolean; dismissed?: boolean }> => {
+  try {
+    const raw = localStorage.getItem('calistheflow_adaptive_progression_decisions_v1');
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+};
+
+export const saveAdaptiveProgressionDecision = (suggestionId: string, accepted: boolean): void => {
+  try {
+    const current = getAdaptiveProgressionDecisions();
+    current[suggestionId] = {
+      accepted,
+      dismissed: !accepted,
+    };
+    localStorage.setItem('calistheflow_adaptive_progression_decisions_v1', JSON.stringify(current));
+  } catch (err) {
+    console.error('Failed to save adaptive progression decision:', err);
+  }
+};
+
+/**
+ * Analisa o histórico de treinos e identifica oportunidades comprovadas de progressão adaptativa (Fase 2 - Seção 8)
+ * Não altera a rotina automaticamente; gera sugestões explicadas com métricas de consistência.
+ */
+export const computeAdaptiveProgressionSuggestions = (
+  history: WorkoutSession[]
+): AdaptiveProgressionSuggestion[] => {
+  if (!history || history.length < 2) return [];
+
+  const storedDecisions = getAdaptiveProgressionDecisions();
+  const suggestions: AdaptiveProgressionSuggestion[] = [];
+
+  // Mapear sessões recentes por exercício
+  const exerciseHistoryMap: Record<string, Array<{ reps: number; seconds: number; completed: boolean; rpe?: number }>> = {};
+
+  // Ordenar cronologicamente
+  const sorted = [...history].sort(
+    (a, b) => new Date(a.endTime || a.startTime).getTime() - new Date(b.endTime || b.startTime).getTime()
+  );
+
+  sorted.forEach(session => {
+    session.exercises.forEach(ex => {
+      if (!exerciseHistoryMap[ex.exerciseId]) {
+        exerciseHistoryMap[ex.exerciseId] = [];
+      }
+      const totalReps = ex.sets.reduce((sum, s) => sum + (s.completedReps || 0), 0);
+      const totalSec = ex.sets.reduce((sum, s) => sum + (s.completedSeconds || 0), 0);
+      const allDone = ex.sets.every(s => s.completed);
+      exerciseHistoryMap[ex.exerciseId].push({
+        reps: totalReps,
+        seconds: totalSec,
+        completed: allDone,
+        rpe: session.perceivedEffort,
+      });
+    });
+  });
+
+  // Para cada exercício com pelo menos 2-3 sessões bem-sucedidas
+  Object.entries(exerciseHistoryMap).forEach(([exId, sessions]) => {
+    if (sessions.length < 2) return;
+    const exData = getExerciseById(exId) || EXERCISES_DATABASE.find(e => e.id === exId);
+    if (!exData || !exData.progressoes || exData.progressoes.length === 0) return;
+
+    // Pegar as últimas 3 sessões (ou 2 se só tiver 2)
+    const recent = sessions.slice(-3);
+    const allSuccessful = recent.every(s => s.completed);
+    const avgRpe = recent.reduce((sum, s) => sum + (s.rpe || 6), 0) / recent.length;
+
+    if (allSuccessful && avgRpe <= 7.5) {
+      const nextProgId = exData.progressoes[0];
+      const nextExData = getExerciseById(nextProgId) || EXERCISES_DATABASE.find(e => e.id === nextProgId);
+      if (!nextExData) return;
+
+      const suggestionId = `prog-${exId}-${nextProgId}`;
+      const decision = storedDecisions[suggestionId];
+
+      // Se já foi dispensada, não re-sugerir
+      if (decision?.dismissed) return;
+
+      const isIso = exData.type === 'isometric';
+      const avgVolume = Math.round(
+        recent.reduce((sum, s) => sum + (isIso ? s.seconds : s.reps), 0) / recent.length
+      );
+
+      suggestions.push({
+        id: suggestionId,
+        fromExerciseId: exData.id,
+        fromExerciseName: exData.name,
+        toExerciseId: nextExData.id,
+        toExerciseName: nextExData.name,
+        reason: `Você completou ${recent.length} sessões consecutivas de ${exData.name} com esforço controlado. A progressão biomecânica recomendada é ${nextExData.name} para manter estímulos de sobrecarga.`,
+        metric: isIso ? `Média de ${avgVolume}s sob tensão (RPE ${avgRpe.toFixed(1)}/10)` : `Média de ${avgVolume} repetições totais (RPE ${avgRpe.toFixed(1)}/10)`,
+        suggestedAt: new Date().toISOString(),
+        accepted: decision?.accepted || false,
+        dismissed: decision?.dismissed || false,
+      });
+    }
+  });
+
+  return suggestions;
 };
 
 // ================= D13: STRENGTH ASSESSMENTS =================

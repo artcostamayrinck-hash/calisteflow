@@ -1,12 +1,14 @@
 import { useState } from 'react';
-import type { Routine, ExerciseCategory } from '../../types';
+import type { Routine, ExerciseCategory, WorkoutSession } from '../../types';
 import { RoutineCard } from './RoutineCard';
 import { RoutineShareModal } from './RoutineShareModal';
+import { WorkoutGeneratorModal } from '../workout/WorkoutGeneratorModal';
 import { soundManager } from '../../utils/audio';
-import { Plus, Search, Dumbbell, RotateCcw, X, Sparkles } from 'lucide-react';
+import { Plus, Search, Dumbbell, RotateCcw, X, Sparkles, Wand2 } from 'lucide-react';
 
 interface RoutineListViewProps {
   routines: Routine[];
+  history?: WorkoutSession[];
   onStartRoutine: (routine: Routine) => void;
   onEditRoutine: (routine: Routine) => void;
   onDuplicateRoutine: (routine: Routine) => void;
@@ -18,6 +20,7 @@ interface RoutineListViewProps {
 
 export const RoutineListView = ({
   routines,
+  history,
   onStartRoutine,
   onEditRoutine,
   onDuplicateRoutine,
@@ -29,6 +32,7 @@ export const RoutineListView = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<ExerciseCategory | 'Todos'>('Todos');
   const [sharingRoutine, setSharingRoutine] = useState<Routine | null>(null);
+  const [showGeneratorModal, setShowGeneratorModal] = useState(false);
 
   const categories: Array<ExerciseCategory | 'Todos'> = [
     'Todos',
@@ -71,15 +75,26 @@ export const RoutineListView = ({
             </p>
           </div>
 
-          <button
-            onClick={() => {
-              soundManager.triggerHaptic([40]);
-              onCreateNewRoutine();
-            }}
-            className="px-5 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xl shadow-emerald-500/25 hover:brightness-110 active:scale-95 transition glow-emerald shrink-0"
-          >
-            <Plus className="w-4 h-4 stroke-[3]" /> Nova Rotina
-          </button>
+          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+            <button
+              onClick={() => {
+                soundManager.triggerHaptic([30]);
+                setShowGeneratorModal(true);
+              }}
+              className="px-4 py-3 rounded-2xl bg-gradient-to-r from-cyan-500/20 via-blue-500/20 to-cyan-500/10 border border-cyan-500/40 text-cyan-300 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-cyan-950/20 hover:bg-cyan-500/30 hover:text-white active:scale-95 transition shrink-0 cursor-pointer"
+            >
+              <Wand2 className="w-4 h-4 text-cyan-400" /> Gerador Inteligente
+            </button>
+            <button
+              onClick={() => {
+                soundManager.triggerHaptic([40]);
+                onCreateNewRoutine();
+              }}
+              className="px-5 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xl shadow-emerald-500/25 hover:brightness-110 active:scale-95 transition glow-emerald shrink-0 cursor-pointer"
+            >
+              <Plus className="w-4 h-4 stroke-[3]" /> Nova Rotina
+            </button>
+          </div>
         </div>
       </div>
 
@@ -183,6 +198,13 @@ export const RoutineListView = ({
           onClose={() => setSharingRoutine(null)}
         />
       )}
+      {/* Fase 2: Gerador Inteligente de Treinos */}
+      <WorkoutGeneratorModal
+        isOpen={showGeneratorModal}
+        onClose={() => setShowGeneratorModal(false)}
+        onStartRoutine={onStartRoutine}
+        history={history}
+      />
     </div>
   );
 };

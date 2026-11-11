@@ -11,6 +11,11 @@ import type {
   MuscleGroup,
   UserOnboardingProfile,
   JointLimitation,
+  Routine,
+  RoutineExercise,
+  ExerciseCategory,
+  WorkoutSession,
+  UserTrainingPreferences,
 } from '../types';
 import { EXERCISES_DATABASE } from '../data/exercisesData';
 
@@ -164,7 +169,7 @@ export function filterExercises(
  */
 export function generateDayWorkout(params: {
   focuses: BodyFocus[];
-  targetDurationMinutes: 20 | 30 | 45 | 60;
+  targetDurationMinutes: 15 | 20 | 30 | 45 | 60;
   goal: FitnessGoal;
   userLevel: ExerciseDifficulty;
   equipments: EquipmentType[];
@@ -189,11 +194,12 @@ export function generateDayWorkout(params: {
 
   // Volumes e metas
   const setsConfig = {
+    15: { mainSets: 2, accSets: 2, mainExercisesCount: 2 },
     20: { mainSets: 3, accSets: 2, mainExercisesCount: 2 },
     30: { mainSets: 3, accSets: 3, mainExercisesCount: 3 },
     45: { mainSets: 4, accSets: 3, mainExercisesCount: 4 },
     60: { mainSets: 4, accSets: 4, mainExercisesCount: 5 },
-  }[targetDurationMinutes];
+  }[targetDurationMinutes] || { mainSets: 3, accSets: 2, mainExercisesCount: 2 };
 
   const goalConfig = {
     forca: { reps: 6, holdSeconds: 20, rest: 90 },
@@ -201,6 +207,7 @@ export function generateDayWorkout(params: {
     resistencia: { reps: 15, holdSeconds: 45, rest: 45 },
     skills: { reps: 5, holdSeconds: 15, rest: 120 },
     perda_gordura: { reps: 15, holdSeconds: 35, rest: 35 },
+    condicionamento: { reps: 15, holdSeconds: 35, rest: 35 },
     mobilidade: { reps: 8, holdSeconds: 40, rest: 40 },
   }[goal] || { reps: 10, holdSeconds: 30, rest: 60 };
 
@@ -560,4 +567,177 @@ export function createCustomWeeklyPlanFromProfile(
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
+}
+
+/**
+ * Converte blocos de treino gerados para o modelo Routine compatível com WorkoutPlayer
+ */
+export function convertBlocksToRoutine(
+  title: string,
+  description: string,
+  category: ExerciseCategory,
+  difficulty: ExerciseDifficulty,
+  estimatedMinutes: number,
+  blocks: WorkoutBlock[]
+): Routine {
+  const exercises: RoutineExercise[] = blocks.flatMap(b =>
+    b.exercises.map(pe => ({
+      exerciseId: pe.exerciseId,
+      sets: pe.sets,
+      targetReps: pe.targetReps,
+      targetHoldSeconds: pe.targetHoldSeconds,
+      restSeconds: pe.restSeconds,
+      notes: pe.notes,
+    }))
+  );
+
+  return {
+    id: `smart-${Date.now()}`,
+    title,
+    description,
+    category,
+    difficulty,
+    estimatedMinutes,
+    exercises,
+    isCustom: true,
+    safetyNotes: 'Treino gerado pelo motor biomecânico do CalisteFlow. Respeite seus limites articulares e de fadiga.',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+/**
+ * Gerador de Treinos Personalizados (Fase 2 - Seção 3)
+ * Considera: Nível, Objetivo, Tempo, Equipamentos, Histórico Recente e Músculos Fadigados
+ */
+export function generateSmartCustomWorkout(params: {
+  goal: FitnessGoal;
+  userLevel: ExerciseDifficulty;
+  durationMinutes: 15 | 20 | 30 | 45 | 60;
+  equipments: EquipmentType[];
+  limitations?: JointLimitation[];
+  recentHistory?: WorkoutSession[];
+  preferences?: UserTrainingPreferences;
+  customFocuses?: BodyFocus[];
+}): { routine: Routine; blocks: WorkoutBlock[]; recentFatiguedMuscles: MuscleGroup[] } {
+  const {
+    goal,
+    userLevel,
+    durationMinutes,
+    equipments,
+    limitations = [],
+    recentHistory = [],
+    preferences,
+    customFocuses,
+  } = params;
+
+  // 1. Detectar músculos fadigados nas últimas 48h
+  const fortyEightHoursMs = 48 * 60 * 60 * 1000;
+  const now = Date.now();
+  const recentMusclesSet = new Set<MuscleGroup>();
+
+  recentHistory.forEach(session => {
+    const sessionTime = new Date(session.endTime || session.startTime).getTime();
+    if (now - sessionTime <= fortyEightHoursMs && session.musclesWorked) {
+      session.musclesWorked.forEach(m => recentMusclesSet.add(m));
+    }
+  });
+
+  const recentFatiguedMuscles = Array.from(recentMusclesSet);
+
+  // 2. Determinar focos musculares ideais
+  let selectedFocuses: BodyFocus[] = [];
+
+  if (customFocuses && customFocuses.length > 0) {
+    selectedFocuses = customFocuses;
+  } else if (goal === 'skills') {
+    selectedFocuses = ['skills', 'core'];
+  } else if (goal === 'mobilidade') {
+    selectedFocuses = ['mobilidade'];
+  } else {
+    // Escolha inteligente de foco evitando músculos em recuperação
+    const pushMuscles: MuscleGroup[] = ['peito', 'triceps', 'ombros'];
+    const pullMuscles: MuscleGroup[] = ['costas', 'biceps', 'antebraco'];
+    const legMuscles: MuscleGroup[] = ['quadriceps', 'posteriores', 'gluteos', 'panturrilhas'];
+
+    const pushFatigued = pushMuscles.some(m => recentMusclesSet.has(m));
+    const pullFatigued = pullMuscles.some(m => recentMusclesSet.has(m));
+    const legsFatigued = legMuscles.some(m => recentMusclesSet.has(m));
+
+    if (preferences?.focusStyle === 'superiores') {
+      selectedFocuses = pushFatigued && !pullFatigued ? ['costas', 'biceps'] : ['peito', 'ombros', 'triceps'];
+    } else if (preferences?.focusStyle === 'inferiores') {
+      selectedFocuses = ['quadriceps', 'gluteos', 'posteriores'];
+    } else if (preferences?.focusStyle === 'skills_isometria') {
+      selectedFocuses = ['skills', 'core'];
+    } else {
+      // Distribuição equilibrada rotativa
+      if (pushFatigued && !pullFatigued) {
+        selectedFocuses = ['costas', 'biceps', 'core'];
+      } else if (pullFatigued && !legsFatigued) {
+        selectedFocuses = ['quadriceps', 'gluteos', 'panturrilhas'];
+      } else if (legsFatigued && !pushFatigued) {
+        selectedFocuses = ['peito', 'ombros', 'triceps'];
+      } else {
+        selectedFocuses = ['full_body'];
+      }
+    }
+  }
+
+  // 3. Mapear meta para categoria de rotina
+  const categoryMap: Record<FitnessGoal, ExerciseCategory> = {
+    forca: 'Push',
+    hipertrofia: selectedFocuses.includes('costas') || selectedFocuses.includes('biceps') ? 'Pull' : 'Full Body',
+    resistencia: 'Full Body',
+    skills: 'Skill',
+    condicionamento: 'Full Body',
+    perda_gordura: 'Full Body',
+    mobilidade: 'Full Body',
+  };
+
+  const goalTitles: Record<FitnessGoal, string> = {
+    forca: 'Força & Tensão Mecânica',
+    hipertrofia: 'Hipertrofia Funcional',
+    resistencia: 'Resistência Muscular',
+    skills: 'Prática de Skills Calistênicas',
+    condicionamento: 'Condicionamento Metabólico',
+    perda_gordura: 'Circuito Queima & Agilidade',
+    mobilidade: 'Mobilidade & Saúde Articular',
+  };
+
+  // 4. Gerar blocos
+  // Ajustar durationMinutes caso 15m (usa config de 20m com repetições concisas)
+  const effectiveMinutes: 20 | 30 | 45 | 60 = durationMinutes === 15 ? 20 : durationMinutes;
+  const blocks = generateDayWorkout({
+    focuses: selectedFocuses,
+    targetDurationMinutes: effectiveMinutes,
+    goal,
+    userLevel,
+    equipments,
+    limitations,
+  });
+
+  // Se preferência indicar sem aquecimento ou alongamento, filtrar
+  let filteredBlocks = blocks;
+  if (preferences?.includeWarmup === false) {
+    filteredBlocks = filteredBlocks.filter(b => b.type !== 'warmup');
+  }
+  if (preferences?.includeStretching === false) {
+    filteredBlocks = filteredBlocks.filter(b => b.type !== 'cooldown');
+  }
+
+  // 5. Converter para rotina
+  const title = `Treino Inteligente • ${goalTitles[goal] || 'Calistenia'}`;
+  const description = `Rotina de ${durationMinutes} min personalizada para nível ${userLevel}. Foco: ${selectedFocuses.map(f => FOCUS_LABELS[f]?.label || f).join(', ')}.`;
+
+  const routine = convertBlocksToRoutine(
+    title,
+    description,
+    categoryMap[goal] || 'Full Body',
+    userLevel,
+    durationMinutes,
+    filteredBlocks
+  );
+
+  return { routine, blocks: filteredBlocks, recentFatiguedMuscles };
 }

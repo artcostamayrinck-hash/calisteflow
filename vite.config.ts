@@ -31,5 +31,8 @@ export default defineConfig({
     __APP_VERSION__: JSON.stringify('4.2.0'),
     __BUILD_TIMESTAMP__: JSON.stringify(new Date().toISOString()),
   },
+  build: {
+    target: 'es2022',
+  },
   plugins: [react(), tailwindcss(), versionedServiceWorkerPlugin()],
 });

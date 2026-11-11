@@ -38,7 +38,7 @@ interface DayEditorModalProps {
 export const DayEditorModal = ({ day, onSaveDay, onClose }: DayEditorModalProps) => {
   const [name, setName] = useState<string>(day.name);
   const [isActive, setIsActive] = useState<boolean>(day.isActive);
-  const [targetDurationMinutes, setTargetDurationMinutes] = useState<20 | 30 | 45 | 60>(
+  const [targetDurationMinutes, setTargetDurationMinutes] = useState<15 | 20 | 30 | 45 | 60>(
     day.targetDurationMinutes
   );
   const [goal, setGoal] = useState<FitnessGoal>(day.goal);

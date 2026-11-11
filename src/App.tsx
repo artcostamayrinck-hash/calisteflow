@@ -413,6 +413,7 @@ export function App() {
         {activeTab === 'routines' && (
           <RoutineListView
             routines={routines}
+            history={history}
             onStartRoutine={handleStartRoutine}
             onEditRoutine={handleEditRoutine}
             onDuplicateRoutine={handleDuplicateRoutine}
