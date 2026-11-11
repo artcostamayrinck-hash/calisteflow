@@ -17,7 +17,7 @@ export interface AppSettings {
   soundVolume: number; // 0.0 to 1.0
   soundTimbre: 'padrao' | 'suave' | 'apito';
   wakeLockEnabled: boolean;
-  theme: 'dark' | 'light' | 'auto';
+  theme: 'dark' | 'light' | 'auto' | 'high-contrast';
   voiceEnabled: boolean;
   avatar: AvatarSettings;
 }
@@ -41,10 +41,11 @@ const DEFAULTS: AppSettings = {
   avatar: { ...DEFAULT_AVATAR_SETTINGS },
 };
 
-/** Aplica classes CSS de tema ('theme-light') e modo outdoor ('mode-outdoor') no <html> */
-export function applyThemeAndOutdoorClasses(theme: 'dark' | 'light' | 'auto', outdoorMode: boolean): void {
+/** Aplica classes CSS de tema ('theme-light', 'theme-high-contrast') e modo outdoor ('mode-outdoor') no <html> */
+export function applyThemeAndOutdoorClasses(theme: 'dark' | 'light' | 'auto' | 'high-contrast', outdoorMode: boolean): void {
   if (typeof document === 'undefined') return;
 
+  const isHighContrast = theme === 'high-contrast' || outdoorMode;
   const isLight =
     theme === 'light' ||
     (theme === 'auto' &&
@@ -52,16 +53,14 @@ export function applyThemeAndOutdoorClasses(theme: 'dark' | 'light' | 'auto', ou
       window.matchMedia &&
       window.matchMedia('(prefers-color-scheme: light)').matches);
 
-  if (isLight) {
-    document.documentElement.classList.add('theme-light');
-  } else {
+  if (isHighContrast) {
+    document.documentElement.classList.add('theme-high-contrast', 'mode-outdoor');
     document.documentElement.classList.remove('theme-light');
-  }
-
-  if (outdoorMode) {
-    document.documentElement.classList.add('mode-outdoor');
+  } else if (isLight) {
+    document.documentElement.classList.add('theme-light');
+    document.documentElement.classList.remove('theme-high-contrast', 'mode-outdoor');
   } else {
-    document.documentElement.classList.remove('mode-outdoor');
+    document.documentElement.classList.remove('theme-light', 'theme-high-contrast', 'mode-outdoor');
   }
 }
 

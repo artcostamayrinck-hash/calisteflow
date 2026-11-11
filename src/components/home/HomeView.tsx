@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import type { Routine, WorkoutStats, WeeklyPlan } from '../../types';
-import { convertDayPlanToRoutine } from '../../utils/storage';
+import { convertDayPlanToRoutine, getActiveWorkoutBackup, clearActiveWorkoutBackup } from '../../utils/storage';
 import { soundManager } from '../../utils/audio';
 import { getAppSettings, saveAppSettings, prefersReducedMotion } from '../../utils/appSettings';
 import type { AppSettings } from '../../utils/appSettings';
@@ -26,6 +26,7 @@ import {
   ShieldAlert,
   X,
   Database,
+  LayoutGrid,
 } from 'lucide-react';
 import { GuidedJourneyCard } from '../retention/GuidedJourneyCard';
 import { StrengthRadarModal } from '../assessment/StrengthRadarModal';
@@ -33,7 +34,13 @@ import { StyleComparisonGalleryModal } from '../visuals/figure/StyleComparisonGa
 import { SkillTreeModal } from '../skills/SkillTreeModal';
 import { InstallGuideModal } from '../pwa/InstallGuideModal';
 import { BackupRestoreModal } from '../pwa/BackupRestoreModal';
-import type { WorkoutSession } from '../../types';
+import { ThemeSelector } from '../layout/ThemeSelector';
+import {
+  DashboardCustomizerModal,
+  getDashboardConfig,
+  type DashboardModuleConfig,
+} from './DashboardCustomizerModal';
+import type { WorkoutSession, ActiveWorkoutBackup } from '../../types';
 
 interface HomeViewProps {
   stats: WorkoutStats;
@@ -85,6 +92,9 @@ export const HomeView: React.FC<HomeViewProps> = ({
   const [showStyleComparison, setShowStyleComparison] = useState(false);
   const [showBackupRestoreModal, setShowBackupRestoreModal] = useState(false);
   const [recordPulse, setRecordPulse] = useState(false);
+  const [dashboardConfig, setDashboardConfig] = useState<DashboardModuleConfig>(getDashboardConfig);
+  const [showCustomizerModal, setShowCustomizerModal] = useState(false);
+  const [activeBackup, setActiveBackup] = useState<ActiveWorkoutBackup | null>(() => getActiveWorkoutBackup());
 
   // D13, D14, D18: Modais de Avaliação, Skills e Instalação PWA
   const [showStrengthRadar, setShowStrengthRadar] = useState(false);
@@ -364,39 +374,36 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 </div>
               )}
 
-              {/* Tema Visual (Claro / Escuro / Auto) */}
-              <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              {/* Tema Visual (Escuro / Claro Sol / Auto / Alto Contraste) */}
+              <div className="p-3 rounded-2xl bg-white/[0.02] border border-white/5 space-y-2">
                 <div>
-                  <span className="text-xs font-bold text-slate-300 block">Tema da Interface</span>
-                  <span className="text-[10px] text-slate-400">Escuro padrão, Claro de alto contraste ou Automático (sistema)</span>
+                  <span className="text-xs font-bold text-slate-200 block">Tema da Interface</span>
+                  <span className="text-[10px] text-slate-400">Escuro padrão, Claro de alta legibilidade ao sol, Automático ou Alto Contraste (WCAG AAA)</span>
                 </div>
-                <div className="flex gap-1 shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => updateSetting('theme', 'dark')}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition ${settings.theme === 'dark' ? 'bg-emerald-500 text-slate-950' : 'bg-white/5 text-slate-400 hover:text-white'
-                      }`}
-                  >
-                    Escuro
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => updateSetting('theme', 'light')}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition ${settings.theme === 'light' ? 'bg-emerald-500 text-slate-950' : 'bg-white/5 text-slate-400 hover:text-white'
-                      }`}
-                  >
-                    Claro
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => updateSetting('theme', 'auto')}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition ${settings.theme === 'auto' ? 'bg-emerald-500 text-slate-950' : 'bg-white/5 text-slate-400 hover:text-white'
-                      }`}
-                  >
-                    Auto
-                  </button>
-                </div>
+                <ThemeSelector
+                  currentTheme={settings.theme}
+                  onThemeChange={newTheme => updateSetting('theme', newTheme)}
+                />
               </div>
+
+              {/* Personalizar Módulos da Tela Inicial */}
+              <button
+                type="button"
+                onClick={() => {
+                  soundManager.triggerHaptic([25]);
+                  setShowCustomizerModal(true);
+                }}
+                className="w-full p-2.5 rounded-xl bg-white/[0.03] border border-white/10 hover:border-emerald-500/40 flex items-center justify-between text-left transition active:scale-98"
+              >
+                <div className="flex items-center gap-2.5">
+                  <LayoutGrid className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <div>
+                    <span className="text-xs font-bold text-slate-100 block">Personalizar Tela Inicial</span>
+                    <span className="text-[10px] text-slate-400">Escolha quais módulos deseja exibir na tela principal</span>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-slate-400" />
+              </button>
 
               {/* Tempo Padrão de Descanso entre Séries */}
               <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/5 space-y-1.5">
@@ -569,8 +576,68 @@ export const HomeView: React.FC<HomeViewProps> = ({
             </div>
           )}
 
+          {/* CONTINUAR TREINO EM ANDAMENTO (RESUME BANNER) */}
+          {activeBackup && dashboardConfig.resumeBanner && (
+            <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-emerald-500/20 via-teal-500/15 to-emerald-500/10 border border-emerald-500/50 shadow-xl shadow-emerald-950/30 space-y-3 animate-in fade-in">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-emerald-500 text-slate-950 flex items-center justify-center font-black shadow-md shrink-0">
+                    <Play className="w-5 h-5 fill-current" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-black uppercase tracking-wider text-emerald-400 block">
+                      Treino em Andamento
+                    </span>
+                    <h3 className="text-sm sm:text-base font-black text-slate-100">
+                      {activeBackup.routine.title}
+                    </h3>
+                    <p className="text-xs text-slate-400 mt-0.5">
+                      Exercício {activeBackup.exerciseIndex + 1} de {activeBackup.routine.exercises.length} • {Math.floor(activeBackup.totalElapsedSeconds / 60)} min decorridos
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    soundManager.triggerHaptic([20]);
+                    clearActiveWorkoutBackup();
+                    setActiveBackup(null);
+                  }}
+                  aria-label="Descartar treino salvo"
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              <div className="flex gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    soundManager.triggerHaptic([50]);
+                    onStartRoutine(activeBackup.routine);
+                  }}
+                  className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 font-black text-xs sm:text-sm shadow-md hover:brightness-110 active:scale-95 transition flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <Play className="w-4 h-4 fill-current" />
+                  Continuar Treino
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    soundManager.triggerHaptic([20]);
+                    clearActiveWorkoutBackup();
+                    setActiveBackup(null);
+                  }}
+                  className="py-3 px-4 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 font-bold text-xs active:scale-95 transition cursor-pointer"
+                >
+                  Descartar
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* TODAY's WORKOUT – Primary CTA */}
-          {hasTodayWorkout ? (
+          {dashboardConfig.recommendedWorkout && (hasTodayWorkout ? (
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
@@ -638,110 +705,114 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 </span>
               </button>
             </div>
-          )}
-        </div>
-      </div>
-
-      {/* ── GUIDED JOURNEY & RETENTION MILESTONES (G2) ── */}
-      <GuidedJourneyCard
-        stats={stats}
-        history={history}
-        onStartQuickWorkout={handleStartQuickWorkout}
-        onNavigateToExercises={() => onNavigateTo('exercises')}
-      />
-
-      {/* ── WEEKLY OVERVIEW ── */}
-      <div className="glass-card rounded-3xl border border-white/10 p-4 sm:p-5 space-y-3" style={{ direction: 'ltr' }}>
-        <div className={`flex items-center justify-between ${lhm ? 'flex-row-reverse' : ''}`}>
-          <h2 className={`${lt ? 'text-base' : 'text-sm'} font-black text-slate-100 flex items-center gap-2`}>
-            <Calendar className="w-4 h-4 text-teal-400" />
-            Semana Atual
-          </h2>
-          <button
-            onClick={() => onNavigateTo('planner')}
-            className="text-xs text-emerald-400 hover:text-emerald-300 font-bold flex items-center gap-1 active:scale-95 transition"
-          >
-            Ver plano <ArrowRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
-
-        {/* Day pills */}
-        <div className="grid grid-cols-7 gap-1">
-          {weeklyPlan.days.map(d => {
-            const isToday = d.dayOfWeek === todayDayNum;
-            const done = false; // future: integrate actual history per day
-            return (
-              <div
-                key={d.dayOfWeek}
-                className={`flex flex-col items-center gap-1 py-2 rounded-xl transition ${isToday
-                    ? 'bg-emerald-500/20 border border-emerald-500/50'
-                    : 'border border-white/5'
-                  }`}
-              >
-                <span
-                  className={`text-[10px] font-black uppercase ${isToday ? 'text-emerald-400' : 'text-slate-500'
-                    }`}
-                >
-                  {d.shortName}
-                </span>
-                <div
-                  className={`w-3 h-3 rounded-full ${done
-                      ? 'bg-emerald-400'
-                      : d.isActive
-                        ? isToday
-                          ? 'bg-emerald-400 animate-pulse'
-                          : 'bg-emerald-500/40'
-                        : 'bg-white/10'
-                    }`}
-                />
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Week stats row */}
-        <div className={`grid grid-cols-3 gap-2 pt-1 ${lhm ? 'flex-row-reverse' : ''}`}>
-          {[
-            {
-              icon: <Flame className="w-4 h-4 text-amber-400" />,
-              value: stats.currentStreakDays,
-              label: 'dias streak',
-              highlight: stats.currentStreakDays >= 7,
-            },
-            {
-              icon: <CheckCircle2 className="w-4 h-4 text-emerald-400" />,
-              value: `${completedThisWeek}/${totalActiveDays}`,
-              label: 'treinos',
-              highlight: false,
-            },
-            {
-              icon: <Clock className="w-4 h-4 text-teal-400" />,
-              value: fmtMinSec(stats.totalMinutes * 60),
-              label: 'tempo total',
-              highlight: false,
-            },
-          ].map((s, i) => (
-            <div
-              key={i}
-              className={`flex flex-col items-center gap-0.5 p-2.5 rounded-2xl glass-card border ${s.highlight
-                  ? `border-amber-500/30 bg-amber-500/10 ${recordPulse && !noMotion ? 'animate-pulse' : ''}`
-                  : 'border-white/5'
-                }`}
-            >
-              {s.icon}
-              <span
-                className={`${lt ? 'text-base' : 'text-sm'} font-black font-mono text-slate-100 leading-tight mt-0.5`}
-              >
-                {s.value}
-              </span>
-              <span className="text-[10px] text-slate-400 font-medium">{s.label}</span>
-            </div>
           ))}
         </div>
       </div>
 
+      {/* ── GUIDED JOURNEY & RETENTION MILESTONES (G2) ── */}
+      {dashboardConfig.weeklyGoals && (
+        <GuidedJourneyCard
+          stats={stats}
+          history={history}
+          onStartQuickWorkout={handleStartQuickWorkout}
+          onNavigateToExercises={() => onNavigateTo('exercises')}
+        />
+      )}
+
+      {/* ── WEEKLY OVERVIEW ── */}
+      {dashboardConfig.weekSummary && (
+        <div className="glass-card rounded-3xl border border-white/10 p-4 sm:p-5 space-y-3" style={{ direction: 'ltr' }}>
+          <div className={`flex items-center justify-between ${lhm ? 'flex-row-reverse' : ''}`}>
+            <h2 className={`${lt ? 'text-base' : 'text-sm'} font-black text-slate-100 flex items-center gap-2`}>
+              <Calendar className="w-4 h-4 text-teal-400" />
+              Semana Atual
+            </h2>
+            <button
+              onClick={() => onNavigateTo('planner')}
+              className="text-xs text-emerald-400 hover:text-emerald-300 font-bold flex items-center gap-1 active:scale-95 transition"
+            >
+              Ver plano <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          {/* Day pills */}
+          <div className="grid grid-cols-7 gap-1">
+            {weeklyPlan.days.map(d => {
+              const isToday = d.dayOfWeek === todayDayNum;
+              const done = false; // future: integrate actual history per day
+              return (
+                <div
+                  key={d.dayOfWeek}
+                  className={`flex flex-col items-center gap-1 py-2 rounded-xl transition ${isToday
+                      ? 'bg-emerald-500/20 border border-emerald-500/50'
+                      : 'border border-white/5'
+                    }`}
+                >
+                  <span
+                    className={`text-[10px] font-black uppercase ${isToday ? 'text-emerald-400' : 'text-slate-500'
+                      }`}
+                  >
+                    {d.shortName}
+                  </span>
+                  <div
+                    className={`w-3 h-3 rounded-full ${done
+                        ? 'bg-emerald-400'
+                        : d.isActive
+                          ? isToday
+                            ? 'bg-emerald-400 animate-pulse'
+                            : 'bg-emerald-500/40'
+                          : 'bg-white/10'
+                      }`}
+                  />
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Week stats row */}
+          <div className={`grid grid-cols-3 gap-2 pt-1 ${lhm ? 'flex-row-reverse' : ''}`}>
+            {[
+              {
+                icon: <Flame className="w-4 h-4 text-amber-400" />,
+                value: stats.currentStreakDays,
+                label: 'dias streak',
+                highlight: stats.currentStreakDays >= 7,
+              },
+              {
+                icon: <CheckCircle2 className="w-4 h-4 text-emerald-400" />,
+                value: `${completedThisWeek}/${totalActiveDays}`,
+                label: 'treinos',
+                highlight: false,
+              },
+              {
+                icon: <Clock className="w-4 h-4 text-teal-400" />,
+                value: fmtMinSec(stats.totalMinutes * 60),
+                label: 'tempo total',
+                highlight: false,
+              },
+            ].map((s, i) => (
+              <div
+                key={i}
+                className={`flex flex-col items-center gap-0.5 p-2.5 rounded-2xl glass-card border ${s.highlight
+                    ? `border-amber-500/30 bg-amber-500/10 ${recordPulse && !noMotion ? 'animate-pulse' : ''}`
+                    : 'border-white/5'
+                  }`}
+              >
+                {s.icon}
+                <span
+                  className={`${lt ? 'text-base' : 'text-sm'} font-black font-mono text-slate-100 leading-tight mt-0.5`}
+                >
+                  {s.value}
+                </span>
+                <span className="text-[10px] text-slate-400 font-medium">{s.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* ── NEXT WORKOUT PREVIEW ── */}
-      {nextActiveDay && (
+      {dashboardConfig.activeProgram && nextActiveDay && (
         <div className="glass-card rounded-3xl border border-white/10 p-4 sm:p-5 space-y-3" style={{ direction: 'ltr' }}>
           <h2 className={`${lt ? 'text-base' : 'text-sm'} font-black text-slate-100 flex items-center gap-2`}>
             <TrendingUp className="w-4 h-4 text-cyan-400" />
@@ -772,56 +843,100 @@ export const HomeView: React.FC<HomeViewProps> = ({
         </div>
       )}
 
-      {/* ── D13 & D14: PILARES & PROGRESSÃO TÉCNICA ── */}
-      <div className="grid grid-cols-2 gap-3" style={{ direction: 'ltr' }}>
-        <button
-          type="button"
-          onClick={() => {
-            soundManager.triggerHaptic([30]);
-            setShowStrengthRadar(true);
-          }}
-          className="p-4 rounded-3xl glass-card border border-cyan-500/20 hover:border-cyan-500/40 bg-cyan-500/5 text-left flex flex-col justify-between space-y-3 transition active:scale-98"
-        >
-          <div className="w-10 h-10 rounded-2xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shrink-0">
-            <Activity className="w-5 h-5 stroke-[2.5]" />
+      {/* ── ATALHO PARA POSTURA & MOBILIDADE ARTICULAR ── */}
+      {dashboardConfig.postureMobility && (
+        <div className="glass-card rounded-3xl border border-teal-500/20 p-4 sm:p-5 space-y-3" style={{ direction: 'ltr' }}>
+          <div className={`flex items-center justify-between ${lhm ? 'flex-row-reverse' : ''}`}>
+            <h2 className={`${lt ? 'text-base' : 'text-sm'} font-black text-slate-100 flex items-center gap-2`}>
+              <Activity className="w-4 h-4 text-teal-400" />
+              Postura & Mobilidade Articular
+            </h2>
+            <button
+              onClick={() => onNavigateTo('exercises')}
+              className="text-xs text-teal-400 hover:text-teal-300 font-bold flex items-center gap-1 active:scale-95 transition"
+            >
+              Biblioteca <ArrowRight className="w-3.5 h-3.5" />
+            </button>
           </div>
-          <div>
-            <span className="text-[10px] uppercase font-bold tracking-wider text-cyan-400 block">
-              Radar Pentagonal
-            </span>
-            <p className="font-bold text-xs sm:text-sm text-slate-100 mt-0.5">
-              Avaliação de Força
-            </p>
-            <p className="text-[10px] text-slate-400 mt-1">
-              5 testes e gráfico SVG dos pilares
-            </p>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {[
+              { name: 'Punhos & Mãos', icon: '🖐️', desc: 'Prepara flexão/prancha' },
+              { name: 'Ombros & Escápulas', icon: '💪', desc: 'Prepara barra e dips' },
+              { name: 'Coluna & Torácica', icon: '🧘', desc: 'Descompressão espinhal' },
+              { name: 'Quadril & Pelve', icon: '🦵', desc: 'Pistol e agachamentos' },
+            ].map(item => (
+              <button
+                key={item.name}
+                type="button"
+                onClick={() => {
+                  soundManager.triggerHaptic([20]);
+                  onNavigateTo('exercises');
+                }}
+                className="p-3 rounded-2xl bg-white/[0.04] hover:bg-teal-500/10 border border-white/5 hover:border-teal-500/30 transition text-left active:scale-95 group"
+              >
+                <span className="text-xl block mb-1">{item.icon}</span>
+                <p className="text-xs font-bold text-slate-200 group-hover:text-teal-300 transition">
+                  {item.name}
+                </p>
+                <span className="text-[10px] text-slate-400 block mt-0.5">{item.desc}</span>
+              </button>
+            ))}
           </div>
-        </button>
+        </div>
+      )}
 
-        <button
-          type="button"
-          onClick={() => {
-            soundManager.triggerHaptic([30]);
-            setShowSkillTree(true);
-          }}
-          className="p-4 rounded-3xl glass-card border border-purple-500/20 hover:border-purple-500/40 bg-purple-500/5 text-left flex flex-col justify-between space-y-3 transition active:scale-98"
-        >
-          <div className="w-10 h-10 rounded-2xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-400 shrink-0">
-            <Sparkles className="w-5 h-5 stroke-[2.5]" />
-          </div>
-          <div>
-            <span className="text-[10px] uppercase font-bold tracking-wider text-purple-400 block">
-              Trilhas Lendárias
-            </span>
-            <p className="font-bold text-xs sm:text-sm text-slate-100 mt-0.5">
-              Árvore de Skills
-            </p>
-            <p className="text-[10px] text-slate-400 mt-1">
-              Barra, Muscle-up, Planche e mais
-            </p>
-          </div>
-        </button>
-      </div>
+      {/* ── D13 & D14: PILARES & PROGRESSÃO TÉCNICA ── */}
+      {dashboardConfig.recentAchievements && (
+        <div className="grid grid-cols-2 gap-3" style={{ direction: 'ltr' }}>
+          <button
+            type="button"
+            onClick={() => {
+              soundManager.triggerHaptic([30]);
+              setShowStrengthRadar(true);
+            }}
+            className="p-4 rounded-3xl glass-card border border-cyan-500/20 hover:border-cyan-500/40 bg-cyan-500/5 text-left flex flex-col justify-between space-y-3 transition active:scale-98"
+          >
+            <div className="w-10 h-10 rounded-2xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shrink-0">
+              <Activity className="w-5 h-5 stroke-[2.5]" />
+            </div>
+            <div>
+              <span className="text-[10px] uppercase font-bold tracking-wider text-cyan-400 block">
+                Radar Pentagonal
+              </span>
+              <p className="font-bold text-xs sm:text-sm text-slate-100 mt-0.5">
+                Avaliação de Força
+              </p>
+              <p className="text-[10px] text-slate-400 mt-1">
+                5 testes e gráfico SVG dos pilares
+              </p>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              soundManager.triggerHaptic([30]);
+              setShowSkillTree(true);
+            }}
+            className="p-4 rounded-3xl glass-card border border-purple-500/20 hover:border-purple-500/40 bg-purple-500/5 text-left flex flex-col justify-between space-y-3 transition active:scale-98"
+          >
+            <div className="w-10 h-10 rounded-2xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-400 shrink-0">
+              <Sparkles className="w-5 h-5 stroke-[2.5]" />
+            </div>
+            <div>
+              <span className="text-[10px] uppercase font-bold tracking-wider text-purple-400 block">
+                Trilhas Lendárias
+              </span>
+              <p className="font-bold text-xs sm:text-sm text-slate-100 mt-0.5">
+                Árvore de Skills
+              </p>
+              <p className="text-[10px] text-slate-400 mt-1">
+                Barra, Muscle-up, Planche e mais
+              </p>
+            </div>
+          </button>
+        </div>
+      )}
 
       {/* ── SAFETY & CREF BIOMECHANICS BANNER ── */}
       {onOpenSafeExecution && (
@@ -855,7 +970,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
       )}
 
       {/* ── QUICK-START ROUTINES ── */}
-      {routines.length > 0 && (
+      {dashboardConfig.quickAccess && routines.length > 0 && (
         <div className="space-y-3" style={{ direction: 'ltr' }}>
           <div className={`flex items-center justify-between ${lhm ? 'flex-row-reverse' : ''}`}>
             <h2 className={`${lt ? 'text-base' : 'text-sm'} font-black text-slate-100 flex items-center gap-2`}>
@@ -984,6 +1099,12 @@ export const HomeView: React.FC<HomeViewProps> = ({
           onClose={() => setShowBackupRestoreModal(false)}
         />
       )}
+      <DashboardCustomizerModal
+        isOpen={showCustomizerModal}
+        onClose={() => setShowCustomizerModal(false)}
+        config={dashboardConfig}
+        onChange={setDashboardConfig}
+      />
     </div>
   );
 };

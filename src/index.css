@@ -222,33 +222,66 @@ html.theme-light .text-slate-400 {
   color: #334155 !important;
 }
 
-/* D20: Modo Outdoor de Altíssimo Contraste (Luz Solar Direta) */
+html.theme-light .bg-slate-900,
+html.theme-light .bg-slate-950 {
+  background-color: #ffffff !important;
+}
+
+html.theme-light .border-slate-800,
+html.theme-light .border-slate-700 {
+  border-color: #e2e8f0 !important;
+}
+
+/* Tema de Alto Contraste (WCAG AAA >= 7:1) & Modo Outdoor Luz Solar */
+html.theme-high-contrast body,
 html.mode-outdoor body {
   background-color: #000000 !important;
   background-image: none !important;
   color: #ffffff !important;
 }
 
+html.theme-high-contrast .glass-card,
+html.theme-high-contrast .glass-panel,
 html.mode-outdoor .glass-card,
 html.mode-outdoor .glass-panel {
-  background: #090d16 !important;
+  background: #000000 !important;
   border: 2px solid #00FF88 !important;
   box-shadow: none !important;
 }
 
+html.theme-high-contrast button,
+html.theme-high-contrast [role="button"],
 html.mode-outdoor button,
 html.mode-outdoor [role="button"] {
-  min-height: 52px;
+  min-height: 48px;
   font-weight: 800 !important;
+  border-width: 2px !important;
 }
 
+html.theme-high-contrast .text-slate-400,
+html.theme-high-contrast .text-slate-300,
 html.mode-outdoor .text-slate-400,
 html.mode-outdoor .text-slate-300 {
+  color: #ffffff !important;
+}
+
+html.theme-high-contrast .text-slate-500,
+html.mode-outdoor .text-slate-500 {
   color: #e2e8f0 !important;
 }
 
-html.mode-outdoor .text-slate-500 {
-  color: #cbd5e1 !important;
+html.theme-high-contrast .bg-slate-900,
+html.theme-high-contrast .bg-slate-950,
+html.mode-outdoor .bg-slate-900,
+html.mode-outdoor .bg-slate-950 {
+  background-color: #000000 !important;
+}
+
+html.theme-high-contrast .border-slate-800,
+html.theme-high-contrast .border-slate-700,
+html.mode-outdoor .border-slate-800,
+html.mode-outdoor .border-slate-700 {
+  border-color: #00FF88 !important;
 }
 
 html.mode-outdoor.theme-light body {
@@ -269,6 +302,30 @@ html.mode-outdoor.theme-light .text-slate-200,
 html.mode-outdoor.theme-light .text-slate-300,
 html.mode-outdoor.theme-light .text-slate-400 {
   color: #000000 !important;
+}
+
+/* Accessibility Focus Rings (WCAG 2.1 AA / AAA) */
+:focus-visible {
+  outline: 2px solid #10b981 !important;
+  outline-offset: 2px !important;
+}
+
+html.theme-high-contrast :focus-visible,
+html.mode-outdoor :focus-visible {
+  outline: 3px solid #00FF88 !important;
+  outline-offset: 3px !important;
+}
+
+/* Reduced Motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* D21: Estilos de Impressão Limpa para Ficha de Treino em PDF */

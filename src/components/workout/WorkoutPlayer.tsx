@@ -36,6 +36,8 @@ import {
   Minimize2,
   ArrowUpDown,
   BellRing,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 
 interface WorkoutPlayerProps {
@@ -94,6 +96,38 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
   // D5: Modo Foco (distraction-free) e Modo Outdoor (Alto Contraste para Luz Solar Direta)
   const [isFocusMode, setIsFocusMode] = useState<boolean>(false);
   const [isOutdoorMode, setIsOutdoorMode] = useState<boolean>(() => getAppSettings().outdoorMode);
+
+  // Fullscreen state
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(() => typeof document !== 'undefined' && Boolean(document.fullscreenElement));
+
+  // Voice narration & audio coach state
+  const [voiceEnabled, setVoiceEnabled] = useState<boolean>(() => getAppSettings().voiceEnabled);
+  const [speechSpeed, setSpeechSpeed] = useState<number>(() => speechVoice.getSpeed());
+
+  useEffect(() => {
+    const onFsChange = () => {
+      setIsFullscreen(Boolean(document.fullscreenElement));
+    };
+    document.addEventListener('fullscreenchange', onFsChange);
+    return () => document.removeEventListener('fullscreenchange', onFsChange);
+  }, []);
+
+  const toggleFullscreen = async () => {
+    soundManager.triggerHaptic([20]);
+    try {
+      if (!document.fullscreenElement) {
+        if (document.documentElement.requestFullscreen) {
+          await document.documentElement.requestFullscreen();
+        }
+      } else {
+        if (document.exitFullscreen) {
+          await document.exitFullscreen();
+        }
+      }
+    } catch (err) {
+      console.warn('Fullscreen toggle not permitted:', err);
+    }
+  };
 
   // D11: Lista de novos Recordes Pessoais (PRs) batidos durante a sessão
   const [sessionPRs, setSessionPRs] = useState<PersonalRecord[]>([]);
@@ -289,7 +323,10 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
     setRestTargetTimestamp(Date.now() + restTime * 1000);
     setPhase('rest');
     soundManager.playCountdownBeep();
-    speechVoice.speak(`Descanse ${restTime} segundos.`);
+    const nextExercise = (setIndex < currentRoutineExercise.sets - 1)
+      ? currentExerciseData?.name
+      : (activeRoutine.exercises[exerciseIndex + 1] ? (getExerciseById(activeRoutine.exercises[exerciseIndex + 1].exerciseId)?.name || 'próximo exercício') : undefined);
+    speechVoice.speakRestStart(restTime, nextExercise);
   };
 
   // Complete Isometric Set
@@ -350,7 +387,10 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
     setRestTargetTimestamp(Date.now() + restTime * 1000);
     setPhase('rest');
     soundManager.playCountdownBeep();
-    speechVoice.speak(`Descanse ${restTime} segundos.`);
+    const nextExercise = (setIndex < currentRoutineExercise.sets - 1)
+      ? currentExerciseData?.name
+      : (activeRoutine.exercises[exerciseIndex + 1] ? (getExerciseById(activeRoutine.exercises[exerciseIndex + 1].exerciseId)?.name || 'próximo exercício') : undefined);
+    speechVoice.speakRestStart(restTime, nextExercise);
   };
 
   // Workout pause toggle with pause-duration accumulation
@@ -637,6 +677,9 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
         lastRestAlertSecondRef.current = remaining;
         soundManager.playCountdownBeep();
         soundManager.triggerHaptic([70]);
+        if (remaining === 3) {
+          speechVoice.speakRestEnding();
+        }
       }
     };
 
@@ -644,6 +687,28 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
     const timer = setInterval(checkRestTime, 250);
     return () => clearInterval(timer);
   }, [phase, restTargetTimestamp, isWorkoutPaused]);
+
+  const hasAnnouncedExerciseRef = useRef<string | null>(null);
+
+  // Auto-announcement of exercise and set (Audio Coach)
+  useEffect(() => {
+    if (phase === 'exercise' && currentExerciseData && !isWorkoutPaused) {
+      const key = `${exerciseIndex}-${setIndex}-${currentExerciseData.id}`;
+      if (hasAnnouncedExerciseRef.current !== key) {
+        hasAnnouncedExerciseRef.current = key;
+        const target = isIsometric
+          ? (currentRoutineExercise.targetHoldSeconds || currentExerciseData.defaultHoldSeconds || 30)
+          : (currentRoutineExercise.targetReps || currentExerciseData.defaultReps || 10);
+        speechVoice.speakExerciseIntro(
+          currentExerciseData.name,
+          isIsometric,
+          target,
+          setIndex + 1,
+          currentRoutineExercise.sets
+        );
+      }
+    }
+  }, [phase, exerciseIndex, setIndex, currentExerciseData, isIsometric, isWorkoutPaused, currentRoutineExercise]);
 
   // Isometric Exercise Countdown / Stopwatch (Timestamp-based)
   useEffect(() => {
@@ -950,6 +1015,17 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
             {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
           </button>
 
+          {/* Fullscreen Toggle */}
+          <button
+            type="button"
+            onClick={toggleFullscreen}
+            className="w-10 h-10 rounded-2xl glass-card text-slate-400 hover:text-white border border-white/10 transition active:scale-95 flex items-center justify-center shrink-0"
+            title={isFullscreen ? 'Sair da tela cheia' : 'Tela cheia'}
+            aria-label={isFullscreen ? 'Sair da tela cheia' : 'Tela cheia'}
+          >
+            {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+          </button>
+
           {/* D5: Botão Toggle Modo Foco */}
           <button
             type="button"
@@ -965,7 +1041,7 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
             title={isFocusMode ? 'Sair do Modo Foco' : 'Ativar Modo Foco (Tela Limpa)'}
             aria-label={isFocusMode ? 'Sair do Modo Foco' : 'Ativar Modo Foco'}
           >
-            {isFocusMode ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+            {isFocusMode ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
           </button>
 
           <button
@@ -981,11 +1057,82 @@ export const WorkoutPlayer: React.FC<WorkoutPlayerProps> = ({
       </header>
 
       {/* Progress Bar under HUD */}
-      <div className="w-full bg-slate-900/80 h-1.5 shrink-0 overflow-hidden">
+      <div
+        className="w-full bg-slate-900/80 h-1.5 shrink-0 overflow-hidden"
+        role="progressbar"
+        aria-valuenow={progressPercent}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-label="Progresso do treino"
+      >
         <div
           className="h-full bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 transition-all duration-300 glow-emerald"
           style={{ width: `${progressPercent}%` }}
         />
+      </div>
+
+      {/* Audio Coach Hands-Free Bar */}
+      <div className="w-full px-3 py-1.5 bg-slate-950/70 border-b border-white/5 flex items-center justify-between text-xs shrink-0 select-none">
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              const next = speechVoice.toggleVoice();
+              setVoiceEnabled(next);
+            }}
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[11px] font-bold transition active:scale-95 ${
+              voiceEnabled
+                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                : 'bg-white/5 text-slate-400 border border-white/5 hover:text-slate-200'
+            }`}
+            title="Ativar ou desativar narração por voz (Audio Coach)"
+            aria-label="Ativar ou desativar narração por voz"
+          >
+            <BellRing className={`w-3.5 h-3.5 ${voiceEnabled ? 'text-emerald-400 animate-pulse' : ''}`} />
+            <span>{voiceEnabled ? 'Voz: Ativa' : 'Voz: Desligada'}</span>
+          </button>
+
+          {voiceEnabled && (
+            <button
+              type="button"
+              onClick={() => {
+                soundManager.triggerHaptic([20]);
+                speechVoice.repeatLastSpeech();
+              }}
+              className="flex items-center gap-1 px-2 py-1 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-[11px] font-semibold border border-white/5 active:scale-95"
+              title="Repetir última instrução falada"
+              aria-label="Repetir última instrução falada"
+            >
+              <RotateCcw className="w-3 h-3 text-cyan-400" />
+              <span className="hidden sm:inline">Repetir</span>
+            </button>
+          )}
+        </div>
+
+        {voiceEnabled && (
+          <div className="flex items-center gap-1">
+            <span className="text-[10px] text-slate-400 mr-1 hidden sm:inline">Velocidade:</span>
+            {[0.8, 1.0, 1.2].map(speed => (
+              <button
+                key={speed}
+                type="button"
+                onClick={() => {
+                  soundManager.triggerHaptic([15]);
+                  speechVoice.setSpeed(speed);
+                  setSpeechSpeed(speed);
+                }}
+                className={`px-1.5 py-0.5 rounded-lg text-[10px] font-bold font-mono transition ${
+                  Math.abs(speechSpeed - speed) < 0.05
+                    ? 'bg-cyan-500 text-slate-950 font-black'
+                    : 'bg-white/5 text-slate-400 hover:text-white'
+                }`}
+                title={`Velocidade de narração ${speed}x`}
+              >
+                {speed}x
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* D3: Overlay de Contagem Preparatória de 5 Segundos para Isometria */}
